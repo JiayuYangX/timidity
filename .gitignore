@@ -1,0 +1,16 @@
+*.a
+*.o
+*.dll
+*.exe
+Makefile
+/common.makefile
+/.lineno
+/stamp-*
+/config.log
+/config.status
+/config.h
+/interface.h
+/*/.deps/
+/timidity/newton_table.c
+/interface/w32g_res.res
+/interface/w32g_subwin_escaped.c
