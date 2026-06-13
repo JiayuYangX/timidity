@@ -1,0 +1,416 @@
+.TH timidity.cfg 5 "April 25 2004" "2.13.0"
+.SH 名称
+timidity.cfg \- TiMidity++ 配置文件
+.SH 描述
+\fBtimidity.cfg\fP 文件描述了 timidity(1) 的运行环境：包括音色库路径、
+乐器配置等。
+.br
+\fBTiMidity++\fP 在启动时，处理任何选项之前会查找配置文件
+\fBtimidity.cfg\fP。如果无法访问该文件，且通过命令行 \fB\-L\fP 选项更改了
+库路径，则在处理完所有选项后，会沿着新库路径再次寻找默认文件，除非已通过
+\fB\-c\fP 选项指定了其他配置文件。
+.br
+配置文件定义了 MIDI 程序到乐器文件的映射。可以指定多个文件，后加载的文件中
+的语句会覆盖先前文件中的语句。
+.SH 变量
+当美元符号 `$' 后紧跟着字母数字和/或下划线 `_' 字符时，该字符串将被视为变量，
+在配置文件处理时会被替换为其他字符串。变量名也可以写在括号内，以与后续字符
+分隔。
+.sp
+例如：
+.br
+$variable
+.br
+${variable} # 等同于 $variable
+.sp
+目前尚未提供新定义变量的命令。未定义的变量将被替换为空字符串。
+.br
+已定义为常规变量的只有以下一个。
+.TP
+.B $basedir
+表示配置文件所在目录。主要用于指定路径的命令中，以便从配置文件所在位置指定
+相对路径。
+.br
+当 $basedir 中可能包含空格时，需要用 "" 括起来。
+.sp
+例如：
+.br
+在 /usr/local/share/timidity/timidity.cfg 中
+.br
+dir $basedir/inst # 解析为 /usr/local/share/timidity/inst
+.SH 语法
+配置文件中可以使用以下语句：
+.TP
+.BI "dir " "directory [...]"
+将 \fIdirectory\fP 添加到搜索路径中，与 \fB\-L\fP 命令行选项作用相同。
+.br
+也允许使用压缩包文件。
+.sp
+例如：
+.br
+dir /usr/local/share/timidity/inst/foo.zip#
+.br
+bank 0
+.br
+0 bar.pat
+.br
+1 baz.pat
+.br
+2 zoo.pat
+.sp
+首先，\fBdir\fP 像指定普通目录一样指定压缩包名称（末尾带 `#'）（在此例中为
+/usr/local/share/timidity/inst/foo.zip）。\fBTiMidity++\fP 识别到最后一个
+字符 `#' 后，将路径视为压缩包文件，并读取该压缩包中包含的所有文件。上述示例
+中，foo.zip 中包含的 patch 文件 bar.pat、baz.pat 和 zoo.pat 也会被加载。
+.TP
+.BI "source " "file [...]"
+读取另一个配置文件，然后继续处理当前文件。\fBsource\fP 的嵌套最多支持 50 层。
+.TP
+.BI "progbase " number
+将后续音色编号设置为从 \fInumber\fP 到 \fInumber\fP+128。如果指定
+\fBprogbase 1\fP，则后续音色编号将设置为从 \fB1\fP 到 \fB128\fP。
+.TP
+.BI "bank " "[MapID1] number"
+选择要修改的音色库。后续的 patch 映射将应用于此音色库。可以通过在
+\fIMapID1\fP 中指定以下任意值来指定目标映射：\fBgm2\fP、\fBsc55\fP、
+\fBsc88\fP、\fBsc88pro\fP、\fBsc8850\fP、\fBxg\fP 和 \fBxgsfx64\fP。
+.TP
+.BI "drumset " "[MapID2] number"
+选择要修改的鼓组。后续的 patch 映射将应用于此鼓组。可以通过在 \fIMapID2\fP
+中指定以下任意值来指定目标映射：\fBgm2drum\fP、\fBsc55drum\fP、
+\fBsc88drum\fP、\fBsc88prodrum\fP、\fBsc8850drum\fP、\fBxgdrum\fP 和
+\fBxgsfx126\fP。
+.TP
+.BI "number " "file [options]"
+.br
+.ns
+.TP
+.BI "number %font " "file bank prog [key] [options]"
+.br
+.ns
+.TP
+.BI "number %sample " "file [options]"
+指定当前音色库或鼓组中的 MIDI 程序编号应使用指定的 patch 文件来演奏。
+如果 \fIfile\fP 是 SoundFont 格式，则通过 \fBnumber %font\fP 格式配合
+\fIbank\fP、\fIprog\fP、\fIkey\fP 参数来提取特定乐器。如果 \fIfile\fP
+是无压缩的 AIFF 或 WAV 采样数据，则使用 \fBnumber %sample\fP 格式指定
+MIDI 程序编号。\fIoptions\fP 可以是以下任意选项：
+.RS
+.TP
+.BI amp= amplification
+将乐器的音量放大 \fIamplification\fP%。如果未指定值，则在乐器加载时自动
+确定。
+.TP
+.BI note= note
+指定演奏乐器时使用的固定 MIDI 音符。如果 \fInote\fP 为 \fB0\fP，乐器将以
+触发它的 Note On 事件的实际音符来演奏。对于打击乐器，如果配置文件中未指定
+值，则使用 patch 文件的默认值。
+.TP
+.BI pan= panning
+设置乐器的默认声像定位。\fIpanning\fP 可以是 \fBleft\fP、\fBright\fP、
+\fBcenter\fP，或介于 \fB\-100\fP 和 \fB100\fP 之间的整数，分别对应极左和
+极右。如果未指定值，则使用 patch 文件的默认值。注意，MIDI 文件中的声像控制
+会覆盖此值。
+.TP
+.BI tune= tuning[,...]
+调整乐器的根音频率。\fBtune=1\fP 表示升高 \fB1\fP 个半音。由于 \fItuning\fP
+支持小数，因此可以进行微调，如 \fBtune=\-0.2\fP。当包含两个以上采样数据时，
+第二个及之后的参数可以分别指定不同的值。
+.TP
+.BI rate= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器的 ADSR 速率。各值可为 \fB0\fP 到 \fB255\fP 之间的整数。如果只想
+设置延音速率，可以使用：
+.sp
+6 GUS/hrpschrd.pat rate=::60
+.sp
+如果只想加快起音时间，可以使用：
+.sp
+6 GUS/hrpschrd.pat rate=255
+.sp
+当包含两个以上采样数据时，第二个及之后的参数可以分别指定不同的值。
+.TP
+.BI offset= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器的 ADSR 偏移量。各值可为 \fB0\fP 到 \fB255\fP 之间的整数。格式与
+\fBrate=\fP 相同。
+.TP
+.B keep={loop|env}
+默认情况下，打击乐器会剥离其循环和包络信息。形状异常的包络也会从旋律乐器中
+自动移除。可以使用 \fBkeep=\fP 来保留循环或包络数据。例如，Short 和 Long
+Whistle 打击乐器（General MIDI 编号 71 和 72）需要在配置文件中指定
+`\fBkeep=loop keep=env\fP'。
+.TP
+.B strip={loop|env|tail}
+强制移除乐器中所有 patch 的循环或包络信息，或去除尾部（即循环之后的所有
+数据）。某些第三方乐器在循环后有无效数据，表现为每次演奏时出现咔嗒声，添加
+\fBstrip=tail\fP 选项可显著改善音质。
+.TP
+.BI tremolo= sweep_increment:control_ratio:depth[,...]
+设置乐器的颤音（tremolo）。各值可为 \fB0\fP 到 \fB255\fP 之间的整数。
+格式与 \fBrate=\fP 类似。\fIsweep_increment\fP 是颤音开始前的时间。
+\fIcontrol_ratio\fP 是音量变化的速率。\fIdepth\fP 是音量变化的深度。
+.TP
+.BI vibrato= sweep_increment:phase_increment:depth[,...]
+设置乐器的颤音（vibrato）。各值可为 \fB0\fP 到 \fB255\fP 之间的整数。
+格式与 \fBrate=\fP 类似。\fIsweep_increment\fP 是颤音开始前的时间。
+\fIphase_increment\fP 是频率变化的速率。\fIdepth\fP 是频率变化的深度。
+.TP
+.BI sclnote= note[,...]
+设置乐器用于音阶调律的标准音符。例如，\fBsclnote=60\fP 将中央 C 作为音阶
+调律的标准音符。当包含两个以上采样数据时，第二个及之后的参数可以分别指定
+不同的值。
+.TP
+.BI scltune= tune[,...]
+设置乐器的音阶调律因子（以音分为单位）。例如，\fBscltune=50\fP 将半音间隔
+设为 \fB50\fP 音分。当包含两个以上采样数据时，第二个及之后的参数可以分别
+指定不同的值。
+.TP
+.BI comm= comment
+指定注释 \fIcomment\fP。与 \fB#extension comm\fP 效果相同。
+.TP
+.BI modrate= attack:decay:sustain:release1:release2:release3[,...]
+.br
+.ns
+.TP
+.BI modoffset= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器调制包络的变化行为。格式和值与音量包络基本相同。除了某些 SoundFont
+之外，即使指定该选项也不会产生任何效果。
+.TP
+.BI envkeyf= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器音量包络的按键跟随。以 \fBnote=60\fP 为基准，根据音符改变包络时间。
+单位为 +\-cent/key。例如，\fBenvkeyf=100\fP 表示每升高 1 个八度，起音时间
+加倍。格式与 \fBrate=\fP 类似。某些 SoundFont 中可能预设了 \fIdecay\fP 和
+\fIsustain\fP 参数。
+.TP
+.BI envvelf= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器音量包络的力度跟随。以 \fBvelocity=64\fP 为基准，根据力度改变包络
+时间。单位为 +\-cent/velocity。例如，\fBenvvelf=100\fP 表示当
+\fBvelocity=127\fP 时起音时间变为约 38 倍。格式与 \fBrate=\fP 类似。
+此选项的规格将来可能会变更。
+.TP
+.BI modkeyf= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器调制包络的按键跟随。以 \fBnote=60\fP 为基准，根据音符改变包络时间。
+单位为 +\-cent/key。例如，\fBmodkeyf=100\fP 表示每升高 1 个八度，起音时间
+加倍。格式与 \fBrate=\fP 类似。某些 SoundFont 中可能预设了 \fIdecay\fP 和
+\fIsustain\fP 参数。
+.TP
+.BI modvelf= attack:decay:sustain:release1:release2:release3[,...]
+设置乐器调制包络的力度跟随。以 \fBvelocity=64\fP 为基准，根据力度改变包络
+时间。单位为 +\-cent/velocity。例如，\fBmodvelf=100\fP 表示当
+\fBvelocity=127\fP 时起音时间变为约 38 倍。格式与 \fBrate=\fP 类似。
+此选项的规格将来可能会变更。
+.TP
+.BI trempitch= num[,...]
+设置乐器根据颤音（tremolo）改变音高的深度。效果本身与 vibrato 相同，用于在
+另一系统中操作。单位为 +\-cent。格式与 \fBrate=\fP 类似。
+.TP
+.BI tremfc= num[,...]
+设置乐器根据颤音（tremolo）改变截止频率的深度。可以表现所谓的"咆哮"效果。
+单位等与 \fBtrempitch=\fP 相同。
+.TP
+.BI modpitch= num[,...]
+设置乐器根据调制包络改变音高的深度。可以仅在起音阶段临时性地提高音高。
+单位等与 \fBtrempitch=\fP 相同。
+.TP
+.BI modfc= num[,...]
+设置乐器根据调制包络改变截止频率的深度。单位等与 \fBtrempitch=\fP 相同。
+.TP
+.BI fc= num[,...]
+设置乐器截止频率的标准值。单位为 Hz。格式与 \fBrate=\fP 类似。
+.TP
+.BI q= num[,...]
+设置乐器的 Q 值（共振）。单位为 cB。格式与 \fBrate=\fP 类似。
+.TP
+.BI fckeyf= num
+设置乐器滤波器的按键跟随。以 \fBnote=60\fP 为基准，根据音符改变截止频率。
+单位为 +\-cent/key。例如，\fBfckeyf=100\fP 表示与音高做相同的变化。
+.TP
+.BI fcvelf= num
+设置乐器滤波器的力度跟随。以 \fBvelocity=127\fP 为基准，根据力度改变截止
+频率。单位为 +\-cent。在 SoundFont 中，\fB\-2400\fP 被设置为特征值。
+.TP
+.BI qvelf= num
+设置乐器共振的力度跟随。以 \fBvelocity=0\fP 为基准，根据力度改变共振。
+单位为 +\-cB。
+.RE
+.TP
+.BI "default " file
+当出现未映射到任何乐器文件的 MIDI 程序时，将以此文件作为替代音色进行发音。
+.TP
+.BI "map " "MapID1 from\-bank from\-prog to\-bank to\-prog"
+将现有音色分配为 GS/XG 各映射中的音色。\fIMapID1\fP 可指定为 \fBgm2\fP、
+\fBsc55\fP、\fBsc88\fP、\fBsc88pro\fP、\fBsc8850\fP、\fBxg\fP 和
+\fBxgsfx64\fP 中任意一个。
+.TP
+.BI "map " "MapID2 from\-drumset from\-keynote to\-drumset to\-keynote"
+将现有鼓音色分配为 GS/XG 各映射中的鼓音色。\fIMapID2\fP 可指定为
+\fBgm2drum\fP、\fBsc55drum\fP、\fBsc88drum\fP、\fBsc88prodrum\fP、
+\fBsc8850drum\fP、\fBxgdrum\fP 和 \fBxgsfx126\fP 中任意一个。
+.TP
+.BI "soundfont " "file [options]"
+读取整个 SoundFont 文件（如需部分读取，请使用 \fBnumber %font\fP）。
+\fIoptions\fP 可以是以下任意选项：
+.RS
+.TP
+.BI order= number
+设置乐器搜索的顺序。当 \fBorder=0\fP 时，先读取 SoundFont，然后对不足的
+采样从 GUS/patch 中搜索。当 \fBorder=1\fP 时，先读取 GUS/patch，然后搜索
+SoundFont。
+.TP
+.BI amp= amplification
+将整个 SoundFont 的音量设置为 \fIamplification\fP%。如果未指定值，则默认为
+\fB100\fP%。
+.TP
+.BI cutoff= number
+指定 SoundFont 中的 LPF 是否有效（\fB1\fP）或无效（\fB0\fP）。如果未指定
+值，则视为有效。
+.TP
+.BI reso= number
+指定 SoundFont 中的共振是否有效（\fB1\fP）或无效（\fB0\fP）。如果未指定
+值，则视为有效。
+.TP
+.B remove
+从内存中释放目标 SoundFont。
+.RE
+.TP
+.BI "font exclude " "bank [prog [key]]"
+禁止搜索指定 \fIbank\fP、\fIprog\fP 中的 SoundFont。如果是鼓组采样，bank 为
+\fB128\fP，drumset 为 \fIprog\fP，键号为 \fIkey\fP。
+.TP
+.BI "font order " "number bank [prog [key]]"
+单独设置乐器搜索的顺序。格式与 \fBfont exclude\fP 相同。
+.LP
+以下语句仅在最新的 \fBTiMidity++\fP 中可用。
+.TP
+.BI "#extension altassign " "program1 program2 ..."
+设置鼓组的交替分配。例如，如果希望 \fBdrumset 0\fP 中的 Hi-Hat 镲（音符编号
+\fB42\fP、\fB44\fP 和 \fB46\fP）互斥发音，请指定：
+.sp
+drumset 0
+.br
+altassign 42 44 46
+.sp
+注意，\fBdrumset 0\fP 的交替分配默认已启用。
+.TP
+.BI "#extension comm " "program comment"
+为音色编号 \fIprogram\fP 指定注释 \fIcomment\fP。当 \fBTiMidity++\fP 使用
+\fB\-int\fP 或 \fB\-iTt\fP 选项启动时，这些注释将显示在指示器行中。
+.TP
+.BI "#extension timeout " "program second"
+指定音色 \fIprogram\fP 的超时值。如果使用音色编号 \fIprogram\fP 演奏的任何
+音符暂停超过 \fIsecond\fP 秒，\fBTiMidity++\fP 将终止这些音符。
+.TP
+.BI "#extension copydrumset " drumset
+将 \fIdrumset\fP 的所有设置复制到当前鼓组。
+.TP
+.BI "#extension copybank " bank
+将 \fIbank\fP 的所有设置复制到当前音色库。
+.TP
+.BI "#extension copymap " "to\-MapID from\-MapID"
+将映射 \fIfrom\-MapID\fP 中定义的所有音色库设置复制到映射 \fIto\-MapID\fP。
+.TP
+.BI "#extension HTTPproxy " hostname:port
+指定 HTTP 协议的代理服务器。\fIhostname\fP 和 \fIport\fP 分别为代理主机的
+主机名和端口号。
+.TP
+.BI "#extension FTPproxy " hostname:port
+指定 FTP 协议的代理服务器。与 HTTP 代理相同。
+.TP
+.BI "#extension mailaddr " your\-mail\-address
+指定用户的邮件地址。当 \fBTiMidity++\fP 通过 FTP 访问文件时，此地址将作为
+密码发送给 FTP 服务器。
+.TP
+.BI "#extension opt " option
+设置启动时的选项值。
+.TP
+.BI "#extension undef " progno
+取消当前音色库中音色 \fIprogno\fP 的定义。
+.TP
+.BI "#extension legato " "progno " {0|1}
+指定 \fIprogno\fP 的连奏是有效（\fB1\fP）还是无效（\fB0\fP）。
+.TP
+.BI "#extension level " "progno tva_level"
+设置处理 NRPN 的鼓乐器 TVA Level 时音量变化的标准值。除非演奏时指定了
+Drum Instrument TVA Level，否则音量不会受到影响。\fIprogno\fP 可以使用 `,'
+和/或 [\fIstart\fP]\-[\fIend\fP] 进行批量指定。如果省略 start 和 end，则
+分别假定为 \fB0\fP 和 \fB127\fP。
+.TP
+.BI "#extension damper " "progno " {0|1}
+指定 \fIprogno\fP 的再制音和半制音是有效（\fB1\fP）还是无效（\fB0\fP）。
+.TP
+.BI "#extension playnote " "progno note"
+将发音频率设置为 \fInote\fP。当通过 GS SysEx Play Note 指定发音频率时，
+音高会根据该值进行适当变化。\fIprogno\fP 可以使用 `,' 和/或
+[\fIstart\fP]\-[\fIend\fP] 进行批量指定。如果省略 start 和 end，则分别
+假定为 \fB0\fP 和 \fB127\fP。
+.sp
+例如：
+.br
+drumset 0
+.br
+#extension playnote \-37,39,44\-46,55\-60
+.TP
+.BI "#extension delaysend " "progno level"
+.br
+.ns
+.TP
+.BI "#extension chorussend " "progno level"
+.br
+.ns
+.TP
+.BI "#extension reverbsend " "progno level"
+设置鼓声部效果有效时的发送电平。所有初始值均为 \fB127\fP。如果 delay、
+chorus、reverb 中至少一个被设置，则未被该音色设置的效果初始值将变为
+\fB0\fP。\fIprogno\fP 可以使用 `,' 和/或 [\fIstart\fP]\-[\fIend\fP]
+进行批量指定。如果省略 start 和 end，则分别假定为 \fB0\fP 和 \fB127\fP。
+.TP
+.BI "#extension rnddelay " "progno msec"
+每次发音时随机添加最大 \fImsec\fP 毫秒以内的延迟。随机值的分布为粉红噪声
+（1/f 波动），而非白噪声。
+.LP
+这些 \fB#extension\fP 语句以旧版 TiMidity（0.2i 及更早版本）的注释标记 `#'
+开头，因此在旧版 TiMidity 中会被视为注释行而忽略，从而保持与旧版的兼容性。
+.br
+最新的 \fBTiMidity++\fP 将 \fB#extension\fP 视为空白，因此可以省略。
+.LP
+如果文件名表达式以 `|'（Ascii 0x7c）字符结尾，则该文件名将被视为命令，
+命令的输出也将被用作语句的参数（仅限 UNIX）。
+.br
+\fBsource\fP \fIcommand\fP| 使 \fIcommand\fP 的输出成为 \fBsource\fP 的
+参数。这在需要根据环境选择 \fBTiMidity++\fP 设置时非常方便。另外，如果像
+\fIcommand\fP | 这样中间有空格，在读取设置文件时会被分割，不再被识别为命令。
+此功能适用于所有可以指定文件名的位置。
+.sp
+.RS
+timidity 'cat fild.mid|'
+.RE
+.sp
+将从 cat fild.mid 的输出中读取。
+.SH 文件
+.TP
+.B /etc/timidity.cfg
+.TP
+.B /usr/local/share/timidity/timidity.cfg
+.SH 相关项目
+timidity(1), lsmidiprog(1), mididump(1), patinfo(1), sf2text(1), wav2pat(1)
+.SH 著作权
+Copyright (C) 1999\-2004 Masanao Izumo <iz@onicos.co.jp>
+.br
+Copyright (C) 1995 Tuukka Toivonen <tt@cgs.fi>
+.LP
+原始版本由 Tuukka Toivonen <tt@cgs.fi> 开发至 TiMidity\-0.2i 版本发布。
+由于工作繁忙，其开发工作中断。
+.LP
+本程序为自由软件；您可以根据自由软件基金会发布的 \fIGNU 通用公共许可证\fP
+的条款对其进行再分发和/或修改；适用许可证的第 2 版或（按您的选择）任何
+更新版本。
+.LP
+本程序的分发是希望它能有用，但不提供任何担保；甚至不提供适销性或特定用途
+适用性的默示担保。详情请参阅 \fIGNU 通用公共许可证\fP。
+.LP
+您应当已随本程序收到 GNU 通用公共许可证的副本；如果没有，请写信至
+Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+MA 02111\-1307 USA
+.SH 获取方式
+最新版本可在 \fBTiMidity++\fP 页面获取：
+.LP
+URL https://sourceforge.net/projects/timidity/

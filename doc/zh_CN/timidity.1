@@ -1,0 +1,1198 @@
+.TH timidity 1 "2004年04月25日" "2.13.0"
+.SH 名称
+TiMidity++ \- MIDI转WAVE转换器兼播放器
+.SH 概要
+.B timidity
+[选项] 文件名 [...]
+.SH 说明
+\fBTiMidity++\fP 是一款将部分 MIDI 文件
+(支持的格式：标准 MIDI 文件 (*.mid)、Recomposer 文件
+(*.rcp, *.r36, *.g18, *.g36) 及 Module 文件 (*.mod)) 转换为格式化
+音频文件（如 RIFF WAVE）的转换器。\fBTiMidity++\fP 使用
+Gravis Ultrasound 兼容的 patch 文件或 Soundfonts (*.sfx, *.sf2) 从
+MIDI 文件生成数字音频数据。\fBTiMidity++\fP
+生成的数字音频数据可以保存到文件中进行处理，
+或通过音频设备实时播放。
+.br
+在实时播放时，\fBTiMidity++\fP 可以显示包含在
+KAR 或 WRD 文件中的歌词。
+.SH 文件名
+\fIfilename\fP 参数可以使用以下表达方式：
+.TP
+.B \-
+从标准输入读取 MIDI 文件。
+.TP
+.B path/filename
+从文件系统中的指定路径读取 MIDI 文件。
+.TP
+.B dir:directory
+.br
+.ns
+.TP
+.B directory/
+读取并播放指定\fIdirectory\fP中的所有 MIDI 文件。例如，
+.sp
+% timidity some/where/
+.sp
+将播放目录 \fBsome/where/\fP 中的所有文件。
+.TP
+.B 归档文件
+从归档中提取并播放文件。若要指定归档中的某个
+MIDI 文件，请在归档名后追加 \fB#<MIDI文件名>\fP。
+`#' 之后的路径可以使用通配符表达式（不区分大小写）。
+.br
+可使用转义序列 \fB\\xHH\fP，其中 `HH' 是十六进制整数表示的 ASCII 编号。
+.sp
+例如：
+.RS
+.TP
+% timidity file.zip#file.mid
+播放 \fBfile.zip\fP 中的 \fBfile.mid\fP
+.TP
+% timidity file.lzh#*.mid
+播放 \fBfile.lzh\fP 中匹配通配符表达式 \fB*.mid\fP 的所有文件
+.TP
+% timidity file.tgz#*
+此表达式等同于 \fBfile.tgz\fP
+.LP
+由于这些机制包含在 \fBTiMidity++\fP 自身中，即使在
+MS Windows 环境下也可以使用此语法。
+.sp
+\fBTiMidity++\fP 可以处理以下归档格式：
+.TP
+.B tar (*.tar)
+.TP
+.B tar+gzip (*.tar.gz, *.tgz)
+.TP
+.B zip (*.zip)
+.TP
+.B lzh (*.lzh, *.lha)
+（支持 lh0、lh1、lh2、lh3、lh4、lh5、lh6、lz4、lzs 和 lz5）
+.LP
+其他归档文件如果在编译阶段指定了解压命令，
+\fBTiMidity++\fP 将管道调用该命令进行解压。
+.RE
+.TP
+.B news://news\-server[:port]/Message\-ID
+.br
+.ns
+.TP
+.B news://news\-server[:port]/newsgroup[/first\-last]
+播放位于新闻服务器上指定文章中的 MIDI 文件。如果指定了
+newsgroup，\fBTiMidity++\fP 将播放张贴到该新闻组的所有文章中找到的所有
+MIDI 文件。
+.br
+\fBTiMidity++\fP 会解析 MIME 多部分消息，对于 \fBnews://*\fP
+方案，会自动提取张贴到该组中的 MIDI 文件；对于普通文件，
+可以通过将其命名为 *.mime 后缀的文件，或在该文件前加
+\fBmime:\fP 前缀来显式处理 MIME 文档。
+.sp
+支持以下 MIME 类型：
+.RS
+.TP
+.B uu\-encoded 文件
+需要有 \fBbegin\fP 行
+.br
+.TP
+.B base64 编码
+需要有 \fBContent\-Transfer\-Encoding: base64\fP
+.br
+.TP
+.B quoted\-string 编码
+需要有 \fBContent\-Transfer\-Encoding: quoted\-string\fP
+.br
+.TP
+.B Mac BinHex 格式
+仅支持 HQX 格式
+.RE
+.TP
+.B http://地址
+.br
+.ns
+.TP
+.B ftp://地址
+播放由 URL 指定的文件。
+.sp
+例如：
+.RS
+.TP
+% timidity http://www.goice.co.jp/member/mo/dist/midi/impromptu.mid
+直接从网络播放指定的 MIDI 文件。
+.LP
+如果在 *.cfg 文件中使用此表达方式，甚至可以使用来自
+远程计算机的 patch 文件（及其他文件）。
+.RE
+.SH 输入文件
+\fBTiMidity++\fP 可以处理以下文件格式：
+.TP
+.B .mid, .rmi (Format 0, 1, 2)
+标准 MIDI 文件 (SMF)
+.TP
+.B .rcp, .r36, .g18, .g36 (Recomposer 格式)
+COME ON MUSIC 公司的 Recomposer 格式
+.TP
+.B .mfi (MFi Version 3 \- i\-Mode 旋律格式)
+i\-Mode 是日本本地手机格式
+.TP
+.B .kar (Karaoke 格式)
+以歌词元事件消息的形式显示歌词
+.TP
+.B .mod, mod.* (Module 文件)
+.TP
+.B .wrd (WRD 格式)
+.SH 选项
+\fBTiMidity++\fP 支持以下命令行选项：
+.TP
+.BI "\-A " [n][,m](a)
+.br
+.ns
+.TP
+.BI \-\-amplification= n
+.br
+.ns
+.TP
+.BI \-\-drumpower= m
+.br
+.ns
+.TP
+.B \-\-[no\-]volume\-compensation
+将总音量设为 \fIn\fP%。默认值为 70%。更高的放大倍数会产生
+更大的声音。可以指定鼓组音量与其他声道音量的比率（鼓组功率）。
+允许的放大值范围为 \fB0\fP（无声）到 \fB800\fP。
+.br
+另外，在 \fB\-a\fP 选项中附加 `a' 字符，或使用
+\fB\-\-volume\-compensation\fP 选项，将使 \fBTiMidity++\fP 启用
+音量正则化功能。这样可以容易地获得动态范围。
+.sp
+例如：
+.RS
+.TP
+.B \-A90
+音量 90%，鼓组功率 100%，补偿关闭
+.TP
+.B \-A,120
+音量 70%，鼓组功率 120%，补偿关闭
+.TP
+.B \-A90,120
+音量 90%，鼓组功率 120%，补偿关闭
+.TP
+.B \-Aa
+音量 70%，鼓组功率 100%，补偿开启
+.TP
+.B \-A90a
+音量 90%，鼓组功率 100%，补偿开启
+.TP
+.B \-A,120a
+音量 70%，鼓组功率 120%，补偿开启
+.TP
+.B \-A90,120a
+音量 90%，鼓组功率 120%，补偿开启
+.RE
+.TP
+.B \-a, \-\-[no\-]anti\-alias
+开启抗混叠滤波。在播放前对采样进行低通滤波处理，
+在低重采样频率下可以降低混叠噪声。
+.TP
+.BI "\-B " n,m ", \-\-buffer\-fragments=" n,m
+对于 Linux/FreeBSD/OSS/ALSA/Windows 声音驱动，在交互模式下
+选择缓冲区片段数量。增加片段数量可以在多个进程运行时减少
+卡顿现象，但会使 \fBTiMidity++\fP 对快进、快退和音量控制
+的响应变慢，并且会使状态显示不同步。将片段数指定为 0 则使用
+最大可用的片段数。
+.TP
+.BI "\-C " n ", \-\-control\-ratio=" n
+设置采样频率与控制频率的比率。这决定了包络重新计算的频率
+——较小的比率产生更好的音质，但会消耗更多 CPU 时间。
+.TP
+.BI "\-c " file ", \-\-config\-file=" file
+读取额外的配置文件。
+.TP
+.BI "\-D " n ", \-\-drum\-channel=" n
+将某个声道标记为鼓声道。如果声道数为负数，则声道
+\-\fIn\fP 被标记为乐器声道。如果 \fIn\fP 为 \fB0\fP，
+则所有声道被标记为乐器声道。
+.TP
+.BI "\-d " dir ", \-\-interface\-path=" dir
+指定包含已安装的动态链接界面模块的目录。
+.TP
+.BI "\-E " mode ", \-\-ext=" mode
+设置 \fBTiMidity++\fP 扩展模式。以下模式可用
+（大写开关表示禁用此功能）：
+.RS
+.TP
+.B w/W, \-\-[no\-]mod\-wheel
+启用/禁用调制轮控制。
+.TP
+.B p/P, \-\-[no\-]portamento
+启用/禁用滑音控制。
+.TP
+.B v/V, \-\-[no\-]vibrato
+启用/禁用 NRPN 颤音。
+.TP
+.B s/S, \-\-[no\-]ch\-pressure
+启用/禁用声道压力控制。
+.TP
+.B e/E, \-\-[no\-]mod\-envelope
+启用/禁用调制包络控制。
+.TP
+.B t/T, \-\-[no\-]trace\-text\-meta
+启用/禁用追踪所有文本元事件。
+.TP
+.B o/O, \-\-[no\-]overlap\-voice
+接受/拒绝同一音符的多次发音。
+.TP
+.B z/Z, \-\-[no\-]temper\-control
+启用/禁用 MIDI Tuning Standard 律制控制。
+.TP
+.BI m HH ", \-\-default\-mid=" HH
+将制造商 ID 设置为 \fIHH\fP（其中 \fIHH\fP 是两位
+十六进制数字）。
+.br
+\fIHH\fP 的值 \fBGS/gs\fP、\fBXG/xg\fP 或 \fBGM/gm\fP 分别被识别为
+\fB41\fP、\fB43\fP 和 \fB7e\fP。
+.TP
+.BI M HH ", \-\-system\-mid=" HH
+将系统制造商 ID 设置为 \fIHH\fP（其中 \fIHH\fP 是两位
+十六进制数字）。
+.br
+此选项中设置的制造商 ID 不可更改，输入文件中的制造商
+ID 将被忽略。
+.TP
+.BI b n ", \-\-default\-bank=" n
+将默认音色库设为 \fIn\fP。
+.TP
+.BI B n ", \-\-force\-bank=" n
+将所有声道的音色库编号设为 \fIn\fP。
+.TP
+.BI i n[/m] ", \-\-default\-program=" n[/m]
+将默认乐器编号设为 \fIn\fP。MIDI 文件中的任何 Program Change
+事件将覆盖此选项。
+.br
+如果在 \fIn\fP 后加上 \fI/m\fP，则为声道 \fIm\fP 指定默认乐器编号。
+.TP
+.BI I n[/m] ", \-\-force\-program=" n[/m]
+与 \fB\-Ei\fP 类似，但此选项忽略所有乐器变更。
+.TP
+.BI "F " args
+用于效果。参见下文。在 \fIargs\fP 选项中，可以指定以下效果选项：
+.RS
+.TP
+.BI delay= (d|l|r|b)[,msec] ", \-\-delay=" (d|l|r|b)[,msec]
+设置延迟类型。
+.RS
+.TP
+.B d, 0
+禁用延迟效果。
+.TP
+.B l, 1
+左声道延迟。
+.TP
+.B r, 2
+右声道延迟。
+.TP
+.B b, 3
+左右声道交换。
+.LP
+可选的 \fImsec\fP 参数为延迟时间。
+.RE
+.TP
+.BI chorus= (d|n|s)[,level] ", \-\-chorus=" (d|n|s)[,level]
+.RS
+.TP
+.B d, 0
+禁用此效果。
+.TP
+.B n, 1
+启用 MIDI 合唱效果控制。
+.TP
+.B s, 2
+环绕声合唱效果，合唱失谐程度较小（默认值）。
+.LP
+可选参数 \fIlevel\fP 指定合唱等级 \fB0\fP 到 \fB127\fP。
+.RE
+.TP
+.BI reverb= (d|n|g)[,level] ", \-\-reverb=" (d|n|g)[,level]
+.TP
+.BI reverb= (f|G)[,level,scaleroom,offsetroom,predelay]
+.TP
+.BI "\-\-reverb=" (f|G)[,level,scaleroom,offsetroom,predelay]
+.RS
+.TP
+.B d, 0
+禁用 MIDI 混响效果控制。
+.TP
+.B n, 1
+启用 MIDI 混响效果控制。此效果仅在立体声模式下有效。
+.TP
+.B g, 2
+全局混响效果。
+.TP
+.B f, 3
+Freeverb MIDI 混响效果控制（默认值）。
+.TP
+.B G, 4
+全局 Freeverb 效果。
+.LP
+可选参数 \fIlevel\fP 指定混响等级 \fB0\fP 到 \fB127\fP。
+.br
+对于 Freeverb 效果，可以额外指定 \fIscaleroom\fP、
+\fIoffsetroom\fP 和 \fIpredelay\fP 参数。
+\fIscaleroom\fP 和 \fIoffsetroom\fP 指定房间大小的变量，计算公式为
+.br
+roomsize = C * \fIscaleroom\fP + \fIoffsetroom\fP
+.br
+其中 C 表示混响特征。
+\fIpredelay\fP 以百分比指定混响预延迟时间的系数。
+任何可选参数都可以省略。
+默认值分别为 \fB0.28\fP、\fB0.7\fP 和 \fB100\fP。
+.RE
+.TP
+.BI vlpf= (d|c|m) ", \-\-voice\-lpf=" (d|c|m)
+.RS
+.TP
+.B d, 0
+禁用 LPF 效果。
+.TP
+.B c, 1
+Chamberlin 谐振 LPF (12dB/oct)（默认值）。
+.TP
+.B m, 2
+Moog 谐振低通 VCF (24dB/oct)
+.RE
+.TP
+.BI ns= n ", \-\-noise\-shaping=" n
+启用 \fIn\fP 阶噪声整形滤波器。衰减阶段的失真得到改善，
+但由于噪声移向高频，人耳感受到的噪声会增加。
+对于 8 位线性编码，\fIn\fP 的有效值区间为 \fB0\fP（最小）
+到 \fB4\fP（最大）。默认值为 \fB4\fP。对于 16 位线性编码，
+\fIn\fP 的有效值区间为 \fB0\fP 到 \fB4\fP。根据取值不同，
+其工作原理如下。默认值为 \fB4\fP。
+.RS
+.TP
+.B 0
+无噪声整形。
+.TP
+.B 1
+传统噪声整形。
+.TP
+.B 2
+过载型软削波 + 新型噪声整形。
+.TP
+.B 3
+电子管放大器型软削波 + 新型噪声整形。
+.TP
+.B 4
+新型噪声整形。
+.RE
+.TP
+.BI resamp= (d|l|c|L|n|g) ", \-\-resample=" (d|l|c|L|n|g)
+.RS
+.TP
+.B d, 0
+无插值。
+.TP
+.B l, 1
+线性插值。
+.TP
+.B c, 2
+三次样条插值。
+.TP
+.B L, 3
+拉格朗日插值。
+.TP
+.B n, 4
+牛顿多项式插值。
+.TP
+.B g, 5
+修正高斯效果（默认值）。
+.LP
+此选项会影响 \fB\-N\fP 选项的行为。
+.RE
+.RE
+.RE
+.TP
+.B \-e, \-\-evil
+使 \fBTiMidity++\fP 变为"邪恶"模式。对于 Win32 版本，此选项将任务
+优先级提高一级。在切换任务时可以获得更好的播放效果，
+但会拖慢所有其他任务的速度。
+.TP
+.B \-F, \-\-[no\-]fast\-panning
+开启快速全局声像控制，以适应期望对已播放音符产生声像
+调整效果的 MIDI 曲目。某些不适应此功能的文件会导致左右
+声道快速来回切换，使用 \fB\-F\fP 标志时可能产生严重的
+爆音现象。
+.br
+当前版本的 \fBTiMidity++\fP 中，此选项为切换开关。
+.TP
+.B \-f, \-\-[no\-]fast\-decay
+切换快速包络。此选项使 \fBTiMidity++\fP 运行更快，但音符
+的释放时间会缩短。
+.TP
+.BI "\-G " begin1-end1[,begin2-end2,...](m)
+.br
+.ns
+.TP
+.BI \-\-segment= begin1-end1[,begin2-end2,...](m)
+按逗号分隔的时间段，仅播放指定的子段落。
+.br
+每个时间段由短划线分隔的时间值定义：
+\fIbegin\fP-\fIend\fP - 默认为 \fB0-infinity\fP。
+从 \fIbegin\fP 播放到 \fIend\fP。
+.sp
+时间格式：\fI[<minutes>:]<seconds>[.<milliseconds>]\fP
+.sp
+若在选项中附加 `m' 字符，则将其视为小节和拍数而非秒数。
+.sp
+时间格式：\fI<measure>[.<beat>]\fP（小节和拍数以 1 为起始）
+.sp
+例如：
+.RS
+.TP
+.B \-G12-1:00.500
+跳过 12 秒，在 1 分零 500 毫秒处停止。
+.TP
+.B \-G-5,2:00-
+播放最初 5 秒，然后跳到距开头 2 分钟处播放至结束。
+.TP
+.B \-G11.4-20m -G4:00-
+从第 11 小节第 4 拍播放到第 20 小节，然后跳到距开头 4 分钟处播放至结束。
+.RE
+.TP
+.BI "\-g " sec ", \-\-spectrogram=" sec
+打开声音谱图窗口。此选项仅当系统支持 X Window System 时
+有效。
+.TP
+.BI "\-H " n ", \-\-force\-keysig=" n
+指定调号数。MIDI 文件将按指定的升号数（\fIn\fP 为正时）
+或降号数（\fIn\fP 为负时）进行移调演奏。\fIn\fP 的有效值区间
+为 \fB\-7\fP 到 \fB7\fP。例如，当 \fIn\fP 为 \fB1\fP 时，任何
+调性的 MIDI 文件都将移调到 \fB1\fP 个降号调（即 F 大调或
+D 小调）演奏。因此，在使用乐器伴奏练习时，可以方便地使用
+易于演奏的调性。
+.TP
+.B \-h, \-\-help
+显示帮助信息。
+.TP
+.BI "\-i " mode ", \-\-interface=" mode
+.br
+.ns
+.TP
+.BI \-\-realtime\-priority= n
+.br
+.ns
+.TP
+.BI \-\-sequencer\-ports= n
+从已编译的备选方案中选择用户界面。
+\fImode\fP 必须以支持的界面标识符之一开头。使用
+\fB\-h\fP 选项运行 \fBTiMidity++\fP 可查看列表。
+.br
+对于 ALSA sequencer 界面，可额外使用
+\fB\-\-realtime\-priority\fP 通过 \fIn\fP 设置实时优先级，
+使用 \fB\-\-sequencer\-ports\fP 设置打开的
+sequencer 端口数。默认值为 \fB4\fP。
+.br
+以下标识符可能可用：
+.RS
+.TP
+.B \-id
+dumb 界面
+.TP
+.B \-in
+ncurses 界面
+.TP
+.B \-is
+S\-Lang 界面
+.TP
+.B \-ia
+X Athena Widget 界面
+.TP
+.B \-ik
+Tcl/Tk 界面
+.TP
+.B \-im
+Motif 界面
+.TP
+.B \-iT
+vt100 界面
+.TP
+.B \-ie
+Emacs 界面
+.br
+（在 Emacs 中使用 ``M\-x timidity''）
+.TP
+.B \-ii
+skin 界面
+.br
+环境变量 \fBTIMIDITY_SKIN\fP 必须设置为 skin 数据的路径
+（也支持压缩数据）。
+.TP
+.B \-ig
+GTK+ 界面
+.TP
+.B \-ir
+将 \fBTiMidity++\fP 作为 MIDI 服务器启动。
+.TP
+.B \-iA
+将 \fBTiMidity++\fP 作为 ALSA sequencer 客户端启动。
+.TP
+.B \-iW
+Windows 合成器界面
+.TP
+.B \-iw
+Windows GUI 界面
+.TP
+.B \-iP
+PortMIDI 合成器界面
+.TP
+.B \-ip
+UMP 界面
+.TP
+.B 界面选项
+在界面标识符后可以立即追加选项字符。
+支持以下选项：
+.RS
+.TP
+.BI "v, \-\-verbose=" n
+提高详细输出级别。此选项可累加。
+.TP
+.BI "q, \-\-quiet=" n
+降低详细输出级别。此选项可累加。
+.TP
+.B t, \-\-[no\-]trace
+切换追踪模式。在追踪模式下，\fBTiMidity++\fP 尝试实时显示
+其当前状态。对于 Linux 声音驱动，这是通过使用短 DMA 缓冲区
+片段实现的，可通过 \fB\-B\fP 选项调整。
+.TP
+.B l, \-\-[no\-]loop
+循环播放（某些界面会忽略此选项）
+.TP
+.B r, \-\-[no\-]random
+播放前随机排列文件列表参数
+.TP
+.B s, \-\-[no\-]sort
+播放前对文件列表参数排序
+.TP
+.B D, \-\-[no\-]background
+将 \fBTiMidity++\fP 后台守护进程化（仅限 alsaseq）
+.RE
+.RE
+.TP
+.B \-j, \-\-[no\-]realtime\-load
+启用播放期间加载 patch 文件的功能。
+.TP
+.BI "\-K " n ", \-\-adjust\-key=" n
+将调性（即歌曲移调）调整 \fIn\fP 个半音。范围从
+\fB\-24\fP 到 \fB24\fP。
+.TP
+.BI "\-k " msec ", \-\-voice\-queue=" msec
+指定音频队列时间限制以减少发音数。如果剩余的音频缓冲区
+小于 \fImsec\fP 毫秒，\fBTiMidity++\fP 将尝试终止某些
+发音。此功能使得在较慢的 CPU 上播放复杂的 MIDI 文件成为可能。
+将 \fImsec\fP 设为零表示 \fBTiMidity++\fP 永不移除任何发音。
+.TP
+.BI "\-L " path ", \-\-patch\-path=" path
+将 \fIpath\fP 添加到库搜索路径。Patch、配置和 MIDI 文件
+将沿此路径搜索。最后添加的目录最先搜索。注意，当前目录始终
+在库路径之前首先被搜索。
+.TP
+.BI "\-M " name ", \-\-pcm\-file=" name
+\fBTiMidity++\fP 可以播放 PCM 文件而非 MIDI 文件。如果指定
+``auto''，\fBTiMidity++\fP 在播放 foo.mid 时会尝试打开
+foo.mid.wav 或 foo.mid.aiff。如果指定 ``none''，则禁用此功能。
+否则直接播放 \fIname\fP。
+.TP
+.BI "\-m " msec ", \-\-decay\-time=" msec
+修改包络音量衰减时间。\fImsec\fP 是保持一个持续音符的
+最短毫秒数。
+.RS
+.TP
+.BI \-m 0
+禁用延音衰减，使延音保持恒定音量（默认值）。
+.TP
+.BI \-m 1
+实际效果如同忽略所有延音，音量衰减与正常的第三阶段相同。
+.TP
+.BI \-m 3000
+一个满音量的音符在开始延音后将在 \fB3\fP 秒内衰减
+（假设常规第三阶段的衰减率不会使其衰减更长时间）。
+较小的音量当然会更早消失。
+.RE
+.TP
+.BI "\-N " n ", \-\-interpolation=" n
+设置插值参数。此选项取决于 \fB\-EFresamp\fP 选项的值。
+.RS
+.TP
+.B cspline, lagrange
+切换 4 点插值（默认为开启）。
+.TP
+.B newton
+使用牛顿多项式的 \fIn\fP 点插值。\fIn\fP 必须是从
+\fB1\fP 到 \fB57\fP 的奇数。
+.TP
+.B gauss
+\fIn\fP+1 点修正高斯插值。范围从 \fB0\fP（禁用）到
+\fB34\fP（最大），默认为 \fB25\fP。
+.LP
+无论使用哪种方式，当音频队列 < 99% 时会使用线性插值。
+.RE
+.TP
+.BI "\-O " mode ", \-\-output\-mode=" mode
+.br
+.ns
+.TP
+.B \-\-flac\-verify
+.br
+.ns
+.TP
+.BI \-\-flac\-padding= n
+.br
+.ns
+.TP
+.BI \-\-flac\-complevel= n
+.br
+.ns
+.TP
+.B \-\-oggflac
+.br
+.ns
+.TP
+.BI \-\-speex\-quality= n
+.br
+.ns
+.TP
+.B \-\-speex\-vbr
+.br
+.ns
+.TP
+.BI \-\-speex\-abr= n
+.br
+.ns
+.TP
+.B \-\-speex\-vad
+.br
+.ns
+.TP
+.B \-\-speex\-dtx
+.br
+.ns
+.TP
+.BI \-\-speex\-complexity= n
+.br
+.ns
+.TP
+.BI \-\-speex\-nframes= n
+从已编译的备选方案中选择输出模式。
+\fImode\fP 必须以支持的输出模式标识符之一开头。使用
+\fB\-h\fP 选项运行 \fBTiMidity++\fP 可查看列表。
+.br
+在 Ogg FLAC 输出模式中，可通过 \fB\-\-flac\-verify\fP、
+\fB\-\-flac\-padding\fP、\fB\-\-flac\-complevel\fP 和
+\fB\-\-oggflac\fP 选项分别指定校验生成的数据（会稍慢一些）、
+头部填充大小（默认为 4096）、压缩级别（0 到 8，默认为 5）
+以及启用 OggFLAC 流。
+.br
+在 Ogg Speex 输出模式中，可通过 \fB\-\-speex\-quality\fP、
+\fB\-\-speex\-vbr\fP、\fB\-\-speex\-abr\fP、
+\fB\-\-speex\-vad\fP、\fB\-\-speex\-dtx\fP、
+\fB\-\-speex\-complexity\fP 和 \fB\-\-speex\-nframes\fP
+选项分别指定压缩质量（0 到 10，默认为 8）、启用 VBR 输出、
+启用 ABR 输出并将比率设为 n、启用 VAD（语音活动检测）、启用
+DTX（非连续传输）、编码复杂度（0 到 10，默认为 3）以及单个
+Ogg 数据包中的帧数（0 到 10，默认为 1）。
+.br
+所有版本都提供以下标识符：
+.RS
+.TP
+.B \-Od
+通过 OSS dsp 设备输出（默认值）
+.TP
+.B \-Os
+输出到 ALSA
+.TP
+.B \-Or
+生成原始波形数据。支持所有格式选项。常见格式包括：
+.RS
+.TP
+.B \-OrU
+u\-Law
+.TP
+.B \-Or1sl
+16 位有符号线性 PCM
+.TP
+.B \-Or8ul
+8 位无符号线性 PCM
+.RE
+.TP
+.B \-Ou
+生成 Sun Audio (au) 数据
+.TP
+.B \-Oa
+生成 AIFF 数据
+.TP
+.B \-Ow
+生成 RIFF WAVE 格式输出。如果输出定向到不可寻址的文件，
+或者如果在关闭文件前中断了 \fBTiMidity++\fP，
+文件头部将在 RIFF 和数据块长度字段中包含 0xffffffff。
+流行的音频转换工具 sox 能够读取此类畸形文件，
+因此你可以将数据直接管道传输给 sox 进行即时格式转换。
+.TP
+.B \-Ol
+列出 MIDI 事件
+.TP
+.B \-OM
+MOD 转 MIDI 转换
+.TP
+.B \-Oe
+EsounD
+.TP
+.B \-Op
+PortAudio
+.TP
+.B \-Oj
+JACK
+.TP
+.B \-OR
+aRts
+.TP
+.B \-OA
+Alib
+.TP
+.B \-Ov
+Ogg Vorbis
+.TP
+.B \-OF
+Ogg FLAC
+.TP
+.B \-OS
+Ogg Speex
+.TP
+.B \-OO
+libao
+.TP
+.B 格式选项
+在模式标识符之后可以立即追加选项字符以更改输出格式。
+支持以下选项：
+.RS
+.TP
+.B S, \-\-output\-stereo
+立体声
+.TP
+.B M, \-\-output\-mono
+单声道
+.TP
+.B s, \-\-output\-signed
+有符号输出
+.TP
+.B u, \-\-output\-unsigned
+无符号输出
+.TP
+.B 1, \-\-output\-16bit
+16 位采样宽度
+.TP
+.B 2, \-\-output\-24bit
+24 位采样宽度
+.TP
+.B 8, \-\-output\-8bit
+8 位采样宽度
+.TP
+.B l, \-\-output\-linear
+线性编码
+.TP
+.B U, \-\-output\-ulaw
+u\-Law (8 位) 编码
+.TP
+.B A, \-\-output\-alaw
+A\-Law 编码
+.TP
+.B x, \-\-[no\-]output\-swab
+字节交换输出
+.LP
+请注意，某些选项对某些模式无效。例如，你无法生成字节交换
+的 RIFF WAVE 文件，也无法在 Linux PCM 设备上强制使用 uLaw
+输出。
+.RE
+.RE
+.TP
+.BI "\-o " file ", \-\-output\-file=" file
+将输出保存到 \fIfile\fP，可以是文件、设备或 HP\-UX 音频
+服务器，具体取决于 \fB\-O\fP 选项选择的输出模式。特殊文件
+名 `\-' 表示输出到标准输出。
+.TP
+.BI "\-P " file ", \-\-patch\-file=" file
+使用 patch 文件作为所有乐器的音色。
+.TP
+.BI "\-p " [n](a)
+.br
+.ns
+.TP
+.BI \-\-polyphony= n
+.br
+.ns
+.TP
+.B \-\-[no\-]polyphony\-reduction
+将复音数（最大同时发音数）设置为 \fIn\fP。
+.br
+另外，在 \fB\-p\fP 选项中附加 `a' 字符，或使用
+\fB\-\-polyphony\-reduction\fP 选项，将使 \fBTiMidity++\fP
+启用自动复音数减少算法。
+.TP
+.BI "\-Q " n[,...](t)
+.br
+.ns
+.TP
+.BI \-\-mute= n[,...]
+.br
+.ns
+.TP
+.BI \-\-temper\-mute= n[,...]
+使声道 \fIn\fP 静音。可以使用 `,' 进行批量指定。
+如果 \fIn\fP 为 \fB0\fP，则关闭所有声道。接着使用
+\-\fIn\fP 可以将声道 \fIn\fP 重新开启。
+.br
+另一方面，在 \fB\-Q\fP 选项后附加 `t' 字符，或使用
+\fB\-\-temper\-mute\fP 选项，表示律制静音。此功能使指定
+律制类型 \fIn\fP 的声道静音。对于预设律制，\fIn\fP 的取值范围
+为 \fB0\fP 到 \fB3\fP。对于用户自定义律制，\fIn\fP 的取值范围
+为 \fB4\fP 到 \fB7\fP。
+.TP
+.BI "\-q " sec/n ", \-\-audio\-buffer=" sec/n
+以秒为单位指定音频缓冲区。\fIsec\fP 为缓冲区的最大大小，
+\fIn\fP 为开始时填充的百分比（默认为 \fB5.0/100\fP）
+（100% 的大小等于整个设备缓冲区大小）。
+.TP
+.BI "\-R " msec
+启用伪混响模式。它将每个乐器的释放时间设置为 \fImsec\fP 毫秒。
+如果 \fImsec\fP 为 \fB0\fP，则 \fImsec\fP 被设置为 \fB800\fP
+（默认值）。
+.TP
+.BI "\-S " n ", \-\-cache\-size=" n
+将重采样缓存大小设置为 \fIn\fP 字节。如果 \fIn\fP 等于
+\fB0\fP，则禁用所有采样缓存。\fIn\fP 的默认值为
+\fB2097152\fP (2MB)。
+.TP
+.BI "\-s " freq ", \-\-sampling\-freq=" freq
+设置重采样频率（Hz 或 kHz）。并非所有音频设备都支持
+所有频率——可能会根据实现选择一个近似频率。
+.TP
+.BI "\-T " n ", \-\-adjust\-tempo=" n
+将速度调整为 \fIn\fP%；\fB120\fP 以 NTSC Amiga 的时序播放
+MOD 文件。
+.TP
+.BI "\-t " code ", \-\-output\-charset=" code
+设置日语文本的输出编码。\fIcode\fP 的可能取值为
+（大写和小写不区分）：
+.RS
+.TP
+.B auto
+由 LANG 环境变量决定。
+.TP
+.B ascii
+将非 ASCII 字符转换为句点。
+.TP
+.B nocnv
+不进行转换。
+.TP
+.B 1251
+从 windows\-1251 转换到 koi8\-r。
+.TP
+.B euc
+以 EUC (日本) 编码输出。
+.TP
+.B jis
+以 JIS 编码输出。
+.TP
+.B sjis
+以 SJIS 编码输出。
+.RE
+.TP
+.B \-U, \-\-[no\-]unload\-instruments
+在播放完各 MIDI 文件后从内存中卸载所有乐器。在连续播放
+多个文件时可以降低内存需求。
+.TP
+.BI "\-V " power ", \-\-volume\-curve=" power
+设置音量曲线的幂指数。总放大倍数为 volume^\fIpower\fP。
+\fB0\fP（默认）使用常规表格。任何非零值会使所有 MIDI
+使用新的用户自定义力度/音量/表情曲线（线性：\fB1\fP，
+理想值：~\fB1.661\fP，GS：~\fB2\fP）。
+.TP
+.B \-v, \-\-version
+显示版本字符串
+.TP
+.BI "\-W " mode ", \-\-wrd=" mode
+播放 WRD 文件。
+.sp
+\fImode\fP 的允许值为：
+.RS
+.TP
+.B x
+X Window System 模式
+.TP
+.B w
+Windows 控制台模式
+.TP
+.B t
+TTY 模式
+.TP
+.B d
+Dumb 模式（直接输出 WRD 事件）
+.TP
+.B \-
+不追踪 WRD
+.TP
+.B R[opts]
+设置 WRD 选项：
+.RS
+.TP
+.BI a1= b1 ,a2= b2 ,...
+设置 WRD 选项。\fBan\fP 是选项名称，\fIbn\fP 是值。
+.TP
+.BI d= n
+模拟原始 MIMPI 播放器的时序（@WAIT、@WMODE）缺陷。
+模拟级别为：
+.RS
+.TP
+.BI \-WRd= 0
+不模拟 MIMPI 的任何缺陷
+.TP
+.BI \-WRd= 1
+仅模拟部分缺陷（默认值）
+.TP
+.BI \-WRd= 2
+模拟所有已知缺陷
+.RE
+.TP
+.BI F= file
+仅在未找到匹配 *.wrd 的文件时使用 \fIfile\fP 作为 WRD 文件。
+.TP
+.BI f= file
+使用 \fIfile\fP 作为 WRD 文件。
+.RE
+.LP
+WRD 模式必须同时使用追踪模式（选项 \fB\-i?t\fP），
+否则 WRD 事件的时序会很糟糕。
+.RE
+.TP
+.BI "\-w " mode ", \-\-rcpcv\-dll=" mode
+MS Windows 扩展模式。以下选项可用：
+.RS
+.TP
+.BI "\-w " r
+使用 rcpcv.dll 播放 RCP/R36 文件。
+.TP
+.BI "\-w " R
+不使用 rcpcv.dll（默认值）。
+.RE
+.TP
+.BI "\-x " str ", \-\-config\-string=" str
+使用 \fIstr\fP 配置 \fBTiMidity++\fP。\fIstr\fP 的格式与
+\fBtimidity.cfg\fP 相同。
+.sp
+例如：
+.br
+\fB\-x'bank 0\\n0 violin.pat'\fP
+.br
+将乐器编号 0 设为小提琴。
+.br
+\fIstr\fP 中的字符 `\\' (ASCII 0x5c) 被视为转义字符，如同 C
+字面量中的用法。例如 \fB\\n\fP 被视为换行符。
+.TP
+.BI "\-Z " file ", \-\-freq\-table=" file
+从 \fIfile\fP 读取频率表。这对于定义不同于十二平均律的
+调音律制很有用。如果指定 ``pure''，则 TiMidity++ 以试用纯律
+演奏。
+.RS
+.TP
+.BI \-Zpure [n(m)] ", \-\-pure\-intonation=" [n(m)]
+根据 MIDI 文件中的 Key Signature 元事件以试用纯律演奏。
+如果 MIDI 文件中不包含该元事件，你可以手动指定初始调号。
+可选的 \fIn\fP 是调号数。升号时为正值，降号时为负值。
+\fIn\fP 的有效值区间为 \fB\-7\fP 到 \fB7\fP。在小调模式时，
+应在 \fB\-Zpure\fP 选项中附加 `m' 字符。
+.RE
+.TP
+.BI \-\-module= n
+尽可能模拟特定合成器模块的行为。
+目前定义的 \fIn\fP 值如下：
+.RS
+.TP
+.B 0
+\fBTiMidity++\fP 默认
+.TP
+.B 1
+Roland SC\-55
+.TP
+.B 2
+Roland SC\-88
+.TP
+.B 3
+Roland SC\-88Pro
+.TP
+.B 4
+Roland SC\-8850
+.TP
+.B 5\-15
+保留给 GS 系列
+.TP
+.B 16
+YAMAHA MU\-50
+.TP
+.B 17
+YAMAHA MU\-80
+.TP
+.B 18
+YAMAHA MU\-90
+.TP
+.B 19
+YAMAHA MU\-100
+.TP
+.B 20\-31
+保留给 XG 系列
+.TP
+.B 32
+SoundBlaster Live!
+.TP
+.B 33
+SoundBlaster Audigy
+.TP
+.B 34\-111
+保留给其他合成器模块
+.TP
+.B 112
+\fBTiMidity++\fP 特殊值 1
+.TP
+.B 113\-126
+保留给 \fBTiMidity++\fP 规范用途
+.TP
+.B 127
+\fBTiMidity++\fP 调试用
+.RE
+.SH 相关参考
+lsmidiprog(1), mididump(1), patinfo(1), sf2text(1), wav2pat(1),
+timidity.cfg(5)
+.SH 版权
+Copyright (C) 1999\-2004 Masanao Izumo <iz@onicos.co.jp>
+.br
+Copyright (C) 1995 Tuukka Toivonen <tt@cgs.fi>
+.LP
+原始版本由 Tuukka Toivonen <tt@cgs.fi> 开发至
+TiMidity\-0.2i 发布。由于他工作繁忙，开发后来中止了。
+.LP
+This program is free software; you can redistribute it and/or modify
+it under the terms of the \fIGNU General Public License\fP as
+published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.
+.LP
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the \fIGNU
+General Public License\fP for more details.
+.LP
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111\-1307
+USA
+.SH 获取来源
+最新版本可在 \fBTiMidity++\fP 页面获取：
+.LP
+URL https://sourceforge.net/projects/timidity/
+.SH 缺陷
+比一只小型 CPU 时间吞噬动物消耗更多的 CPU 时间。
+.LP
+本手册页是从日文翻译为英文而来，原作者的英文水平有限 :)
+.SH 作者
+.TP
+.B Version 0.2i 及更早版本：
+Tuukka Toivonen <tt@cgs.fi>
+.br
+Vincent Pagel <pagel@loria.fr>
+.br
+Takashi Iwai <tiwai@suse.de>
+.br
+Davide Moretti <dave@rimini.com>
+.br
+Chi Ming HUNG <cmhung@insti.physics.sunysb.edu>
+.br
+Riccardo Facchetti <riccardo@cdc8g5.cdc.polimi.it>
+.TP
+.B TiMidity++:
+出雲正尚 (IZUMO Masanao) <iz@onicos.co.jp>
+.br
+原田智和 (HARADA Tomokazu) <harada@prince.pe.u\-tokyo.ac.jp>
+.br
+山手敬一郎 (YAMATE Keiichirou) <keiich\-y@is.aist\-nara.ac.jp>
+.br
+桐生正章 (KIRYU Masaki) <mkiryu@usa.net>
+.br
+青木大輔 (AOKI Daisuke) <dai@y7.net>
+.br
+松本正路 (MATSUMOTO Shoji) <shom@i.h.kyoto\-u.ac.jp>
+.br
+小柳正明 (KOYANAGI Masaaki) <koyanagi@okilab.oki.co.jp>
+.br
+今井邦彦 (IMAI Kunihiko) <imai@leo.ec.t.kanazawa\-u.ac.jp>
+.br
+野上孝也 (NOGAMI Takaya) <t\-nogami@happy.email.ne.jp>
+.br
+渡辺隆徳 (WATANABE Takanori) <takawata@shidahara1.planet.kobe\-u.ac.jp>
+.br
+竹川博 (TAKEKAWA Hiroshi) <sian@big.or.jp>
+.br
+長野大輔 (NAGANO Daisuke) <breeze.nagano@nifty.ne.jp>
+.br
+木下康介 (KINOSHITA Kosuke) <kino@krhm.jvc\-victor.co.jp>
+.br
+重村紀克 (SHIGEMURA Norikatsu) <nork@ninth\-nine.com>
+.br
+山畑功 (YAMAHATA Isaku) <yamahata@kusm.kyoto\-u.ac.jp>
+.br
+新井良重 (ARAI Yoshishige) <ryo2@on.rim.or.jp>
+.br
+Glenn Trigg <ggt@netspace.net.au>
+.br
+Tim Allen <thristian@usa.net>
+.br
+Michael Haardt <michael@moria.de>
+.br
+Eric A. Welsh <ewelsh@ccb.wustl.edu>
+.br
+Paolo Bonzini <bonzini@gnu.org>
+.br
+木本雅彦 (KIMOTO Masahiko) <kimoto@ohnolab.org>
+.br
+岩井隆 (IWAI Takashi) <tiwai@suse.de>
+.br
+Saito <saito2@digitalme.com>
+.br
+佐藤健太郎 (SATO Kentaro) <kentaro@ps.catv.ne.jp>
+.br
+田向正一 (TAMUKI Shoichi) <tamuki@linet.gr.jp>
+.br
+浦部翔平 (URABE Shohei) <root@mput.dip.jp>
+.br
+末永圭史 (SUENAGA Keishi) <s_keishi@mutt.freemail.ne.jp>
+.br
+SUZUKI Koji <k@kekyo.net>
+.LP
+（头衔省略且排序不分先后）
+.LP
+此外还有许多人为 \fBTiMidity++\fP 邮件列表提供了信息和缺陷修复代码。
+.LP
+本手册页的英文版由長野大輔 (NAGANO Daisuke
+<breeze.nagano@nifty.ne.jp>) 编写。
+.LP
+目前由 田向正一 (TAMUKI Shoichi <tamuki@linet.gr.jp>) 和 浦部翔平
+(URABE Shohei <root@mput.dip.jp>) 负责维护本手册页。
+.br
+如果您对本手册页有任何意见、建议或抱怨 :)，请告诉我们。
+.LP
+WRD 使用的 MIMPI 模拟器代码引用了 X Consortium 和 kterm 的代码，
+特此致谢。但本程序不对使用后产生的任何直接、间接损害承担责任。
+.LP
+\fBTiMidity++\fP 的选项和 cfg 文件说明由出雲正尚
+(IZUMO Masanao <iz@onicos.co.jp>) 编写。
+.br
+本 nroff 源码和手册页由長野大輔 (NAGANO Daisuke
+<breeze.nagano@nifty.ne.jp>) 制作。
+.LP
+目前由 田向正一 (TAMUKI Shoichi <tamuki@linet.gr.jp>) 和 浦部翔平
+(URABE Shohei <root@mput.dip.jp>) 负责手册页的维护。
