@@ -1,10 +1,8 @@
 *.a
 *.o
-*.dll
 *.exe
 Makefile
 /common.makefile
-/.lineno
 /stamp-*
 /config.log
 /config.status
