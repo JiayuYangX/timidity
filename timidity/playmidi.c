@@ -2139,7 +2139,7 @@ static int find_voice(MidiEvent *e)
 	int i, lowest = -1;
 	
 	status_check = (opt_overlap_voice_allow)
-			? (VOICE_OFF | VOICE_SUSTAINED) : 0xff;
+			? 0 : 0xff;
 	mono_check = channel[ch].mono;
 	altassign = find_altassign(channel[ch].altassign, note);
 	for (i = 0; i < upper_voices; i++)
