@@ -1,15 +1,28 @@
 #!/bin/bash
 # TiMidity++ 32-bit build script
-# Usage: ./build.sh          # both
-#        ./build.sh console  # console only
-#        ./build.sh gui      # GUI only
+# Usage: ./build.sh [OUTDIR] [console|gui|all]
+#    或: ./build.sh [console|gui|all] [OUTDIR]
+#    ./build.sh              # both, default dir
+#    ./build.sh /e/out       # both, custom dir
+#    ./build.sh /e/out gui   # GUI, custom dir
+#    ./build.sh gui /e/out   # same
 
 set -e
 export PATH=/mingw32/bin:/ucrt64/bin:/usr/bin
 
 cd "$(dirname "$0")"
 SRCDIR="$(pwd)"
-OUTDIR="/e/MIDI Player/TiMidity++"
+OUTDIR="$SRCDIR"
+TARGET=all
+
+for arg in "$@"; do
+    case "$arg" in
+        [a-zA-Z]:[/\\]*) OUTDIR="$(echo "$arg" | sed 's|\\|/|g; s|^\([a-zA-Z]\):|/\L\1|')" ;;
+        /*) OUTDIR="$arg" ;;
+        console|gui|all) TARGET="$arg" ;;
+        *) echo "Usage: $0 [OUTDIR] [console|gui|all]"; exit 1 ;;
+    esac
+done
 
 CONFIGURE_OPTS="--build=x86_64-w64-mingw32 --host=i686-w64-mingw32 --prefix="
 AUDIO_OPTS="--enable-audio=w32,vorbis,gogo,ogg,flac,portaudio"
@@ -67,7 +80,9 @@ build_gui() {
     echo "GUI: $(ls -la "$OUTDIR/timw32g.exe" | awk '{print $5}')"
 }
 
-case "${1:-all}" in
+mkdir -p "$OUTDIR"
+
+case "$TARGET" in
     console) build_console ;;
     gui)     build_gui ;;
     all)     build_gui; build_console ;;
