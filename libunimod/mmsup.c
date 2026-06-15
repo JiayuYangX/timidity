@@ -28,9 +28,9 @@
 
 #include "unimod_priv.h"
 
-int _mm_errno = 0;
+int _um_errno = 0;
 
-static CHAR *_mm_errmsg[MMERR_MAX + 1] =
+static CHAR *_um_errmsg[MMERR_MAX + 1] =
 {
 /* No error */
 
@@ -69,32 +69,32 @@ ML_strerror (int code)
 {
   if ((code < 0) || (code > MMERR_MAX))
     code = MMERR_MAX + 1;
-  return _mm_errmsg[code];
+  return _um_errmsg[code];
 }
 
 
-/* Same as malloc, but sets error variable _mm_error when fails */
+/* Same as malloc, but sets error variable _um_error when fails */
 void *
-_mm_malloc (size_t size)
+__um_malloc (size_t size)
 {
   void *d;
 
   if (!(d = calloc (1, size)))
     {
-      _mm_errno = MMERR_OUT_OF_MEMORY;
+      _um_errno = MMERR_OUT_OF_MEMORY;
     }
   return d;
 }
 
-/* Same as calloc, but sets error variable _mm_error when fails */
+/* Same as calloc, but sets error variable _um_error when fails */
 void *
-_mm_calloc (size_t nitems, size_t size)
+__um_calloc (size_t nitems, size_t size)
 {
   void *d;
 
   if (!(d = calloc (nitems, size)))
     {
-      _mm_errno = MMERR_OUT_OF_MEMORY;
+      _um_errno = MMERR_OUT_OF_MEMORY;
     }
   return d;
 }
@@ -105,10 +105,10 @@ _mm_calloc (size_t nitems, size_t size)
 
    The way this module works:
 
-   - _mm_read_I_* and _mm_read_M_* differ : the first is for reading data
+   - _um_read_I_* and _um_read_M_* differ : the first is for reading data
    written by a little endian (intel) machine, and the second is for reading
    big endian (Mac, RISC, Alpha) machine data.
-   - _mm_read_string is for reading binary strings.  It is basically the same
+   - _um_read_string is for reading binary strings.  It is basically the same
    as an fread of bytes.
 
  */
@@ -118,72 +118,72 @@ _mm_calloc (size_t nitems, size_t size)
 /*========== Read functions */
 
 int 
-_mm_read_string (CHAR * buffer, int number, URL reader)
+_um_read_string (CHAR * buffer, int number, URL reader)
 {
   return url_nread (reader, buffer, number);
 }
 
 UWORD 
-_mm_read_M_UWORD (URL reader)
+_um_read_M_UWORD (URL reader)
 {
-  UWORD result = ((UWORD) _mm_read_UBYTE (reader)) << 8;
-  result |= _mm_read_UBYTE (reader);
+  UWORD result = ((UWORD) _um_read_UBYTE (reader)) << 8;
+  result |= _um_read_UBYTE (reader);
   return result;
 }
 
 UWORD 
-_mm_read_I_UWORD (URL reader)
+_um_read_I_UWORD (URL reader)
 {
-  UWORD result = _mm_read_UBYTE (reader);
-  result |= ((UWORD) _mm_read_UBYTE (reader)) << 8;
+  UWORD result = _um_read_UBYTE (reader);
+  result |= ((UWORD) _um_read_UBYTE (reader)) << 8;
   return result;
 }
 
 ULONG 
-_mm_read_M_ULONG (URL reader)
+_um_read_M_ULONG (URL reader)
 {
-  ULONG result = ((ULONG) _mm_read_M_UWORD (reader)) << 16;
-  result |= _mm_read_M_UWORD (reader);
+  ULONG result = ((ULONG) _um_read_M_UWORD (reader)) << 16;
+  result |= _um_read_M_UWORD (reader);
   return result;
 }
 
 ULONG 
-_mm_read_I_ULONG (URL reader)
+_um_read_I_ULONG (URL reader)
 {
-  ULONG result = _mm_read_I_UWORD (reader);
-  result |= ((ULONG) _mm_read_I_UWORD (reader)) << 16;
+  ULONG result = _um_read_I_UWORD (reader);
+  result |= ((ULONG) _um_read_I_UWORD (reader)) << 16;
   return result;
 }
 
 SWORD 
-_mm_read_M_SWORD (URL reader)
+_um_read_M_SWORD (URL reader)
 {
-  return ((SWORD) _mm_read_M_UWORD (reader));
+  return ((SWORD) _um_read_M_UWORD (reader));
 }
 
 SWORD 
-_mm_read_I_SWORD (URL reader)
+_um_read_I_SWORD (URL reader)
 {
-  return ((SWORD) _mm_read_I_UWORD (reader));
+  return ((SWORD) _um_read_I_UWORD (reader));
 }
 
 SLONG 
-_mm_read_M_SLONG (URL reader)
+_um_read_M_SLONG (URL reader)
 {
-  return ((SLONG) _mm_read_M_ULONG (reader));
+  return ((SLONG) _um_read_M_ULONG (reader));
 }
 
 SLONG 
-_mm_read_I_SLONG (URL reader)
+_um_read_I_SLONG (URL reader)
 {
-  return ((SLONG) _mm_read_I_ULONG (reader));
+  return ((SLONG) _um_read_I_ULONG (reader));
 }
 
 #define DEFINE_MULTIPLE_READ_FUNCTION(type_name,type)				\
-int _mm_read_##type_name##S (type *buffer,int number,URL reader)		\
+int _um_read_##type_name##S (type *buffer,int number,URL reader)		\
 {										\
 	while(number-->0)							\
-		*(buffer++)=_mm_read_##type_name(reader);			\
+		*(buffer++)=_um_read_##type_name(reader);			\
 	return !url_eof(reader);						\
 }
 

@@ -88,7 +88,7 @@ S69_Test (void)
 {
   UBYTE buf[0x80];
 
-  if (!_mm_read_UBYTES (buf, 2, modreader))
+  if (!_um_read_UBYTES (buf, 2, modreader))
     return 0;
   /* look for id */
   if (!memcmp (buf, "if", 2) || !memcmp (buf, "JN", 2))
@@ -96,28 +96,28 @@ S69_Test (void)
       int i;
 
       /* skip song message */
-      _mm_fseek (modreader, 108, SEEK_CUR);
+      _um_fseek (modreader, 108, SEEK_CUR);
       /* sanity checks */
-      if (_mm_read_UBYTE (modreader) > 64)
+      if (_um_read_UBYTE (modreader) > 64)
 	return 0;
-      if (_mm_read_UBYTE (modreader) > 128)
+      if (_um_read_UBYTE (modreader) > 128)
 	return 0;
-      if (_mm_read_UBYTE (modreader) > 127)
+      if (_um_read_UBYTE (modreader) > 127)
 	return 0;
       /* check order table */
-      if (!_mm_read_UBYTES (buf, 0x80, modreader))
+      if (!_um_read_UBYTES (buf, 0x80, modreader))
 	return 0;
       for (i = 0; i < 0x80; i++)
 	if ((buf[i] >= 0x80) && (buf[i] != 0xff))
 	  return 0;
       /* check tempos table */
-      if (!_mm_read_UBYTES (buf, 0x80, modreader))
+      if (!_um_read_UBYTES (buf, 0x80, modreader))
 	return 0;
       for (i = 0; i < 0x80; i++)
 	if ((!buf[i]) || (buf[i] > 32))
 	  return 0;
       /* check pattern length table */
-      if (!_mm_read_UBYTES (buf, 0x80, modreader))
+      if (!_um_read_UBYTES (buf, 0x80, modreader))
 	return 0;
       for (i = 0; i < 0x80; i++)
 	if (buf[i] > 0x3f)
@@ -132,9 +132,9 @@ S69_Test (void)
 static BOOL
 S69_Init (void)
 {
-  if (!(s69pat = (S69NOTE *) _mm_malloc (64 * 8 * sizeof (S69NOTE))))
+  if (!(s69pat = (S69NOTE *) __um_malloc (64 * 8 * sizeof (S69NOTE))))
     return 0;
-  if (!(mh = (S69HEADER *) _mm_malloc (sizeof (S69HEADER))))
+  if (!(mh = (S69HEADER *) __um_malloc (sizeof (S69HEADER))))
     return 0;
 
   return 1;
@@ -143,8 +143,8 @@ S69_Init (void)
 static void
 S69_Cleanup (void)
 {
-  _mm_free (s69pat);
-  _mm_free (mh);
+  __um_free (s69pat);
+  __um_free (mh);
 }
 
 static BOOL 
@@ -171,15 +171,15 @@ S69_LoadPatterns (void)
 	{
 	  for (channel = 0; channel < 8; channel++, cur++)
 	    {
-	      cur->a = _mm_read_UBYTE (modreader);
-	      cur->b = _mm_read_UBYTE (modreader);
-	      cur->c = _mm_read_UBYTE (modreader);
+	      cur->a = _um_read_UBYTE (modreader);
+	      cur->b = _um_read_UBYTE (modreader);
+	      cur->c = _um_read_UBYTE (modreader);
 	    }
 	}
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
 
@@ -278,30 +278,30 @@ S69_Load (BOOL curious)
   S69SAMPLE sample;
 
   /* module header */
-  _mm_read_UBYTES (mh->marker, 2, modreader);
-  _mm_read_UBYTES (mh->message, 108, modreader);
-  mh->nos = _mm_read_UBYTE (modreader);
-  mh->nop = _mm_read_UBYTE (modreader);
-  mh->looporder = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->orders, 0x80, modreader);
+  _um_read_UBYTES (mh->marker, 2, modreader);
+  _um_read_UBYTES (mh->message, 108, modreader);
+  mh->nos = _um_read_UBYTE (modreader);
+  mh->nop = _um_read_UBYTE (modreader);
+  mh->looporder = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->orders, 0x80, modreader);
   for (i = 0; i < 0x80; i++)
     if ((mh->orders[i] >= 0x80) && (mh->orders[i] != 0xff))
       {
-	_mm_errno = MMERR_NOT_A_MODULE;
+	_um_errno = MMERR_NOT_A_MODULE;
 	return 1;
       }
-  _mm_read_UBYTES (mh->tempos, 0x80, modreader);
+  _um_read_UBYTES (mh->tempos, 0x80, modreader);
   for (i = 0; i < 0x80; i++)
     if ((!mh->tempos[i]) || (mh->tempos[i] > 32))
       {
-	_mm_errno = MMERR_NOT_A_MODULE;
+	_um_errno = MMERR_NOT_A_MODULE;
 	return 1;
       }
-  _mm_read_UBYTES (mh->breaks, 0x80, modreader);
+  _um_read_UBYTES (mh->breaks, 0x80, modreader);
   for (i = 0; i < 0x80; i++)
     if (mh->breaks[i] > 0x3f)
       {
-	_mm_errno = MMERR_NOT_A_MODULE;
+	_um_errno = MMERR_NOT_A_MODULE;
 	return 1;
       }
 
@@ -323,7 +323,7 @@ S69_Load (BOOL curious)
   for (i = 72 + 35; (i >= 72 + 0) && (mh->message[i] == ' '); i--)
     mh->message[i] = 0;
   if ((mh->message[0]) || (mh->message[36]) || (mh->message[72]))
-    if ((of.comment = (CHAR *) _mm_malloc (3 * (36 + 1) + 1)))
+    if ((of.comment = (CHAR *) __um_malloc (3 * (36 + 1) + 1)))
       {
 	strncpy (of.comment, mh->message, 36);
 	strcat (of.comment, "\r");
@@ -354,16 +354,16 @@ S69_Load (BOOL curious)
   for (i = 0; i < of.numins; i++)
     {
       /* sample information */
-      _mm_read_UBYTES ((UBYTE *) sample.filename, 13, modreader);
-      sample.length = _mm_read_I_SLONG (modreader);
-      sample.loopbeg = _mm_read_I_SLONG (modreader);
-      sample.loopend = _mm_read_I_SLONG (modreader);
+      _um_read_UBYTES ((UBYTE *) sample.filename, 13, modreader);
+      sample.length = _um_read_I_SLONG (modreader);
+      sample.loopbeg = _um_read_I_SLONG (modreader);
+      sample.loopend = _um_read_I_SLONG (modreader);
       if (sample.loopend == 0xfffff)
 	sample.loopend = 0;
 
       if ((sample.length < 0) || (sample.loopbeg < -1) || (sample.loopend < -1))
 	{
-	  _mm_errno = MMERR_LOADING_HEADER;
+	  _um_errno = MMERR_LOADING_HEADER;
 	  return 0;
 	}
 
@@ -390,8 +390,8 @@ S69_LoadTitle (void)
 {
   CHAR s[36];
 
-  _mm_fseek (modreader, 2, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 36, modreader))
+  _um_fseek (modreader, 2, SEEK_SET);
+  if (!_um_read_UBYTES (s, 36, modreader))
     return NULL;
 
   return (DupStr (s, 36, 1));

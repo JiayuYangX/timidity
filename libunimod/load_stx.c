@@ -109,15 +109,15 @@ STX_Test (void)
   UBYTE id[8];
   int t;
 
-  _mm_fseek(modreader,0x14,SEEK_SET);
-  if(!_mm_read_UBYTES(id, 8, modreader))
+  _um_fseek(modreader,0x14,SEEK_SET);
+  if(!_um_read_UBYTES(id, 8, modreader))
     return 0;
 
   for(t=0;t<STM_NTRACKERS;t++)
     if(!memcmp(id,STM_Signatures[t],8)) return 1;
 
-  _mm_fseek (modreader, 0x3C, SEEK_SET);
-  if (!_mm_read_UBYTES (id, 4, modreader))
+  _um_fseek (modreader, 0x3C, SEEK_SET);
+  if (!_um_read_UBYTES (id, 4, modreader))
     return 0;
   if (memcmp (id, "SCRM", 4))
     return 0;
@@ -128,11 +128,11 @@ STX_Test (void)
 static BOOL 
 STX_Init (void)
 {
-  if (!(stxbuf = (STXNOTE *) _mm_malloc (4 * 64 * sizeof (STXNOTE))))
+  if (!(stxbuf = (STXNOTE *) __um_malloc (4 * 64 * sizeof (STXNOTE))))
     return 0;
-  if (!(mh = (STXHEADER *) _mm_malloc (sizeof (STXHEADER))))
+  if (!(mh = (STXHEADER *) __um_malloc (sizeof (STXHEADER))))
     return 0;
-  if (!(poslookup = (UBYTE *) _mm_malloc (sizeof (UBYTE) * 256)))
+  if (!(poslookup = (UBYTE *) __um_malloc (sizeof (UBYTE) * 256)))
     return 0;
   memset (poslookup, -1, 256);
 
@@ -142,10 +142,10 @@ STX_Init (void)
 static void 
 STX_Cleanup (void)
 {
-  _mm_free (stxbuf);
-  _mm_free (paraptr);
-  _mm_free (poslookup);
-  _mm_free (mh);
+  __um_free (stxbuf);
+  __um_free (paraptr);
+  __um_free (poslookup);
+  __um_free (mh);
 }
 
 static BOOL 
@@ -159,11 +159,11 @@ STX_ReadPattern (void)
 
   while (row < 64)
     {
-      flag = _mm_read_UBYTE (modreader);
+      flag = _um_read_UBYTE (modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
 
@@ -178,19 +178,19 @@ STX_ReadPattern (void)
 
 	  if (flag & 32)
 	    {
-	      n->note = _mm_read_UBYTE (modreader);
-	      n->ins = _mm_read_UBYTE (modreader);
+	      n->note = _um_read_UBYTE (modreader);
+	      n->ins = _um_read_UBYTE (modreader);
 	    }
 	  if (flag & 64)
 	    {
-	      n->vol = _mm_read_UBYTE (modreader);
+	      n->vol = _um_read_UBYTE (modreader);
 	      if (n->vol > 64)
 	        n->vol = 64;
 	    }
 	  if (flag & 128)
 	    {
-	      n->cmd = _mm_read_UBYTE (modreader);
-	      n->inf = _mm_read_UBYTE (modreader);
+	      n->cmd = _um_read_UBYTE (modreader);
+	      n->inf = _um_read_UBYTE (modreader);
 	    }
 	}
       else
@@ -297,30 +297,30 @@ STX_Load (BOOL curious)
   const char *tracker;
 
   /* try to read module header */
-  _mm_read_string (mh->songname, 20, modreader);
-  _mm_read_string (mh->trackername, 8, modreader);
-  mh->patsize = _mm_read_I_UWORD (modreader);
-  mh->unknown1 = _mm_read_I_UWORD (modreader);
-  mh->patptr = _mm_read_I_UWORD (modreader);
-  mh->insptr = _mm_read_I_UWORD (modreader);
-  mh->chnptr = _mm_read_I_UWORD (modreader);
-  mh->unknown2 = _mm_read_I_UWORD (modreader);
-  mh->unknown3 = _mm_read_I_UWORD (modreader);
-  mh->mastermult = _mm_read_UBYTE (modreader);
-  mh->initspeed = _mm_read_UBYTE (modreader) >> 4;
-  mh->unknown4 = _mm_read_I_UWORD (modreader);
-  mh->unknown5 = _mm_read_I_UWORD (modreader);
-  mh->patnum = _mm_read_I_UWORD (modreader);
-  mh->insnum = _mm_read_I_UWORD (modreader);
-  mh->ordnum = _mm_read_I_UWORD (modreader);
-  mh->unknown6 = _mm_read_I_UWORD (modreader);
-  mh->unknown7 = _mm_read_I_UWORD (modreader);
-  mh->unknown8 = _mm_read_I_UWORD (modreader);
-  _mm_read_string (mh->scrm, 4, modreader);
+  _um_read_string (mh->songname, 20, modreader);
+  _um_read_string (mh->trackername, 8, modreader);
+  mh->patsize = _um_read_I_UWORD (modreader);
+  mh->unknown1 = _um_read_I_UWORD (modreader);
+  mh->patptr = _um_read_I_UWORD (modreader);
+  mh->insptr = _um_read_I_UWORD (modreader);
+  mh->chnptr = _um_read_I_UWORD (modreader);
+  mh->unknown2 = _um_read_I_UWORD (modreader);
+  mh->unknown3 = _um_read_I_UWORD (modreader);
+  mh->mastermult = _um_read_UBYTE (modreader);
+  mh->initspeed = _um_read_UBYTE (modreader) >> 4;
+  mh->unknown4 = _um_read_I_UWORD (modreader);
+  mh->unknown5 = _um_read_I_UWORD (modreader);
+  mh->patnum = _um_read_I_UWORD (modreader);
+  mh->insnum = _um_read_I_UWORD (modreader);
+  mh->ordnum = _um_read_I_UWORD (modreader);
+  mh->unknown6 = _um_read_I_UWORD (modreader);
+  mh->unknown7 = _um_read_I_UWORD (modreader);
+  mh->unknown8 = _um_read_I_UWORD (modreader);
+  _um_read_string (mh->scrm, 4, modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -332,7 +332,7 @@ STX_Load (BOOL curious)
 	break;
       }
 
-  of.modtype = _mm_malloc(
+  of.modtype = __um_malloc(
     strlen(tracker) +
     strlen("STM2STX 1.x ()") + 1);
 
@@ -348,18 +348,18 @@ STX_Load (BOOL curious)
   of.numchn = 4;
   of.flags |= UF_S3MSLIDES;
 
-  if (!(paraptr = (UWORD *) _mm_malloc ((of.numins + of.numpat) * sizeof (UWORD))))
+  if (!(paraptr = (UWORD *) __um_malloc ((of.numins + of.numpat) * sizeof (UWORD))))
     return 0;
 
   /* read the instrument+pattern parapointers */
-  _mm_fseek (modreader, mh->insptr << 4, SEEK_SET);
-  _mm_read_I_UWORDS (paraptr, of.numins, modreader);
-  _mm_fseek (modreader, mh->patptr << 4, SEEK_SET);
-  _mm_read_I_UWORDS (paraptr + of.numins, of.numpat, modreader);
+  _um_fseek (modreader, mh->insptr << 4, SEEK_SET);
+  _um_read_I_UWORDS (paraptr, of.numins, modreader);
+  _um_fseek (modreader, mh->patptr << 4, SEEK_SET);
+  _um_read_I_UWORDS (paraptr + of.numins, of.numpat, modreader);
 
   /* check module version */
-  _mm_fseek (modreader, paraptr[of.numins] << 4, SEEK_SET);
-  version = _mm_read_I_UWORD (modreader);
+  _um_fseek (modreader, paraptr[of.numins] << 4, SEEK_SET);
+  version = _um_read_I_UWORD (modreader);
   if (version == mh->patsize)
     {
       version = 0x10;
@@ -372,13 +372,13 @@ STX_Load (BOOL curious)
     }
 
   /* read the order data */
-  _mm_fseek (modreader, (mh->chnptr << 4) + 32, SEEK_SET);
+  _um_fseek (modreader, (mh->chnptr << 4) + 32, SEEK_SET);
   if (!AllocPositions (mh->ordnum))
     return 0;
   for (t = 0; t < mh->ordnum; t++)
     {
-      of.positions[t] = _mm_read_UBYTE (modreader);
-      _mm_fseek (modreader, 4, SEEK_CUR);
+      of.positions[t] = _um_read_UBYTE (modreader);
+      _um_fseek (modreader, 4, SEEK_CUR);
     }
 
   of.numpos = 0;
@@ -395,9 +395,9 @@ STX_Load (BOOL curious)
 	break;
     }
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -409,27 +409,27 @@ STX_Load (BOOL curious)
       STXSAMPLE s;
 
       /* seek to instrument position */
-      _mm_fseek (modreader, ((long) paraptr[t]) << 4, SEEK_SET);
+      _um_fseek (modreader, ((long) paraptr[t]) << 4, SEEK_SET);
       /* and load sample info */
-      s.type = _mm_read_UBYTE (modreader);
-      _mm_read_string (s.filename, 12, modreader);
-      s.memsegh = _mm_read_UBYTE (modreader);
-      s.memsegl = _mm_read_I_UWORD (modreader);
-      s.length = _mm_read_I_ULONG (modreader);
-      s.loopbeg = _mm_read_I_ULONG (modreader);
-      s.loopend = _mm_read_I_ULONG (modreader);
-      s.volume = _mm_read_UBYTE (modreader);
-      s.dsk = _mm_read_UBYTE (modreader);
-      s.pack = _mm_read_UBYTE (modreader);
-      s.flags = _mm_read_UBYTE (modreader);
-      s.c2spd = _mm_read_I_ULONG (modreader);
-      _mm_read_UBYTES (s.unused, 12, modreader);
-      _mm_read_string (s.sampname, 28, modreader);
-      _mm_read_string (s.scrs, 4, modreader);
+      s.type = _um_read_UBYTE (modreader);
+      _um_read_string (s.filename, 12, modreader);
+      s.memsegh = _um_read_UBYTE (modreader);
+      s.memsegl = _um_read_I_UWORD (modreader);
+      s.length = _um_read_I_ULONG (modreader);
+      s.loopbeg = _um_read_I_ULONG (modreader);
+      s.loopend = _um_read_I_ULONG (modreader);
+      s.volume = _um_read_UBYTE (modreader);
+      s.dsk = _um_read_UBYTE (modreader);
+      s.pack = _um_read_UBYTE (modreader);
+      s.flags = _um_read_UBYTE (modreader);
+      s.c2spd = _um_read_I_ULONG (modreader);
+      _um_read_UBYTES (s.unused, 12, modreader);
+      _um_read_string (s.sampname, 28, modreader);
+      _um_read_string (s.scrs, 4, modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
 
@@ -468,7 +468,7 @@ STX_Load (BOOL curious)
   for (t = 0; t < of.numpat; t++)
     {
       /* seek to pattern position (+2 skip pattern length) */
-      _mm_fseek (modreader, (((long) paraptr[of.numins + t]) << 4) +
+      _um_fseek (modreader, (((long) paraptr[of.numins + t]) << 4) +
 		 (version == 0x10 ? 2 : 0), SEEK_SET);
       if (!STX_ReadPattern ())
 	return 0;
@@ -485,8 +485,8 @@ STX_LoadTitle (void)
 {
   CHAR s[28];
 
-  _mm_fseek (modreader, 0, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 20, modreader))
+  _um_fseek (modreader, 0, SEEK_SET);
+  if (!_um_read_UBYTES (s, 20, modreader))
     return NULL;
 
   return (DupStr (s, 28, 1));

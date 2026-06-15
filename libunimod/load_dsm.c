@@ -105,7 +105,7 @@ DSM_Test (void)
 {
   UBYTE id[12];
 
-  if (!_mm_read_UBYTES (id, 12, modreader))
+  if (!_um_read_UBYTES (id, 12, modreader))
     return 0;
   if (!memcmp (id, DSMSIG, 4) && !memcmp (id + 8, DSMSIG + 4, 4))
     return 1;
@@ -116,9 +116,9 @@ DSM_Test (void)
 static BOOL
 DSM_Init (void)
 {
-  if (!(dsmbuf = (DSMNOTE *) _mm_malloc (DSM_MAXCHAN * 64 * sizeof (DSMNOTE))))
+  if (!(dsmbuf = (DSMNOTE *) __um_malloc (DSM_MAXCHAN * 64 * sizeof (DSMNOTE))))
     return 0;
-  if (!(mh = (DSMSONG *) _mm_calloc (1, sizeof (DSMSONG))))
+  if (!(mh = (DSMSONG *) __um_calloc (1, sizeof (DSMSONG))))
     return 0;
   return 1;
 }
@@ -126,8 +126,8 @@ DSM_Init (void)
 static void
 DSM_Cleanup (void)
 {
-  _mm_free (dsmbuf);
-  _mm_free (mh);
+  __um_free (dsmbuf);
+  __um_free (mh);
 }
 
 static BOOL 
@@ -135,15 +135,15 @@ GetBlockHeader (void)
 {
   /* make sure we're at the right position for reading the
      next riff block, no matter how many bytes read */
-  _mm_fseek (modreader, blocklp + blockln, SEEK_SET);
+  _um_fseek (modreader, blocklp + blockln, SEEK_SET);
 
   while (1)
     {
-      _mm_read_UBYTES (blockid, 4, modreader);
-      blockln = _mm_read_I_ULONG (modreader);
-      if (_mm_eof (modreader))
+      _um_read_UBYTES (blockid, 4, modreader);
+      blockln = _um_read_I_ULONG (modreader);
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_HEADER;
+	  _um_errno = MMERR_LOADING_HEADER;
 	  return 0;
 	}
 
@@ -153,13 +153,13 @@ GetBlockHeader (void)
 #ifdef MIKMOD_DEBUG
 	  fprintf (stderr, "\rDSM: Skipping unknown block type %4.4s\n", blockid);
 #endif
-	  _mm_fseek (modreader, blockln, SEEK_CUR);
+	  _um_fseek (modreader, blockln, SEEK_CUR);
 	}
       else
 	break;
     }
 
-  blocklp = _mm_ftell (modreader);
+  blocklp = _um_ftell (modreader);
 
   return 1;
 }
@@ -173,14 +173,14 @@ DSM_ReadPattern (void)
 
   /* clear pattern data */
   memset (dsmbuf, 255, DSM_MAXCHAN * 64 * sizeof (DSMNOTE));
-  length = _mm_read_I_SWORD (modreader);
+  length = _um_read_I_SWORD (modreader);
 
   while (row < 64)
     {
-      flag = _mm_read_UBYTE (modreader);
-      if ((_mm_eof (modreader)) || (--length < 0))
+      flag = _um_read_UBYTE (modreader);
+      if ((_um_eof (modreader)) || (--length < 0))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
 
@@ -188,15 +188,15 @@ DSM_ReadPattern (void)
 	{
 	  n = &dsmbuf[((flag & 0xf) * 64) + row];
 	  if (flag & 0x80)
-	    n->note = _mm_read_UBYTE (modreader);
+	    n->note = _um_read_UBYTE (modreader);
 	  if (flag & 0x40)
-	    n->ins = _mm_read_UBYTE (modreader);
+	    n->ins = _um_read_UBYTE (modreader);
 	  if (flag & 0x20)
-	    n->vol = _mm_read_UBYTE (modreader);
+	    n->vol = _um_read_UBYTE (modreader);
 	  if (flag & 0x10)
 	    {
-	      n->cmd = _mm_read_UBYTE (modreader);
-	      n->inf = _mm_read_UBYTE (modreader);
+	      n->cmd = _um_read_UBYTE (modreader);
+	      n->inf = _um_read_UBYTE (modreader);
 	    }
 	}
       else
@@ -273,24 +273,24 @@ DSM_Load (BOOL curious)
     return 0;
   if (memcmp (blockid, SONGID, 4))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
-  _mm_read_UBYTES (mh->songname, 28, modreader);
-  mh->version = _mm_read_I_UWORD (modreader);
-  mh->flags = _mm_read_I_UWORD (modreader);
-  mh->reserved2 = _mm_read_I_ULONG (modreader);
-  mh->numord = _mm_read_I_UWORD (modreader);
-  mh->numsmp = _mm_read_I_UWORD (modreader);
-  mh->numpat = _mm_read_I_UWORD (modreader);
-  mh->numtrk = _mm_read_I_UWORD (modreader);
-  mh->globalvol = _mm_read_UBYTE (modreader);
-  mh->mastervol = _mm_read_UBYTE (modreader);
-  mh->speed = _mm_read_UBYTE (modreader);
-  mh->bpm = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->panpos, DSM_MAXCHAN, modreader);
-  _mm_read_UBYTES (mh->orders, DSM_MAXORDERS, modreader);
+  _um_read_UBYTES (mh->songname, 28, modreader);
+  mh->version = _um_read_I_UWORD (modreader);
+  mh->flags = _um_read_I_UWORD (modreader);
+  mh->reserved2 = _um_read_I_ULONG (modreader);
+  mh->numord = _um_read_I_UWORD (modreader);
+  mh->numsmp = _um_read_I_UWORD (modreader);
+  mh->numpat = _um_read_I_UWORD (modreader);
+  mh->numtrk = _um_read_I_UWORD (modreader);
+  mh->globalvol = _um_read_UBYTE (modreader);
+  mh->mastervol = _um_read_UBYTE (modreader);
+  mh->speed = _um_read_UBYTE (modreader);
+  mh->bpm = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->panpos, DSM_MAXCHAN, modreader);
+  _um_read_UBYTES (mh->orders, DSM_MAXORDERS, modreader);
 
   /* set module variables */
   of.initspeed = mh->speed;
@@ -334,19 +334,19 @@ DSM_Load (BOOL curious)
 	  q = &of.samples[cursmp];
 
 	  /* try to read sample info */
-	  _mm_read_UBYTES (s.filename, 13, modreader);
-	  s.flags = _mm_read_I_UWORD (modreader);
-	  s.volume = _mm_read_UBYTE (modreader);
-	  s.length = _mm_read_I_ULONG (modreader);
-	  s.loopstart = _mm_read_I_ULONG (modreader);
-	  s.loopend = _mm_read_I_ULONG (modreader);
-	  s.reserved1 = _mm_read_I_ULONG (modreader);
-	  s.c2spd = _mm_read_I_UWORD (modreader);
-	  s.period = _mm_read_I_UWORD (modreader);
-	  _mm_read_UBYTES (s.samplename, 28, modreader);
+	  _um_read_UBYTES (s.filename, 13, modreader);
+	  s.flags = _um_read_I_UWORD (modreader);
+	  s.volume = _um_read_UBYTE (modreader);
+	  s.length = _um_read_I_ULONG (modreader);
+	  s.loopstart = _um_read_I_ULONG (modreader);
+	  s.loopend = _um_read_I_ULONG (modreader);
+	  s.reserved1 = _um_read_I_ULONG (modreader);
+	  s.c2spd = _um_read_I_UWORD (modreader);
+	  s.period = _um_read_I_UWORD (modreader);
+	  _um_read_UBYTES (s.samplename, 28, modreader);
 
 	  q->samplename = DupStr (s.samplename, 28, 1);
-	  q->seekpos = _mm_ftell (modreader);
+	  q->seekpos = _um_ftell (modreader);
 	  q->speed = s.c2spd;
 	  q->length = s.length;
 	  q->loopstart = s.loopstart;
@@ -379,8 +379,8 @@ DSM_LoadTitle (void)
 {
   CHAR s[28];
 
-  _mm_fseek (modreader, 12, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 28, modreader))
+  _um_fseek (modreader, 12, SEEK_SET);
+  if (!_um_read_UBYTES (s, 28, modreader))
     return NULL;
 
   return (DupStr (s, 28, 1));

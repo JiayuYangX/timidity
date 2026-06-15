@@ -170,7 +170,7 @@ MED_Test (void)
 {
   UBYTE id[4];
 
-  if (!_mm_read_UBYTES (id, 4, modreader))
+  if (!_um_read_UBYTES (id, 4, modreader))
     return 0;
   if ((!memcmp (id, "MMD0", 4)) || (!memcmp (id, "MMD1", 4)))
     return 1;
@@ -180,11 +180,11 @@ MED_Test (void)
 static BOOL
 MED_Init (void)
 {
-  if (!(me = (MEDEXP *) _mm_malloc (sizeof (MEDEXP))))
+  if (!(me = (MEDEXP *) __um_malloc (sizeof (MEDEXP))))
     return 0;
-  if (!(mh = (MEDHEADER *) _mm_malloc (sizeof (MEDHEADER))))
+  if (!(mh = (MEDHEADER *) __um_malloc (sizeof (MEDHEADER))))
     return 0;
-  if (!(ms = (MEDSONG *) _mm_malloc (sizeof (MEDSONG))))
+  if (!(ms = (MEDSONG *) __um_malloc (sizeof (MEDSONG))))
     return 0;
   return 1;
 }
@@ -192,12 +192,12 @@ MED_Init (void)
 static void
 MED_Cleanup (void)
 {
-  _mm_free (me);
-  _mm_free (mh);
-  _mm_free (ms);
-  _mm_free (ba);
-  _mm_free (mmd0pat);
-  _mm_free (mmd1pat);
+  __um_free (me);
+  __um_free (mh);
+  __um_free (ms);
+  __um_free (ba);
+  __um_free (mmd0pat);
+  __um_free (mmd1pat);
 }
 
 static void 
@@ -354,9 +354,9 @@ LoadMMD0Patterns (void)
   /* first, scan patterns to see how many channels are used */
   for (t = 0; t < of.numpat; t++)
     {
-      _mm_fseek (modreader, ba[t], SEEK_SET);
-      numtracks = _mm_read_UBYTE (modreader);
-      numlines = _mm_read_UBYTE (modreader);
+      _um_fseek (modreader, ba[t], SEEK_SET);
+      numtracks = _um_read_UBYTE (modreader);
+      numlines = _um_read_UBYTE (modreader);
 
       if (numtracks > of.numchn)
 	of.numchn = numtracks;
@@ -370,15 +370,15 @@ LoadMMD0Patterns (void)
   if (!AllocPatterns ())
     return 0;
 
-  if (!(mmd0pat = (MMD0NOTE *) _mm_calloc (of.numchn * (maxlines + 1), sizeof (MMD0NOTE))))
+  if (!(mmd0pat = (MMD0NOTE *) __um_calloc (of.numchn * (maxlines + 1), sizeof (MMD0NOTE))))
     return 0;
 
   /* second read: read and convert patterns */
   for (t = 0; t < of.numpat; t++)
     {
-      _mm_fseek (modreader, ba[t], SEEK_SET);
-      numtracks = _mm_read_UBYTE (modreader);
-      numlines = _mm_read_UBYTE (modreader);
+      _um_fseek (modreader, ba[t], SEEK_SET);
+      numtracks = _um_read_UBYTE (modreader);
+      numlines = _um_read_UBYTE (modreader);
 
       of.pattrows[t] = ++numlines;
       memset (mmdp = mmd0pat, 0, of.numchn * maxlines * sizeof (MMD0NOTE));
@@ -386,9 +386,9 @@ LoadMMD0Patterns (void)
 	{
 	  for (col = numtracks; col; col--, mmdp++)
 	    {
-	      mmdp->a = _mm_read_UBYTE (modreader);
-	      mmdp->b = _mm_read_UBYTE (modreader);
-	      mmdp->c = _mm_read_UBYTE (modreader);
+	      mmdp->a = _um_read_UBYTE (modreader);
+	      mmdp->b = _um_read_UBYTE (modreader);
+	      mmdp->c = _um_read_UBYTE (modreader);
 	    }
 	}
 
@@ -408,9 +408,9 @@ LoadMMD1Patterns (void)
   /* first, scan patterns to see how many channels are used */
   for (t = 0; t < of.numpat; t++)
     {
-      _mm_fseek (modreader, ba[t], SEEK_SET);
-      numtracks = _mm_read_M_UWORD (modreader);
-      numlines = _mm_read_M_UWORD (modreader);
+      _um_fseek (modreader, ba[t], SEEK_SET);
+      numtracks = _um_read_M_UWORD (modreader);
+      numlines = _um_read_M_UWORD (modreader);
       if (numtracks > of.numchn)
 	of.numchn = numtracks;
       if (numlines > maxlines)
@@ -423,17 +423,17 @@ LoadMMD1Patterns (void)
   if (!AllocPatterns ())
     return 0;
 
-  if (!(mmd1pat = (MMD1NOTE *) _mm_calloc (of.numchn * (maxlines + 1), sizeof (MMD1NOTE))))
+  if (!(mmd1pat = (MMD1NOTE *) __um_calloc (of.numchn * (maxlines + 1), sizeof (MMD1NOTE))))
     return 0;
 
   /* second read: really read and convert patterns */
   for (t = 0; t < of.numpat; t++)
     {
-      _mm_fseek (modreader, ba[t], SEEK_SET);
-      numtracks = _mm_read_M_UWORD (modreader);
-      numlines = _mm_read_M_UWORD (modreader);
+      _um_fseek (modreader, ba[t], SEEK_SET);
+      numtracks = _um_read_M_UWORD (modreader);
+      numlines = _um_read_M_UWORD (modreader);
 
-      _mm_fseek (modreader, sizeof (ULONG), SEEK_CUR);
+      _um_fseek (modreader, sizeof (ULONG), SEEK_CUR);
       of.pattrows[t] = ++numlines;
       memset (mmdp = mmd1pat, 0, of.numchn * maxlines * sizeof (MMD1NOTE));
 
@@ -441,10 +441,10 @@ LoadMMD1Patterns (void)
 	{
 	  for (col = numtracks; col; col--, mmdp++)
 	    {
-	      mmdp->a = _mm_read_UBYTE (modreader);
-	      mmdp->b = _mm_read_UBYTE (modreader);
-	      mmdp->c = _mm_read_UBYTE (modreader);
-	      mmdp->d = _mm_read_UBYTE (modreader);
+	      mmdp->a = _um_read_UBYTE (modreader);
+	      mmdp->b = _um_read_UBYTE (modreader);
+	      mmdp->c = _um_read_UBYTE (modreader);
+	      mmdp->d = _um_read_UBYTE (modreader);
 	    }
 	}
 
@@ -464,96 +464,96 @@ MED_Load (BOOL curious)
   MEDSAMPLE *mss;
 
   /* try to read module header */
-  mh->id = _mm_read_M_ULONG (modreader);
-  mh->modlen = _mm_read_M_ULONG (modreader);
-  mh->pMEDSONG = _mm_read_M_ULONG (modreader);
-  mh->psecnum = _mm_read_M_UWORD (modreader);
-  mh->pseq = _mm_read_M_UWORD (modreader);
-  mh->pMEDBLOCKP = _mm_read_M_ULONG (modreader);
-  mh->reserved1 = _mm_read_M_ULONG (modreader);
-  mh->ppMedInstrHdr = _mm_read_M_ULONG (modreader);
-  mh->reserved2 = _mm_read_M_ULONG (modreader);
-  mh->pMEDEXP = _mm_read_M_ULONG (modreader);
-  mh->reserved3 = _mm_read_M_ULONG (modreader);
-  mh->pstate = _mm_read_M_UWORD (modreader);
-  mh->pblock = _mm_read_M_UWORD (modreader);
-  mh->pline = _mm_read_M_UWORD (modreader);
-  mh->pseqnum = _mm_read_M_UWORD (modreader);
-  mh->actplayline = _mm_read_M_SWORD (modreader);
-  mh->counter = _mm_read_UBYTE (modreader);
-  mh->extra_songs = _mm_read_UBYTE (modreader);
+  mh->id = _um_read_M_ULONG (modreader);
+  mh->modlen = _um_read_M_ULONG (modreader);
+  mh->pMEDSONG = _um_read_M_ULONG (modreader);
+  mh->psecnum = _um_read_M_UWORD (modreader);
+  mh->pseq = _um_read_M_UWORD (modreader);
+  mh->pMEDBLOCKP = _um_read_M_ULONG (modreader);
+  mh->reserved1 = _um_read_M_ULONG (modreader);
+  mh->ppMedInstrHdr = _um_read_M_ULONG (modreader);
+  mh->reserved2 = _um_read_M_ULONG (modreader);
+  mh->pMEDEXP = _um_read_M_ULONG (modreader);
+  mh->reserved3 = _um_read_M_ULONG (modreader);
+  mh->pstate = _um_read_M_UWORD (modreader);
+  mh->pblock = _um_read_M_UWORD (modreader);
+  mh->pline = _um_read_M_UWORD (modreader);
+  mh->pseqnum = _um_read_M_UWORD (modreader);
+  mh->actplayline = _um_read_M_SWORD (modreader);
+  mh->counter = _um_read_UBYTE (modreader);
+  mh->extra_songs = _um_read_UBYTE (modreader);
 
   /* Seek to MEDSONG struct */
-  _mm_fseek (modreader, mh->pMEDSONG, SEEK_SET);
+  _um_fseek (modreader, mh->pMEDSONG, SEEK_SET);
 
   /* Load the MMD0 Song Header */
   mss = ms->sample;		/* load the sample data first */
   for (t = 63; t; t--, mss++)
     {
-      mss->rep = _mm_read_M_UWORD (modreader);
-      mss->replen = _mm_read_M_UWORD (modreader);
-      mss->midich = _mm_read_UBYTE (modreader);
-      mss->midipreset = _mm_read_UBYTE (modreader);
-      mss->svol = _mm_read_UBYTE (modreader);
-      mss->strans = _mm_read_SBYTE (modreader);
+      mss->rep = _um_read_M_UWORD (modreader);
+      mss->replen = _um_read_M_UWORD (modreader);
+      mss->midich = _um_read_UBYTE (modreader);
+      mss->midipreset = _um_read_UBYTE (modreader);
+      mss->svol = _um_read_UBYTE (modreader);
+      mss->strans = _um_read_SBYTE (modreader);
     }
 
-  ms->numblocks = _mm_read_M_UWORD (modreader);
-  ms->songlen = _mm_read_M_UWORD (modreader);
-  _mm_read_UBYTES (ms->playseq, 256, modreader);
-  ms->deftempo = _mm_read_M_UWORD (modreader);
-  ms->playtransp = _mm_read_SBYTE (modreader);
-  ms->flags = _mm_read_UBYTE (modreader);
-  ms->flags2 = _mm_read_UBYTE (modreader);
-  ms->tempo2 = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (ms->trkvol, 16, modreader);
-  ms->mastervol = _mm_read_UBYTE (modreader);
-  ms->numsamples = _mm_read_UBYTE (modreader);
+  ms->numblocks = _um_read_M_UWORD (modreader);
+  ms->songlen = _um_read_M_UWORD (modreader);
+  _um_read_UBYTES (ms->playseq, 256, modreader);
+  ms->deftempo = _um_read_M_UWORD (modreader);
+  ms->playtransp = _um_read_SBYTE (modreader);
+  ms->flags = _um_read_UBYTE (modreader);
+  ms->flags2 = _um_read_UBYTE (modreader);
+  ms->tempo2 = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (ms->trkvol, 16, modreader);
+  ms->mastervol = _um_read_UBYTE (modreader);
+  ms->numsamples = _um_read_UBYTE (modreader);
 
   /* check for a bad header */
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
   /* load extension structure */
   if (mh->pMEDEXP)
     {
-      _mm_fseek (modreader, mh->pMEDEXP, SEEK_SET);
-      me->nextmod = _mm_read_M_ULONG (modreader);
-      me->exp_smp = _mm_read_M_ULONG (modreader);
-      me->s_ext_entries = _mm_read_M_UWORD (modreader);
-      me->s_ext_entrsz = _mm_read_M_UWORD (modreader);
-      me->annotxt = _mm_read_M_ULONG (modreader);
-      me->annolen = _mm_read_M_ULONG (modreader);
-      me->iinfo = _mm_read_M_ULONG (modreader);
-      me->i_ext_entries = _mm_read_M_UWORD (modreader);
-      me->i_ext_entrsz = _mm_read_M_UWORD (modreader);
-      me->jumpmask = _mm_read_M_ULONG (modreader);
-      me->rgbtable = _mm_read_M_ULONG (modreader);
-      me->channelsplit = _mm_read_M_ULONG (modreader);
-      me->n_info = _mm_read_M_ULONG (modreader);
-      me->songname = _mm_read_M_ULONG (modreader);
-      me->songnamelen = _mm_read_M_ULONG (modreader);
-      me->dumps = _mm_read_M_ULONG (modreader);
+      _um_fseek (modreader, mh->pMEDEXP, SEEK_SET);
+      me->nextmod = _um_read_M_ULONG (modreader);
+      me->exp_smp = _um_read_M_ULONG (modreader);
+      me->s_ext_entries = _um_read_M_UWORD (modreader);
+      me->s_ext_entrsz = _um_read_M_UWORD (modreader);
+      me->annotxt = _um_read_M_ULONG (modreader);
+      me->annolen = _um_read_M_ULONG (modreader);
+      me->iinfo = _um_read_M_ULONG (modreader);
+      me->i_ext_entries = _um_read_M_UWORD (modreader);
+      me->i_ext_entrsz = _um_read_M_UWORD (modreader);
+      me->jumpmask = _um_read_M_ULONG (modreader);
+      me->rgbtable = _um_read_M_ULONG (modreader);
+      me->channelsplit = _um_read_M_ULONG (modreader);
+      me->n_info = _um_read_M_ULONG (modreader);
+      me->songname = _um_read_M_ULONG (modreader);
+      me->songnamelen = _um_read_M_ULONG (modreader);
+      me->dumps = _um_read_M_ULONG (modreader);
     }
 
   /* seek to and read the samplepointer array */
-  _mm_fseek (modreader, mh->ppMedInstrHdr, SEEK_SET);
-  if (!_mm_read_M_ULONGS (sa, ms->numsamples, modreader))
+  _um_fseek (modreader, mh->ppMedInstrHdr, SEEK_SET);
+  if (!_um_read_M_ULONGS (sa, ms->numsamples, modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
   /* alloc and read the blockpointer array */
-  if (!(ba = (ULONG *) _mm_calloc (ms->numblocks, sizeof (ULONG))))
+  if (!(ba = (ULONG *) __um_calloc (ms->numblocks, sizeof (ULONG))))
     return 0;
-  _mm_fseek (modreader, mh->pMEDBLOCKP, SEEK_SET);
-  if (!_mm_read_M_ULONGS (ba, ms->numblocks, modreader))
+  _um_fseek (modreader, mh->pMEDBLOCKP, SEEK_SET);
+  if (!_um_read_M_ULONGS (ba, ms->numblocks, modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -623,9 +623,9 @@ MED_Load (BOOL curious)
     {
       char *name;
 
-      _mm_fseek (modreader, me->songname, SEEK_SET);
-      name = _mm_malloc (me->songnamelen);
-      _mm_read_UBYTES (name, me->songnamelen, modreader);
+      _um_fseek (modreader, me->songname, SEEK_SET);
+      name = __um_malloc (me->songnamelen);
+      _um_read_UBYTES (name, me->songnamelen, modreader);
       of.songname = DupStr (name, me->songnamelen, 1);
       free (name);
     }
@@ -633,7 +633,7 @@ MED_Load (BOOL curious)
     of.songname = DupStr (NULL, 0, 0);
   if ((mh->pMEDEXP) && (me->annotxt) && (me->annolen))
     {
-      _mm_fseek (modreader, me->annotxt, SEEK_SET);
+      _um_fseek (modreader, me->annotxt, SEEK_SET);
       ReadComment (me->annolen);
     }
 
@@ -646,9 +646,9 @@ MED_Load (BOOL curious)
       q->volume = 64;
       if (sa[t])
 	{
-	  _mm_fseek (modreader, sa[t], SEEK_SET);
-	  s.length = _mm_read_M_ULONG (modreader);
-	  s.type = _mm_read_M_SWORD (modreader);
+	  _um_fseek (modreader, sa[t], SEEK_SET);
+	  s.length = _um_read_M_ULONG (modreader);
+	  s.type = _um_read_M_SWORD (modreader);
 
 	  if (s.type)
 	    {
@@ -657,20 +657,20 @@ MED_Load (BOOL curious)
 #endif
 	      if (!curious)
 		{
-		  _mm_errno = MMERR_MED_SYNTHSAMPLES;
+		  _um_errno = MMERR_MED_SYNTHSAMPLES;
 		  return 0;
 		}
 	      s.length = 0;
 	    }
 
-	  if (_mm_eof (modreader))
+	  if (_um_eof (modreader))
 	    {
-	      _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	      _um_errno = MMERR_LOADING_SAMPLEINFO;
 	      return 0;
 	    }
 
 	  q->length = s.length;
-	  q->seekpos = _mm_ftell (modreader);
+	  q->seekpos = _um_ftell (modreader);
 	  q->loopstart = ms->sample[t].rep << 1;
 	  q->loopend = q->loopstart + (ms->sample[t].replen << 1);
 
@@ -690,11 +690,11 @@ MED_Load (BOOL curious)
 	{
 	  MEDINSTEXT ie;
 
-	  _mm_fseek (modreader, me->exp_smp + t * me->s_ext_entrsz, SEEK_SET);
-	  ie.hold = _mm_read_UBYTE (modreader);
-	  ie.decay = _mm_read_UBYTE (modreader);
-	  ie.suppress_midi_off = _mm_read_UBYTE (modreader);
-	  ie.finetune = _mm_read_SBYTE (modreader);
+	  _um_fseek (modreader, me->exp_smp + t * me->s_ext_entrsz, SEEK_SET);
+	  ie.hold = _um_read_UBYTE (modreader);
+	  ie.decay = _um_read_UBYTE (modreader);
+	  ie.suppress_midi_off = _um_read_UBYTE (modreader);
+	  ie.finetune = _um_read_SBYTE (modreader);
 
 	  q->speed = finetune[ie.finetune & 0xf];
 	}
@@ -706,8 +706,8 @@ MED_Load (BOOL curious)
 	{
 	  MEDINSTINFO ii;
 
-	  _mm_fseek (modreader, me->iinfo + t * me->i_ext_entrsz, SEEK_SET);
-	  _mm_read_UBYTES (ii.name, 40, modreader);
+	  _um_fseek (modreader, me->iinfo + t * me->i_ext_entrsz, SEEK_SET);
+	  _um_read_UBYTES (ii.name, 40, modreader);
 	  q->samplename = DupStr ((CHAR *) ii.name, 40, 1);
 	}
       else
@@ -720,7 +720,7 @@ MED_Load (BOOL curious)
     {
       if (!LoadMMD0Patterns ())
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
     }
@@ -728,13 +728,13 @@ MED_Load (BOOL curious)
     {
       if (!LoadMMD1Patterns ())
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
     }
   else
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
   return 1;

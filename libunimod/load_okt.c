@@ -72,7 +72,7 @@ OKT_Test(void)
 {
 	CHAR id[8];
 
-	if (!_mm_read_UBYTES(id, 8, modreader))
+	if (!_um_read_UBYTES(id, 8, modreader))
 		return 0;
 	if (!memcmp(id, "OKTASONG", 8))
 		return 1;
@@ -165,7 +165,7 @@ static void OKT_doCMOD(void)
 	of.numchn = 0;
 
 	for (t = 0; t < 4; t++)
-		if (_mm_read_M_UWORD(modreader)) {
+		if (_um_read_M_UWORD(modreader)) {
 			/* two channels tied to the same Amiga hardware voice */
 			of.panning[of.numchn++] = amigapan[t];
 			of.panning[of.numchn++] = amigapan[t];
@@ -186,16 +186,16 @@ static BOOL OKT_doSAMP(int len)
 		return 0;
 
 	for (t = 0, q = of.samples; t < of.numins; t++, q++) {
-		_mm_read_UBYTES(s.sampname, 20, modreader);
-		s.len = _mm_read_M_ULONG(modreader);
-		s.loopbeg = _mm_read_M_UWORD(modreader);
-		s.looplen = _mm_read_M_UWORD(modreader);
-		_mm_read_UBYTE(modreader);
-		s.volume = _mm_read_UBYTE(modreader);
-		_mm_read_M_UWORD(modreader);
+		_um_read_UBYTES(s.sampname, 20, modreader);
+		s.len = _um_read_M_ULONG(modreader);
+		s.loopbeg = _um_read_M_UWORD(modreader);
+		s.looplen = _um_read_M_UWORD(modreader);
+		_um_read_UBYTE(modreader);
+		s.volume = _um_read_UBYTE(modreader);
+		_um_read_M_UWORD(modreader);
 
-		if (_mm_eof(modreader)) {
-			_mm_errno = MMERR_LOADING_SAMPLEINFO;
+		if (_um_eof(modreader)) {
+			_um_errno = MMERR_LOADING_SAMPLEINFO;
 			return 0;
 		}
 
@@ -229,7 +229,7 @@ static BOOL OKT_doSAMP(int len)
 /* Read speed information */
 static void OKT_doSPEE(void)
 {
-	int tempo = _mm_read_M_UWORD(modreader);
+	int tempo = _um_read_M_UWORD(modreader);
 
 	of.initspeed = tempo;
 }
@@ -237,13 +237,13 @@ static void OKT_doSPEE(void)
 /* Read song length information */
 static void OKT_doSLEN(void)
 {
-	of.numpat = _mm_read_M_UWORD(modreader);
+	of.numpat = _um_read_M_UWORD(modreader);
 }
 
 /* Read pattern length information */
 static void OKT_doPLEN(void)
 {
-	of.numpos = _mm_read_M_UWORD(modreader);
+	of.numpos = _um_read_M_UWORD(modreader);
 }
 
 /* Read order table */
@@ -256,7 +256,7 @@ static BOOL OKT_doPATT(void)
 
 	for (t = 0; t < 128; t++)
 		if (t < of.numpos)
-			of.positions[t] = (UWORD)_mm_read_UBYTE(modreader);
+			of.positions[t] = (UWORD)_um_read_UBYTE(modreader);
 		else
 			break;
 
@@ -277,14 +277,14 @@ static BOOL OKT_doPBOD(int patnum)
 	}
 
 	/* Read pattern */
-	of.pattrows[patnum] = rows = _mm_read_M_UWORD(modreader);
+	of.pattrows[patnum] = rows = _um_read_M_UWORD(modreader);
 
-	if (!(okttrk = (OKTNOTE *) _mm_calloc(rows, sizeof(OKTNOTE))) ||
-	    !(patbuf = (char *)_mm_calloc(rows * of.numchn, sizeof(OKTNOTE))))
+	if (!(okttrk = (OKTNOTE *) __um_calloc(rows, sizeof(OKTNOTE))) ||
+	    !(patbuf = (char *)__um_calloc(rows * of.numchn, sizeof(OKTNOTE))))
 		return 0;
-	_mm_read_UBYTES(patbuf, rows * of.numchn * sizeof(OKTNOTE), modreader);
-	if (_mm_eof(modreader)) {
-		_mm_errno = MMERR_LOADING_PATTERN;
+	_um_read_UBYTES(patbuf, rows * of.numchn * sizeof(OKTNOTE), modreader);
+	if (_um_eof(modreader)) {
+		_um_errno = MMERR_LOADING_PATTERN;
 		return 0;
 	}
 
@@ -299,14 +299,14 @@ static BOOL OKT_doPBOD(int patnum)
 		if (!(of.tracks[patnum * of.numchn + i] = OKT_ConvertTrack(rows)))
 			return 0;
 	}
-	_mm_free(patbuf);
-	_mm_free(okttrk);
+	__um_free(patbuf);
+	__um_free(okttrk);
 	return 1;
 }
 
 static void OKT_doSBOD(int insnum)
 {
-	of.samples[insnum].seekpos = _mm_ftell(modreader);
+	of.samples[insnum].seekpos = _um_ftell(modreader);
 }
 
 static BOOL
@@ -320,7 +320,7 @@ OKT_Load(BOOL curious)
 	int patnum = 0, insnum = 0;
 
 	/* skip OKTALYZER header */
-	_mm_fseek(modreader, 8, SEEK_SET);
+	_um_fseek(modreader, 8, SEEK_SET);
 	of.songname = strdup("");
 
 	of.modtype = strdup("Amiga Oktalyzer");
@@ -332,26 +332,26 @@ OKT_Load(BOOL curious)
 	
 	while (1) {
 		/* read block header */
-		_mm_read_UBYTES(id, 4, modreader);
-		len = _mm_read_M_ULONG(modreader);
+		_um_read_UBYTES(id, 4, modreader);
+		len = _um_read_M_ULONG(modreader);
 		
-		if (_mm_eof(modreader))
+		if (_um_eof(modreader))
 			break;
-		fp = _mm_ftell(modreader);
+		fp = _um_ftell(modreader);
 		
 		if (!memcmp(id, "CMOD", 4)) {
 			if (!seen_cmod) {
 				OKT_doCMOD();
 				seen_cmod = 1;
 			} else {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 		} else if (!memcmp(id, "SAMP", 4)) {
 			if (!seen_samp && OKT_doSAMP(len))
 				seen_samp = 1;
 			else {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 		} else if (!memcmp(id, "SPEE", 4)) {
@@ -359,7 +359,7 @@ OKT_Load(BOOL curious)
 				OKT_doSPEE();
 				seen_spee = 1;
 			} else {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 		} else if (!memcmp(id, "SLEN", 4)) {
@@ -367,7 +367,7 @@ OKT_Load(BOOL curious)
 				OKT_doSLEN();
 				seen_slen = 1;
 			} else {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 		} else if (!memcmp(id, "PLEN", 4)) {
@@ -375,52 +375,52 @@ OKT_Load(BOOL curious)
 				OKT_doPLEN();
 				seen_plen = 1;
 			} else {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 		} else if (!memcmp(id, "PATT", 4)) {
 			if (!seen_plen) {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 			if (!seen_patt && OKT_doPATT())
 				seen_patt = 1;
 			else {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 		} else if (!memcmp(id,"PBOD", 4)) {
 			/* need to know numpat and numchn */
 			if (!seen_slen || !seen_cmod || (patnum >= of.numpat)) {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 			if (!OKT_doPBOD(patnum++)) {
-				_mm_errno = MMERR_LOADING_PATTERN;
+				_um_errno = MMERR_LOADING_PATTERN;
 				return 0;
 			}
 		} else if (!memcmp(id,"SBOD",4)) {
 			/* need to know numsmp */
 			if (!seen_samp) {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 			while ((insnum < of.numins) && !of.samples[insnum].length)
 				insnum++;
 			if (insnum >= of.numins) {
-				_mm_errno = MMERR_LOADING_HEADER;
+				_um_errno = MMERR_LOADING_HEADER;
 				return 0;
 			}
 			OKT_doSBOD(insnum++);
 		}
 
 		/* goto next block start position */
-		_mm_fseek(modreader, fp + len, SEEK_SET);
+		_um_fseek(modreader, fp + len, SEEK_SET);
 	}
 
 	if (!seen_cmod || !seen_samp || !seen_patt ||
 		!seen_slen || !seen_plen || (patnum != of.numpat)) {
-		_mm_errno = MMERR_LOADING_HEADER;
+		_um_errno = MMERR_LOADING_HEADER;
 		return 0;
 	}
 

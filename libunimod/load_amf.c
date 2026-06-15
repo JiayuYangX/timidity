@@ -87,12 +87,12 @@ AMF_Test (void)
 {
   UBYTE id[3], ver;
 
-  if (!_mm_read_UBYTES (id, 3, modreader))
+  if (!_um_read_UBYTES (id, 3, modreader))
     return 0;
   if (memcmp (id, "AMF", 3))
     return 0;
 
-  ver = _mm_read_UBYTE (modreader);
+  ver = _um_read_UBYTE (modreader);
   if ((ver >= 10) && (ver <= 14))
     return 1;
   return 0;
@@ -101,9 +101,9 @@ AMF_Test (void)
 static BOOL
 AMF_Init (void)
 {
-  if (!(mh = (AMFHEADER *) _mm_malloc (sizeof (AMFHEADER))))
+  if (!(mh = (AMFHEADER *) __um_malloc (sizeof (AMFHEADER))))
     return 0;
-  if (!(track = (AMFNOTE *) _mm_calloc (64, sizeof (AMFNOTE))))
+  if (!(track = (AMFNOTE *) __um_calloc (64, sizeof (AMFNOTE))))
     return 0;
 
   return 1;
@@ -112,8 +112,8 @@ AMF_Init (void)
 static void
 AMF_Cleanup (void)
 {
-  _mm_free (mh);
-  _mm_free (track);
+  __um_free (mh);
+  __um_free (track);
 }
 
 static BOOL 
@@ -129,14 +129,14 @@ AMF_UnpackTrack (URL modreader)
   /* read packed track */
   if (modreader)
     {
-      tracksize = _mm_read_I_UWORD (modreader);
-      tracksize += ((ULONG) _mm_read_UBYTE (modreader)) << 16;
+      tracksize = _um_read_I_UWORD (modreader);
+      tracksize += ((ULONG) _um_read_UBYTE (modreader)) << 16;
       if (tracksize)
 	while (tracksize--)
 	  {
-	    row = _mm_read_UBYTE (modreader);
-	    cmd = _mm_read_UBYTE (modreader);
-	    arg = _mm_read_SBYTE (modreader);
+	    row = _um_read_UBYTE (modreader);
+	    cmd = _um_read_UBYTE (modreader);
+	    arg = _um_read_SBYTE (modreader);
 	    /* unexpected end of track */
 	    if (!tracksize)
 	      {
@@ -373,39 +373,39 @@ AMF_Load (BOOL curious)
   int channel_remap[16];
 
   /* try to read module header  */
-  _mm_read_UBYTES (mh->id, 3, modreader);
-  mh->version = _mm_read_UBYTE (modreader);
-  _mm_read_string (mh->songname, 32, modreader);
-  mh->numsamples = _mm_read_UBYTE (modreader);
-  mh->numorders = _mm_read_UBYTE (modreader);
-  mh->numtracks = _mm_read_I_UWORD (modreader);
-  mh->numchannels = _mm_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->id, 3, modreader);
+  mh->version = _um_read_UBYTE (modreader);
+  _um_read_string (mh->songname, 32, modreader);
+  mh->numsamples = _um_read_UBYTE (modreader);
+  mh->numorders = _um_read_UBYTE (modreader);
+  mh->numtracks = _um_read_I_UWORD (modreader);
+  mh->numchannels = _um_read_UBYTE (modreader);
   if ((!mh->numchannels) || (mh->numchannels > (mh->version >= 12 ? 32 : 16)))
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
 
   if (mh->version >= 11)
     {
       memset (mh->panpos, 0, 32);
-      _mm_read_SBYTES (mh->panpos, (mh->version >= 13) ? 32 : 16, modreader);
+      _um_read_SBYTES (mh->panpos, (mh->version >= 13) ? 32 : 16, modreader);
     }
   else
-    _mm_read_UBYTES (channel_remap, 16, modreader);
+    _um_read_UBYTES (channel_remap, 16, modreader);
 
   if (mh->version >= 13)
     {
-      mh->songbpm = _mm_read_UBYTE (modreader);
+      mh->songbpm = _um_read_UBYTE (modreader);
       if (mh->songbpm < 32)
 	{
-	  _mm_errno = MMERR_NOT_A_MODULE;
+	  _um_errno = MMERR_NOT_A_MODULE;
 	  return 0;
 	}
-      mh->songspd = _mm_read_UBYTE (modreader);
+      mh->songspd = _um_read_UBYTE (modreader);
       if (mh->songspd > 32)
 	{
-	  _mm_errno = MMERR_NOT_A_MODULE;
+	  _um_errno = MMERR_NOT_A_MODULE;
 	  return 0;
 	}
     }
@@ -415,9 +415,9 @@ AMF_Load (BOOL curious)
       mh->songspd = 6;
     }
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -462,16 +462,16 @@ AMF_Load (BOOL curious)
     {
       if (mh->version >= 14)
 	/* track size */
-	of.pattrows[t] = _mm_read_I_UWORD (modreader);
+	of.pattrows[t] = _um_read_I_UWORD (modreader);
       if (mh->version >= 10)
-	_mm_read_I_UWORDS (of.patterns + (t * of.numchn), of.numchn, modreader);
+	_um_read_I_UWORDS (of.patterns + (t * of.numchn), of.numchn, modreader);
       else
 	for (u = 0; u < of.numchn; u++)
-	  of.patterns[t * of.numchn + channel_remap[u]] = _mm_read_I_UWORD (modreader);
+	  of.patterns[t * of.numchn + channel_remap[u]] = _um_read_I_UWORD (modreader);
     }
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -482,29 +482,29 @@ AMF_Load (BOOL curious)
   for (t = 0; t < of.numins; t++)
     {
       /* try to read sample info */
-      s.type = _mm_read_UBYTE (modreader);
-      _mm_read_string (s.samplename, 32, modreader);
-      _mm_read_string (s.filename, 13, modreader);
-      s.offset = _mm_read_I_ULONG (modreader);
-      s.length = _mm_read_I_ULONG (modreader);
-      s.c2spd = _mm_read_I_UWORD (modreader);
+      s.type = _um_read_UBYTE (modreader);
+      _um_read_string (s.samplename, 32, modreader);
+      _um_read_string (s.filename, 13, modreader);
+      s.offset = _um_read_I_ULONG (modreader);
+      s.length = _um_read_I_ULONG (modreader);
+      s.c2spd = _um_read_I_UWORD (modreader);
       if (s.c2spd == 8368)
 	s.c2spd = 8363;
-      s.volume = _mm_read_UBYTE (modreader);
+      s.volume = _um_read_UBYTE (modreader);
       if (mh->version >= 11)
 	{
-	  s.reppos = _mm_read_I_ULONG (modreader);
-	  s.repend = _mm_read_I_ULONG (modreader);
+	  s.reppos = _um_read_I_ULONG (modreader);
+	  s.repend = _um_read_I_ULONG (modreader);
 	}
       else
 	{
-	  s.reppos = _mm_read_I_UWORD (modreader);
+	  s.reppos = _um_read_I_UWORD (modreader);
 	  s.repend = s.length;
 	}
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
 
@@ -524,13 +524,13 @@ AMF_Load (BOOL curious)
     }
 
   /* read track table */
-  if (!(track_remap = _mm_calloc (mh->numtracks + 1, sizeof (UWORD))))
+  if (!(track_remap = __um_calloc (mh->numtracks + 1, sizeof (UWORD))))
     return 0;
-  _mm_read_I_UWORDS (track_remap + 1, mh->numtracks, modreader);
-  if (_mm_eof (modreader))
+  _um_read_I_UWORDS (track_remap + 1, mh->numtracks, modreader);
+  if (_um_eof (modreader))
     {
       free (track_remap);
-      _mm_errno = MMERR_LOADING_TRACK;
+      _um_errno = MMERR_LOADING_TRACK;
       return 0;
     }
 
@@ -546,14 +546,14 @@ AMF_Load (BOOL curious)
   /* unpack tracks */
   for (t = 0; t < realtrackcnt; t++)
     {
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_TRACK;
+	  _um_errno = MMERR_LOADING_TRACK;
 	  return 0;
 	}
       if (!AMF_UnpackTrack (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_TRACK;
+	  _um_errno = MMERR_LOADING_TRACK;
 	  return 0;
 	}
       if (!(of.tracks[t] = AMF_ConvertTrack ()))
@@ -568,7 +568,7 @@ AMF_Load (BOOL curious)
     of.tracks[t] = NULL;
 
   /* compute sample offsets */
-  samplepos = _mm_ftell (modreader);
+  samplepos = _um_ftell (modreader);
   for (realsmpcnt = t = 0; t < of.numsmp; t++)
     if (realsmpcnt < of.samples[t].seekpos)
       realsmpcnt = of.samples[t].seekpos;
@@ -589,8 +589,8 @@ AMF_LoadTitle (void)
 {
   CHAR s[32];
 
-  _mm_fseek (modreader, 4, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 32, modreader))
+  _um_fseek (modreader, 4, SEEK_SET);
+  if (!_um_read_UBYTES (s, 32, modreader))
     return NULL;
 
   return (DupStr (s, 32, 1));

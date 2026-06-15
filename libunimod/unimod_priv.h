@@ -53,46 +53,46 @@ extern "C"
 
 /*========== Error handling */
 
-#define _mm_errno ML_errno
+#define _um_errno ML_errno
 
 /*========== Memory allocation */
 
-extern void *_mm_malloc (size_t);
-extern void *_mm_calloc (size_t, size_t);
-#define _mm_free(p) do { if (p) free(p); p = NULL; } while(0)
+extern void *__um_malloc (size_t);
+extern void *__um_calloc (size_t, size_t);
+#define __um_free(p) do { if (p) free(p); p = NULL; } while(0)
 
 /*========== Portable file I/O */
 
-#define _mm_read_SBYTE(x)	((SBYTE)url_getc(x))
-#define _mm_read_UBYTE(x)	((UBYTE)url_getc(x))
-#define _mm_read_SBYTES(x,y,z)	url_nread(z,(void *)x,y)
-#define _mm_read_UBYTES(x,y,z)	url_nread(z,(void *)x,y)
-#define _mm_fseek(x,y,z)	url_seek(x,y,z)
-#define _mm_ftell(x)		url_tell(x)
-#define _mm_eof(x)		url_eof(x)
-#define _mm_rewind(x)		_mm_fseek(x,0,SEEK_SET)
+#define _um_read_SBYTE(x)	((SBYTE)url_getc(x))
+#define _um_read_UBYTE(x)	((UBYTE)url_getc(x))
+#define _um_read_SBYTES(x,y,z)	url_nread(z,(void *)x,y)
+#define _um_read_UBYTES(x,y,z)	url_nread(z,(void *)x,y)
+#define _um_fseek(x,y,z)	url_seek(x,y,z)
+#define _um_ftell(x)		url_tell(x)
+#define _um_eof(x)		url_eof(x)
+#define _um_rewind(x)		_um_fseek(x,0,SEEK_SET)
 
-extern int _mm_read_string (CHAR *, int, URL);
+extern int _um_read_string (CHAR *, int, URL);
 
-extern SWORD _mm_read_M_SWORD (URL);
-extern SWORD _mm_read_I_SWORD (URL);
-extern UWORD _mm_read_M_UWORD (URL);
-extern UWORD _mm_read_I_UWORD (URL);
+extern SWORD _um_read_M_SWORD (URL);
+extern SWORD _um_read_I_SWORD (URL);
+extern UWORD _um_read_M_UWORD (URL);
+extern UWORD _um_read_I_UWORD (URL);
 
-extern SLONG _mm_read_M_SLONG (URL);
-extern SLONG _mm_read_I_SLONG (URL);
-extern ULONG _mm_read_M_ULONG (URL);
-extern ULONG _mm_read_I_ULONG (URL);
+extern SLONG _um_read_M_SLONG (URL);
+extern SLONG _um_read_I_SLONG (URL);
+extern ULONG _um_read_M_ULONG (URL);
+extern ULONG _um_read_I_ULONG (URL);
 
-extern int _mm_read_M_SWORDS (SWORD *, int, URL);
-extern int _mm_read_I_SWORDS (SWORD *, int, URL);
-extern int _mm_read_M_UWORDS (UWORD *, int, URL);
-extern int _mm_read_I_UWORDS (UWORD *, int, URL);
+extern int _um_read_M_SWORDS (SWORD *, int, URL);
+extern int _um_read_I_SWORDS (SWORD *, int, URL);
+extern int _um_read_M_UWORDS (UWORD *, int, URL);
+extern int _um_read_I_UWORDS (UWORD *, int, URL);
 
-extern int _mm_read_M_SLONGS (SLONG *, int, URL);
-extern int _mm_read_I_SLONGS (SLONG *, int, URL);
-extern int _mm_read_M_ULONGS (ULONG *, int, URL);
-extern int _mm_read_I_ULONGS (ULONG *, int, URL);
+extern int _um_read_M_SLONGS (SLONG *, int, URL);
+extern int _um_read_I_SLONGS (SLONG *, int, URL);
+extern int _um_read_M_ULONGS (ULONG *, int, URL);
+extern int _um_read_I_ULONGS (ULONG *, int, URL);
 
 
 /*========== Loaders */

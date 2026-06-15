@@ -104,7 +104,7 @@ BOOL
 SL_Init (SAMPLOAD * s)
 {
   if (!sl_buffer)
-    if (!(sl_buffer = _mm_malloc (SLBUFSIZE * sizeof (SWORD))))
+    if (!(sl_buffer = __um_malloc (SLBUFSIZE * sizeof (SWORD))))
       return 0;
 
   sl_rlength = s->length;
@@ -119,7 +119,7 @@ void
 SL_Exit (SAMPLOAD * s)
 {
   if (sl_rlength > 0)
-    _mm_fseek (s->reader, sl_rlength, SEEK_CUR);
+    _um_fseek (s->reader, sl_rlength, SEEK_CUR);
   if (sl_buffer)
     {
       free (sl_buffer);
@@ -148,7 +148,7 @@ read_itcompr8 (ITPACK * status, URL reader, SWORD * sl_buffer, UWORD count, UWOR
 	  if (!bufbits)
 	    {
 	      if ((*incnt)--)
-		buf = _mm_read_UBYTE (reader);
+		buf = _um_read_UBYTE (reader);
 	      else
 		buf = 0;
 	      bufbits = 8;
@@ -199,7 +199,7 @@ read_itcompr8 (ITPACK * status, URL reader, SWORD * sl_buffer, UWORD count, UWOR
       else
 	{
 	  /* error in compressed data... */
-	  _mm_errno = MMERR_ITPACK_INVALID_DATA;
+	  _um_errno = MMERR_ITPACK_INVALID_DATA;
 	  return 0;
 	}
 
@@ -235,7 +235,7 @@ read_itcompr16 (ITPACK * status, URL reader, SWORD * sl_buffer, UWORD count, UWO
 	  if (!bufbits)
 	    {
 	      if ((*incnt)--)
-		buf = _mm_read_UBYTE (reader);
+		buf = _um_read_UBYTE (reader);
 	      else
 		buf = 0;
 	      bufbits = 8;
@@ -286,7 +286,7 @@ read_itcompr16 (ITPACK * status, URL reader, SWORD * sl_buffer, UWORD count, UWO
       else
 	{
 	  /* error in compressed data... */
-	  _mm_errno = MMERR_ITPACK_INVALID_DATA;
+	  _um_errno = MMERR_ITPACK_INVALID_DATA;
 	  return 0;
 	}
 
@@ -323,7 +323,7 @@ SL_LoadInternal (void *buffer, UWORD infmt, UWORD outfmt, int scalefactor, ULONG
 	    {
 	      status.bits = (infmt & SF_16BITS) ? 17 : 9;
 	      status.last = status.bufbits = 0;
-	      incnt = _mm_read_I_UWORD (reader);
+	      incnt = _um_read_I_UWORD (reader);
 	      c_block = (infmt & SF_16BITS) ? 0x4000 : 0x8000;
 	      if (infmt & SF_DELTA)
 		sl_old = 0;
@@ -340,7 +340,7 @@ SL_LoadInternal (void *buffer, UWORD infmt, UWORD outfmt, int scalefactor, ULONG
 	    }
 	  if (result != stodo)
 	    {
-	      _mm_errno = MMERR_ITPACK_INVALID_DATA;
+	      _um_errno = MMERR_ITPACK_INVALID_DATA;
 	      return 1;
 	    }
 	  c_block -= stodo;
@@ -350,9 +350,9 @@ SL_LoadInternal (void *buffer, UWORD infmt, UWORD outfmt, int scalefactor, ULONG
 	  if (infmt & SF_16BITS)
 	    {
 	      if (infmt & SF_BIG_ENDIAN)
-		_mm_read_M_SWORDS (sl_buffer, stodo, reader);
+		_um_read_M_SWORDS (sl_buffer, stodo, reader);
 	      else
-		_mm_read_I_SWORDS (sl_buffer, stodo, reader);
+		_um_read_I_SWORDS (sl_buffer, stodo, reader);
 	    }
 	  else
 	    {
@@ -360,7 +360,7 @@ SL_LoadInternal (void *buffer, UWORD infmt, UWORD outfmt, int scalefactor, ULONG
 	      SBYTE *src;
 	      SWORD *dest;
 
-	      _mm_read_UBYTES (sl_buffer, stodo, reader);
+	      _um_read_UBYTES (sl_buffer, stodo, reader);
 	      src = (SBYTE *) sl_buffer;
 	      dest = sl_buffer;
 	      src += stodo;
@@ -449,9 +449,9 @@ SL_Load (struct SAMPLOAD *sload)
   loopstart = s->loopstart;
   loopend = s->loopend;
 
-  if (!(data = (SWORD *) _mm_malloc ((length + 20) << 1)))
+  if (!(data = (SWORD *) __um_malloc ((length + 20) << 1)))
     {
-      _mm_errno = MMERR_SAMPLE_TOO_BIG;
+      _um_errno = MMERR_SAMPLE_TOO_BIG;
       return NULL;
     }
 
@@ -486,7 +486,7 @@ SL_RegisterSample (SAMPLE * s, URL reader)
   cruise = musiclist;
 
   /* Allocate and add structure to the END of the list */
-  if (!(news = (SAMPLOAD *) _mm_malloc (sizeof (SAMPLOAD))))
+  if (!(news = (SAMPLOAD *) __um_malloc (sizeof (SAMPLOAD))))
     return NULL;
 
   if (cruise)
@@ -624,7 +624,7 @@ SL_LoadSamples (void)
       if (s->sample->length)
 	{
 	  if (s->sample->seekpos)
-	    _mm_fseek (s->reader, s->sample->seekpos, SEEK_SET);
+	    _um_fseek (s->reader, s->sample->seekpos, SEEK_SET);
 
 	  /* Call the sample load routine of the driver module. It has to
 	     return a pointer to sample dat). */
@@ -700,7 +700,7 @@ ML_InfoLoader (void)
     len += 1 + (l->next ? 1 : 0) + strlen (l->version);
 
   if (len)
-    if ((list = _mm_malloc (len * sizeof (CHAR))))
+    if ((list = __um_malloc (len * sizeof (CHAR))))
       {
 	list[0] = 0;
 	/* list all registered module loders */
@@ -717,9 +717,9 @@ ReadComment (UWORD len)
     {
       int i;
 
-      if (!(of.comment = (CHAR *) _mm_malloc (len + 1)))
+      if (!(of.comment = (CHAR *) __um_malloc (len + 1)))
 	return 0;
-      _mm_read_UBYTES (of.comment, len, modreader);
+      _um_read_UBYTES (of.comment, len, modreader);
 
       /* translate IT linefeeds */
       for (i = 0; i < len; i++)
@@ -745,14 +745,14 @@ ReadLinedComment (UWORD lines, UWORD linelen)
 
   if (lines)
     {
-      if (!(tempcomment = (CHAR *) _mm_malloc (len + 1)))
+      if (!(tempcomment = (CHAR *) __um_malloc (len + 1)))
 	return 0;
-      if (!(storage = (CHAR *) _mm_malloc (linelen + 1)))
+      if (!(storage = (CHAR *) __um_malloc (linelen + 1)))
 	{
 	  free (tempcomment);
 	  return 0;
 	}
-      _mm_read_UBYTES (tempcomment, len, modreader);
+      _um_read_UBYTES (tempcomment, len, modreader);
 
       /* compute message length */
       for (line = tempcomment, total = t = 0; t < lines; t++, line += linelen)
@@ -767,7 +767,7 @@ ReadLinedComment (UWORD lines, UWORD linelen)
 
       if (total > lines)
 	{
-	  if (!(of.comment = (CHAR *) _mm_malloc (total + 1)))
+	  if (!(of.comment = (CHAR *) __um_malloc (total + 1)))
 	    {
 	      free (storage);
 	      free (tempcomment);
@@ -796,10 +796,10 @@ AllocPositions (int total)
 {
   if (!total)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
-  if (!(of.positions = _mm_calloc (total, sizeof (UWORD))))
+  if (!(of.positions = __um_calloc (total, sizeof (UWORD))))
     return 0;
   return 1;
 }
@@ -811,13 +811,13 @@ AllocPatterns (void)
 
   if ((!of.numpat) || (!of.numchn))
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
   /* Allocate track sequencing array */
-  if (!(of.patterns = (UWORD *) _mm_calloc ((ULONG) (of.numpat + 1) * of.numchn, sizeof (UWORD))))
+  if (!(of.patterns = (UWORD *) __um_calloc ((ULONG) (of.numpat + 1) * of.numchn, sizeof (UWORD))))
     return 0;
-  if (!(of.pattrows = (UWORD *) _mm_calloc (of.numpat + 1, sizeof (UWORD))))
+  if (!(of.pattrows = (UWORD *) __um_calloc (of.numpat + 1, sizeof (UWORD))))
     return 0;
 
   for (t = 0; t <= of.numpat; t++)
@@ -835,10 +835,10 @@ AllocTracks (void)
 {
   if (!of.numtrk)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
-  if (!(of.tracks = (UBYTE **) _mm_calloc (of.numtrk, sizeof (UBYTE *))))
+  if (!(of.tracks = (UBYTE **) __um_calloc (of.numtrk, sizeof (UBYTE *))))
     return 0;
   return 1;
 }
@@ -850,10 +850,10 @@ AllocInstruments (void)
 
   if (!of.numins)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
-  if (!(of.instruments = (INSTRUMENT *) _mm_calloc (of.numins, sizeof (INSTRUMENT))))
+  if (!(of.instruments = (INSTRUMENT *) __um_calloc (of.numins, sizeof (INSTRUMENT))))
     return 0;
 
   for (t = 0; t < of.numins; t++)
@@ -876,10 +876,10 @@ AllocSamples (void)
 
   if (!of.numsmp)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
-  if (!(of.samples = (SAMPLE *) _mm_calloc (of.numsmp, sizeof (SAMPLE))))
+  if (!(of.samples = (SAMPLE *) __um_calloc (of.numsmp, sizeof (SAMPLE))))
     return 0;
 
   for (u = 0; u < of.numsmp; u++)
@@ -933,7 +933,7 @@ DupStr (CHAR * s, UWORD len, BOOL strict)
 
   /* When the buffer wasn't completely empty, allocate a cstring and copy the
      buffer into that string, except for any control-chars */
-  if ((d = (CHAR *) _mm_malloc (sizeof (CHAR) * (len + 1))))
+  if ((d = (CHAR *) __um_malloc (sizeof (CHAR) * (len + 1))))
     {
       for (t = 0; t < len; t++)
 	d[t] = (s[t] < 32) ? '.' : s[t];
@@ -1008,7 +1008,7 @@ ML_Free (MODULE * mf)
 static MODULE *
 ML_AllocUniMod (void)
 {
-  return (_mm_malloc (sizeof (MODULE)));
+  return (__um_malloc (sizeof (MODULE)));
 }
 
 CHAR *
@@ -1017,19 +1017,19 @@ ML_LoadTitle (URL reader)
   MLOADER *l;
 
   modreader = reader;
-  _mm_errno = 0;
+  _um_errno = 0;
 
   /* Try to find a loader that recognizes the module */
   for (l = firstloader; l; l = l->next)
     {
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       if (l->Test ())
 	break;
     }
 
   if (!l)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return NULL;
     }
 
@@ -1043,12 +1043,12 @@ ML_Test (URL reader)
   MLOADER *l;
 
   modreader = reader;
-  _mm_errno = 0;
+  _um_errno = 0;
 
   /* Try to find a loader that recognizes the module */
   for (l = firstloader; l; l = l->next)
     {
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       if (l->Test ())
 	return 1;
     }
@@ -1065,27 +1065,27 @@ ML_Load (URL reader, int maxchan, BOOL curious)
   MODULE *mf;
 
   modreader = reader;
-  _mm_errno = 0;
+  _um_errno = 0;
 
   /* Try to find a loader that recognizes the module */
   for (l = firstloader; l; l = l->next)
     {
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       if (l->Test ())
 	break;
     }
 
   if (!l)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
-      _mm_rewind (modreader);
+      _um_errno = MMERR_NOT_A_MODULE;
+      _um_rewind (modreader);
       return NULL;
     }
 
   /* init unitrk routines */
   if (!UniInit ())
     {
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       return NULL;
     }
 
@@ -1102,7 +1102,7 @@ ML_Load (URL reader, int maxchan, BOOL curious)
   /* init module loader and load the header / patterns */
   if (l->Init ())
     {
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       ok = l->Load (curious);
     }
   else
@@ -1115,14 +1115,14 @@ ML_Load (URL reader, int maxchan, BOOL curious)
   if (!ok)
     {
       ML_Free (&of);
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       return NULL;
     }
 
   if (!ML_LoadSamples ())
     {
       ML_Free (&of);
-      _mm_rewind (modreader);
+      _um_rewind (modreader);
       return NULL;
     }
 

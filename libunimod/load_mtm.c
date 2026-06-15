@@ -86,7 +86,7 @@ MTM_Test (void)
 {
   UBYTE id[3];
 
-  if (!_mm_read_UBYTES (id, 3, modreader))
+  if (!_um_read_UBYTES (id, 3, modreader))
     return 0;
   if (!memcmp (id, "MTM", 3))
     return 1;
@@ -96,9 +96,9 @@ MTM_Test (void)
 static BOOL
 MTM_Init (void)
 {
-  if (!(mtmtrk = (MTMNOTE *) _mm_calloc (64, sizeof (MTMNOTE))))
+  if (!(mtmtrk = (MTMNOTE *) __um_calloc (64, sizeof (MTMNOTE))))
     return 0;
-  if (!(mh = (MTMHEADER *) _mm_malloc (sizeof (MTMHEADER))))
+  if (!(mh = (MTMHEADER *) __um_malloc (sizeof (MTMHEADER))))
     return 0;
 
   return 1;
@@ -107,8 +107,8 @@ MTM_Init (void)
 static void
 MTM_Cleanup (void)
 {
-  _mm_free (mtmtrk);
-  _mm_free (mh);
+  __um_free (mtmtrk);
+  __um_free (mh);
 }
 
 static UBYTE *
@@ -154,22 +154,22 @@ MTM_Load (BOOL curious)
   SAMPLE *q;
 
   /* try to read module header  */
-  _mm_read_UBYTES (mh->id, 3, modreader);
-  mh->version = _mm_read_UBYTE (modreader);
-  _mm_read_string (mh->songname, 20, modreader);
-  mh->numtracks = _mm_read_I_UWORD (modreader);
-  mh->lastpattern = _mm_read_UBYTE (modreader);
-  mh->lastorder = _mm_read_UBYTE (modreader);
-  mh->commentsize = _mm_read_I_UWORD (modreader);
-  mh->numsamples = _mm_read_UBYTE (modreader);
-  mh->attribute = _mm_read_UBYTE (modreader);
-  mh->beatspertrack = _mm_read_UBYTE (modreader);
-  mh->numchannels = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->panpos, 32, modreader);
+  _um_read_UBYTES (mh->id, 3, modreader);
+  mh->version = _um_read_UBYTE (modreader);
+  _um_read_string (mh->songname, 20, modreader);
+  mh->numtracks = _um_read_I_UWORD (modreader);
+  mh->lastpattern = _um_read_UBYTE (modreader);
+  mh->lastorder = _um_read_UBYTE (modreader);
+  mh->commentsize = _um_read_I_UWORD (modreader);
+  mh->numsamples = _um_read_UBYTE (modreader);
+  mh->attribute = _um_read_UBYTE (modreader);
+  mh->beatspertrack = _um_read_UBYTE (modreader);
+  mh->numchannels = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->panpos, 32, modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -193,17 +193,17 @@ MTM_Load (BOOL curious)
   for (t = 0; t < of.numins; t++)
     {
       /* try to read sample info */
-      _mm_read_string (s.samplename, 22, modreader);
-      s.length = _mm_read_I_ULONG (modreader);
-      s.reppos = _mm_read_I_ULONG (modreader);
-      s.repend = _mm_read_I_ULONG (modreader);
-      s.finetune = _mm_read_UBYTE (modreader);
-      s.volume = _mm_read_UBYTE (modreader);
-      s.attribute = _mm_read_UBYTE (modreader);
+      _um_read_string (s.samplename, 22, modreader);
+      s.length = _um_read_I_ULONG (modreader);
+      s.reppos = _um_read_I_ULONG (modreader);
+      s.repend = _um_read_I_ULONG (modreader);
+      s.finetune = _um_read_UBYTE (modreader);
+      s.volume = _um_read_UBYTE (modreader);
+      s.attribute = _um_read_UBYTE (modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
 
@@ -233,12 +233,12 @@ MTM_Load (BOOL curious)
   if (!AllocPositions (of.numpos))
     return 0;
   for (t = 0; t < of.numpos; t++)
-    of.positions[t] = _mm_read_UBYTE (modreader);
+    of.positions[t] = _um_read_UBYTE (modreader);
   for (; t < 128; t++)
-    _mm_read_UBYTE (modreader);
-  if (_mm_eof (modreader))
+    _um_read_UBYTE (modreader);
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -254,14 +254,14 @@ MTM_Load (BOOL curious)
 
       for (s = 0; s < 64; s++)
 	{
-	  mtmtrk[s].a = _mm_read_UBYTE (modreader);
-	  mtmtrk[s].b = _mm_read_UBYTE (modreader);
-	  mtmtrk[s].c = _mm_read_UBYTE (modreader);
+	  mtmtrk[s].a = _um_read_UBYTE (modreader);
+	  mtmtrk[s].b = _um_read_UBYTE (modreader);
+	  mtmtrk[s].c = _um_read_UBYTE (modreader);
 	}
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_TRACK;
+	  _um_errno = MMERR_LOADING_TRACK;
 	  return 0;
 	}
 
@@ -271,7 +271,7 @@ MTM_Load (BOOL curious)
 
   for (t = 0; t < of.numpat; t++)
     {
-      _mm_read_I_UWORDS (pat, 32, modreader);
+      _um_read_I_UWORDS (pat, 32, modreader);
       for (u = 0; u < of.numchn; u++)
 	of.patterns[((long) t * of.numchn) + u] = pat[u];
     }
@@ -289,8 +289,8 @@ MTM_LoadTitle (void)
 {
   CHAR s[20];
 
-  _mm_fseek (modreader, 4, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 20, modreader))
+  _um_fseek (modreader, 4, SEEK_SET);
+  if (!_um_read_UBYTES (s, 20, modreader))
     return NULL;
 
   return (DupStr (s, 20, 1));

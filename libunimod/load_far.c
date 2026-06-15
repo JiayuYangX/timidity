@@ -98,7 +98,7 @@ FAR_Test (void)
 {
   UBYTE id[47];
 
-  if (!_mm_read_UBYTES (id, 47, modreader))
+  if (!_um_read_UBYTES (id, 47, modreader))
     return 0;
   if ((memcmp (id, FARSIG, 4)) || (memcmp (id + 44, FARSIG + 4, 3)))
     return 0;
@@ -108,11 +108,11 @@ FAR_Test (void)
 static BOOL
 FAR_Init (void)
 {
-  if (!(mh1 = (FARHEADER1 *) _mm_malloc (sizeof (FARHEADER1))))
+  if (!(mh1 = (FARHEADER1 *) __um_malloc (sizeof (FARHEADER1))))
     return 0;
-  if (!(mh2 = (FARHEADER2 *) _mm_malloc (sizeof (FARHEADER2))))
+  if (!(mh2 = (FARHEADER2 *) __um_malloc (sizeof (FARHEADER2))))
     return 0;
-  if (!(pat = (FARNOTE *) _mm_malloc (256 * 16 * 4 * sizeof (FARNOTE))))
+  if (!(pat = (FARNOTE *) __um_malloc (256 * 16 * 4 * sizeof (FARNOTE))))
     return 0;
 
   return 1;
@@ -121,9 +121,9 @@ FAR_Init (void)
 static void
 FAR_Cleanup (void)
 {
-  _mm_free (mh1);
-  _mm_free (mh2);
-  _mm_free (pat);
+  __um_free (mh1);
+  __um_free (mh2);
+  __um_free (pat);
 }
 
 static UBYTE *
@@ -187,17 +187,17 @@ FAR_Load (BOOL curious)
   UBYTE smap[8];
 
   /* try to read module header (first part) */
-  _mm_read_UBYTES (mh1->id, 4, modreader);
-  _mm_read_SBYTES (mh1->songname, 40, modreader);
-  _mm_read_SBYTES (mh1->blah, 3, modreader);
-  mh1->headerlen = _mm_read_I_UWORD (modreader);
-  mh1->version = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh1->onoff, 16, modreader);
-  _mm_read_UBYTES (mh1->edit1, 9, modreader);
-  mh1->speed = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh1->panning, 16, modreader);
-  _mm_read_UBYTES (mh1->edit2, 4, modreader);
-  mh1->stlen = _mm_read_I_UWORD (modreader);
+  _um_read_UBYTES (mh1->id, 4, modreader);
+  _um_read_SBYTES (mh1->songname, 40, modreader);
+  _um_read_SBYTES (mh1->blah, 3, modreader);
+  mh1->headerlen = _um_read_I_UWORD (modreader);
+  mh1->version = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh1->onoff, 16, modreader);
+  _um_read_UBYTES (mh1->edit1, 9, modreader);
+  mh1->speed = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh1->panning, 16, modreader);
+  _um_read_UBYTES (mh1->edit2, 4, modreader);
+  mh1->stlen = _um_read_I_UWORD (modreader);
 
   /* init modfile data */
   of.modtype = strdup (FAR_Version);
@@ -215,11 +215,11 @@ FAR_Load (BOOL curious)
       return 0;
 
   /* try to read module header (second part) */
-  _mm_read_UBYTES (mh2->orders, 256, modreader);
-  mh2->numpat = _mm_read_UBYTE (modreader);
-  mh2->snglen = _mm_read_UBYTE (modreader);
-  mh2->loopto = _mm_read_UBYTE (modreader);
-  _mm_read_I_UWORDS (mh2->patsiz, 256, modreader);
+  _um_read_UBYTES (mh2->orders, 256, modreader);
+  mh2->numpat = _um_read_UBYTE (modreader);
+  mh2->snglen = _um_read_UBYTE (modreader);
+  mh2->loopto = _um_read_UBYTE (modreader);
+  _um_read_I_UWORDS (mh2->patsiz, 256, modreader);
 
   of.numpos = mh2->snglen;
   if (!AllocPositions (of.numpos))
@@ -240,7 +240,7 @@ FAR_Load (BOOL curious)
   of.numtrk = of.numpat * of.numchn;
 
   /* seek across eventual new data */
-  _mm_fseek (modreader, mh1->headerlen - (869 + mh1->stlen), SEEK_CUR);
+  _um_fseek (modreader, mh1->headerlen - (869 + mh1->stlen), SEEK_CUR);
 
   /* alloc track and pattern structures */
   if (!AllocTracks ())
@@ -255,27 +255,27 @@ FAR_Load (BOOL curious)
       memset (pat, 0, 256 * 16 * 4 * sizeof (FARNOTE));
       if (mh2->patsiz[t])
 	{
-	  rows = _mm_read_UBYTE (modreader);
-	  /* tempo = */ _mm_read_UBYTE (modreader);
+	  rows = _um_read_UBYTE (modreader);
+	  /* tempo = */ _um_read_UBYTE (modreader);
 
 	  crow = pat;
 	  /* file often allocates 64 rows even if there are less in pattern */
 	  if (mh2->patsiz[t] < 2 + (rows * 16 * 4))
 	    {
-	      _mm_errno = MMERR_LOADING_PATTERN;
+	      _um_errno = MMERR_LOADING_PATTERN;
 	      return 0;
 	    }
 	  for (u = (mh2->patsiz[t] - 2) / 4; u; u--, crow++)
 	    {
-	      crow->note = _mm_read_UBYTE (modreader);
-	      crow->ins = _mm_read_UBYTE (modreader);
-	      crow->vol = _mm_read_UBYTE (modreader);
-	      crow->eff = _mm_read_UBYTE (modreader);
+	      crow->note = _um_read_UBYTE (modreader);
+	      crow->ins = _um_read_UBYTE (modreader);
+	      crow->vol = _um_read_UBYTE (modreader);
+	      crow->eff = _um_read_UBYTE (modreader);
 	    }
 
-	  if (_mm_eof (modreader))
+	  if (_um_eof (modreader))
 	    {
-	      _mm_errno = MMERR_LOADING_PATTERN;
+	      _um_errno = MMERR_LOADING_PATTERN;
 	      return 0;
 	    }
 
@@ -284,7 +284,7 @@ FAR_Load (BOOL curious)
 	  for (u = 16; u; u--, crow++)
 	    if (!(of.tracks[tracks++] = FAR_ConvertTrack (crow, rows)))
 	      {
-		_mm_errno = MMERR_LOADING_PATTERN;
+		_um_errno = MMERR_LOADING_PATTERN;
 		return 0;
 	      }
 	}
@@ -293,9 +293,9 @@ FAR_Load (BOOL curious)
     }
 
   /* read sample map */
-  if (!_mm_read_UBYTES (smap, 8, modreader))
+  if (!_um_read_UBYTES (smap, 8, modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -317,14 +317,14 @@ FAR_Load (BOOL curious)
       q->flags = SF_SIGNED;
       if (smap[t >> 3] & (1 << (t & 7)))
 	{
-	  _mm_read_SBYTES (s.samplename, 32, modreader);
-	  s.length = _mm_read_I_ULONG (modreader);
-	  s.finetune = _mm_read_UBYTE (modreader);
-	  s.volume = _mm_read_UBYTE (modreader);
-	  s.reppos = _mm_read_I_ULONG (modreader);
-	  s.repend = _mm_read_I_ULONG (modreader);
-	  s.type = _mm_read_UBYTE (modreader);
-	  s.loop = _mm_read_UBYTE (modreader);
+	  _um_read_SBYTES (s.samplename, 32, modreader);
+	  s.length = _um_read_I_ULONG (modreader);
+	  s.finetune = _um_read_UBYTE (modreader);
+	  s.volume = _um_read_UBYTE (modreader);
+	  s.reppos = _um_read_I_ULONG (modreader);
+	  s.repend = _um_read_I_ULONG (modreader);
+	  s.type = _um_read_UBYTE (modreader);
+	  s.loop = _um_read_UBYTE (modreader);
 
 	  q->samplename = DupStr (s.samplename, 32, 1);
 	  q->length = s.length;
@@ -337,8 +337,8 @@ FAR_Load (BOOL curious)
 	  if (s.loop & 8)
 	    q->flags |= SF_LOOP;
 
-	  q->seekpos = _mm_ftell (modreader);
-	  _mm_fseek (modreader, q->length, SEEK_CUR);
+	  q->seekpos = _um_ftell (modreader);
+	  _um_fseek (modreader, q->length, SEEK_CUR);
 	}
       else
 	q->samplename = DupStr (NULL, 0, 0);
@@ -352,8 +352,8 @@ FAR_LoadTitle (void)
 {
   CHAR s[40];
 
-  _mm_fseek (modreader, 4, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 40, modreader))
+  _um_fseek (modreader, 4, SEEK_SET);
+  if (!_um_read_UBYTES (s, 40, modreader))
     return NULL;
 
   return (DupStr (s, 40, 1));

@@ -304,7 +304,7 @@ UniDup (void)
     return NULL;
   unibuf[unitt] = 0;
 
-  if (!(d = (UBYTE *) _mm_malloc (unipc)))
+  if (!(d = (UBYTE *) __um_malloc (unipc)))
     return NULL;
   memcpy (d, unibuf, unipc);
 
@@ -316,7 +316,7 @@ UniInit (void)
 {
   unimax = BUFPAGE;
 
-  if (!(unibuf = (UBYTE *) _mm_malloc (unimax * sizeof (UBYTE))))
+  if (!(unibuf = (UBYTE *) __um_malloc (unimax * sizeof (UBYTE))))
     return 0;
   return 1;
 }

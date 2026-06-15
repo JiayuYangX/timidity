@@ -87,7 +87,7 @@ LoadModuleHeader (MODULEHEADER * mh)
 {
   int t, u;
 
-  _mm_read_string (mh->songname, 20, modreader);
+  _um_read_string (mh->songname, 20, modreader);
   mh->songname[20] = 0;		/* just in case */
 
   /* sanity check : title should contain printable characters and a bunch
@@ -105,13 +105,13 @@ LoadModuleHeader (MODULEHEADER * mh)
     {
       MSAMPINFO *s = &mh->samples[t];
 
-      _mm_read_string (s->samplename, 22, modreader);
+      _um_read_string (s->samplename, 22, modreader);
       s->samplename[22] = 0;	/* just in case */
-      s->length = _mm_read_M_UWORD (modreader);
-      s->finetune = _mm_read_UBYTE (modreader);
-      s->volume = _mm_read_UBYTE (modreader);
-      s->reppos = _mm_read_M_UWORD (modreader);
-      s->replen = _mm_read_M_UWORD (modreader);
+      s->length = _um_read_M_UWORD (modreader);
+      s->finetune = _um_read_UBYTE (modreader);
+      s->volume = _um_read_UBYTE (modreader);
+      s->reppos = _um_read_M_UWORD (modreader);
+      s->replen = _um_read_M_UWORD (modreader);
 
       /* sanity check : sample title should contain printable characters and
          a bunch of null chars */
@@ -129,8 +129,8 @@ LoadModuleHeader (MODULEHEADER * mh)
 	return 0;
     }
 
-  mh->songlength = _mm_read_UBYTE (modreader);
-  mh->magic1 = _mm_read_UBYTE (modreader);	/* should be 127 */
+  mh->songlength = _um_read_UBYTE (modreader);
+  mh->magic1 = _um_read_UBYTE (modreader);	/* should be 127 */
 
   /* sanity check : no more than 128 positions, restart position in range */
   if ((!mh->songlength) || (mh->songlength > 128))
@@ -139,14 +139,14 @@ LoadModuleHeader (MODULEHEADER * mh)
   if (((mh->magic1 & 0xf8) != 0x78) && (mh->magic1 != 0x6a) && (mh->magic1 > mh->songlength))
     return 0;
 
-  _mm_read_UBYTES (mh->positions, 128, modreader);
+  _um_read_UBYTES (mh->positions, 128, modreader);
 
   /* sanity check : pattern range is 0..63 */
   for (t = 0; t < 128; t++)
     if (mh->positions[t] > 63)
       return 0;
 
-  return (!_mm_eof (modreader));
+  return (!_um_eof (modreader));
 }
 
 /* Checks the patterns in the modfile for UST / 15-inst indications.
@@ -163,10 +163,10 @@ CheckPatternType (int numpat)
   for (t = 0; t < numpat * (64U * 4); t++)
     {
       /* Load the pattern into the temp buffer and scan it */
-      _mm_read_UBYTE (modreader);
-      _mm_read_UBYTE (modreader);
-      eff = _mm_read_UBYTE (modreader);
-      dat = _mm_read_UBYTE (modreader);
+      _um_read_UBYTE (modreader);
+      _um_read_UBYTE (modreader);
+      eff = _um_read_UBYTE (modreader);
+      dat = _um_read_UBYTE (modreader);
 
       switch (eff)
 	{
@@ -274,7 +274,7 @@ M15_Test (void)
 static BOOL 
 M15_Init (void)
 {
-  if (!(mh = (MODULEHEADER *) _mm_malloc (sizeof (MODULEHEADER))))
+  if (!(mh = (MODULEHEADER *) __um_malloc (sizeof (MODULEHEADER))))
     return 0;
   return 1;
 }
@@ -282,8 +282,8 @@ M15_Init (void)
 static void 
 M15_Cleanup (void)
 {
-  _mm_free (mh);
-  _mm_free (patbuf);
+  __um_free (mh);
+  __um_free (patbuf);
 }
 
 /*
@@ -442,7 +442,7 @@ M15_LoadPatterns (void)
     return 0;
 
   /* Allocate temporary buffer for loading and converting the patterns */
-  if (!(patbuf = (MODNOTE *) _mm_calloc (64U * 4, sizeof (MODNOTE))))
+  if (!(patbuf = (MODNOTE *) __um_calloc (64U * 4, sizeof (MODNOTE))))
     return 0;
 
   for (t = 0; t < of.numpat; t++)
@@ -450,10 +450,10 @@ M15_LoadPatterns (void)
       /* Load the pattern into the temp buffer and convert it */
       for (s = 0; s < (64U * 4); s++)
 	{
-	  patbuf[s].a = _mm_read_UBYTE (modreader);
-	  patbuf[s].b = _mm_read_UBYTE (modreader);
-	  patbuf[s].c = _mm_read_UBYTE (modreader);
-	  patbuf[s].d = _mm_read_UBYTE (modreader);
+	  patbuf[s].a = _um_read_UBYTE (modreader);
+	  patbuf[s].b = _um_read_UBYTE (modreader);
+	  patbuf[s].c = _um_read_UBYTE (modreader);
+	  patbuf[s].d = _um_read_UBYTE (modreader);
 	}
 
       for (s = 0; s < 4; s++)
@@ -473,7 +473,7 @@ M15_Load (BOOL curious)
   /* try to read module header */
   if (!LoadModuleHeader (mh))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -567,8 +567,8 @@ M15_LoadTitle (void)
 {
   CHAR s[21];
 
-  _mm_fseek (modreader, 0, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 20, modreader))
+  _um_fseek (modreader, 0, SEEK_SET);
+  if (!_um_read_UBYTES (s, 20, modreader))
     return NULL;
   s[20] = 0;			/* just in case */
   return (DupStr (s, 21, 1));

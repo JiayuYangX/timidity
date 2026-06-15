@@ -91,11 +91,11 @@ readstring (void)
   char *s = NULL;
   UWORD len;
 
-  len = _mm_read_I_UWORD (modreader);
+  len = _um_read_I_UWORD (modreader);
   if (len)
     {
-      s = _mm_malloc (len + 1);
-      _mm_read_UBYTES (s, len, modreader);
+      s = __um_malloc (len + 1);
+      _um_read_UBYTES (s, len, modreader);
       s[len] = 0;
     }
   return s;
@@ -106,7 +106,7 @@ UNI_Test (void)
 {
   char id[6];
 
-  if (!_mm_read_UBYTES (id, 6, modreader))
+  if (!_um_read_UBYTES (id, 6, modreader))
     return 0;
 
   /* UNIMod created by MikCvt */
@@ -133,7 +133,7 @@ UNI_Init (void)
 static void
 UNI_Cleanup (void)
 {
-  _mm_free (wh);
+  __um_free (wh);
   s = NULL;
 }
 
@@ -145,15 +145,15 @@ readtrack (void)
   int cur = 0, chunk;
 
   if (universion >= 6)
-    len = _mm_read_M_UWORD (modreader);
+    len = _um_read_M_UWORD (modreader);
   else
-    len = _mm_read_I_UWORD (modreader);
+    len = _um_read_I_UWORD (modreader);
 
   if (!len)
     return NULL;
-  if (!(t = _mm_malloc (len)))
+  if (!(t = __um_malloc (len)))
     return NULL;
-  _mm_read_UBYTES (t, len, modreader);
+  _um_read_UBYTES (t, len, modreader);
 
   /* Check if the track is correct */
   while (1)
@@ -243,7 +243,7 @@ loadsmp6 (void)
     {
       int flags;
 
-      flags = _mm_read_M_UWORD (modreader);
+      flags = _um_read_M_UWORD (modreader);
       s->flags = 0;
       if (flags & 0x0100)
 	s->flags |= SF_REVERSE;
@@ -291,26 +291,26 @@ loadsmp6 (void)
 	    s->flags |= SF_DELTA;
 	}
 
-      s->speed = _mm_read_M_ULONG (modreader);
-      s->volume = _mm_read_UBYTE (modreader);
-      s->panning = _mm_read_M_UWORD (modreader);
-      s->length = _mm_read_M_ULONG (modreader);
-      s->loopstart = _mm_read_M_ULONG (modreader);
-      s->loopend = _mm_read_M_ULONG (modreader);
-      s->susbegin = _mm_read_M_ULONG (modreader);
-      s->susend = _mm_read_M_ULONG (modreader);
-      s->globvol = _mm_read_UBYTE (modreader);
-      s->vibflags = _mm_read_UBYTE (modreader);
-      s->vibtype = _mm_read_UBYTE (modreader);
-      s->vibsweep = _mm_read_UBYTE (modreader);
-      s->vibdepth = _mm_read_UBYTE (modreader);
-      s->vibrate = _mm_read_UBYTE (modreader);
+      s->speed = _um_read_M_ULONG (modreader);
+      s->volume = _um_read_UBYTE (modreader);
+      s->panning = _um_read_M_UWORD (modreader);
+      s->length = _um_read_M_ULONG (modreader);
+      s->loopstart = _um_read_M_ULONG (modreader);
+      s->loopend = _um_read_M_ULONG (modreader);
+      s->susbegin = _um_read_M_ULONG (modreader);
+      s->susend = _um_read_M_ULONG (modreader);
+      s->globvol = _um_read_UBYTE (modreader);
+      s->vibflags = _um_read_UBYTE (modreader);
+      s->vibtype = _um_read_UBYTE (modreader);
+      s->vibsweep = _um_read_UBYTE (modreader);
+      s->vibdepth = _um_read_UBYTE (modreader);
+      s->vibrate = _um_read_UBYTE (modreader);
 
       s->samplename = readstring ();
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
     }
@@ -326,28 +326,28 @@ loadinstr6 (void)
   i = of.instruments;
   for (t = 0; t < of.numins; t++, i++)
     {
-      i->flags = _mm_read_UBYTE (modreader);
-      i->nnatype = _mm_read_UBYTE (modreader);
-      i->dca = _mm_read_UBYTE (modreader);
-      i->dct = _mm_read_UBYTE (modreader);
-      i->globvol = _mm_read_UBYTE (modreader);
-      i->panning = _mm_read_M_UWORD (modreader);
-      i->pitpansep = _mm_read_UBYTE (modreader);
-      i->pitpancenter = _mm_read_UBYTE (modreader);
-      i->rvolvar = _mm_read_UBYTE (modreader);
-      i->rpanvar = _mm_read_UBYTE (modreader);
-      i->volfade = _mm_read_M_UWORD (modreader);
+      i->flags = _um_read_UBYTE (modreader);
+      i->nnatype = _um_read_UBYTE (modreader);
+      i->dca = _um_read_UBYTE (modreader);
+      i->dct = _um_read_UBYTE (modreader);
+      i->globvol = _um_read_UBYTE (modreader);
+      i->panning = _um_read_M_UWORD (modreader);
+      i->pitpansep = _um_read_UBYTE (modreader);
+      i->pitpancenter = _um_read_UBYTE (modreader);
+      i->rvolvar = _um_read_UBYTE (modreader);
+      i->rpanvar = _um_read_UBYTE (modreader);
+      i->volfade = _um_read_M_UWORD (modreader);
 
 #define UNI_LoadEnvelope6(name) 											\
-		i->name##flg=_mm_read_UBYTE(modreader);							\
-		i->name##pts=_mm_read_UBYTE(modreader);							\
-		i->name##susbeg=_mm_read_UBYTE(modreader);						\
-		i->name##susend=_mm_read_UBYTE(modreader);						\
-		i->name##beg=_mm_read_UBYTE(modreader);							\
-		i->name##end=_mm_read_UBYTE(modreader);							\
+		i->name##flg=_um_read_UBYTE(modreader);							\
+		i->name##pts=_um_read_UBYTE(modreader);							\
+		i->name##susbeg=_um_read_UBYTE(modreader);						\
+		i->name##susend=_um_read_UBYTE(modreader);						\
+		i->name##beg=_um_read_UBYTE(modreader);							\
+		i->name##end=_um_read_UBYTE(modreader);							\
 		for(w=0;w<(universion>=0x100?32:i->name##pts);w++) {				\
-			i->name##env[w].pos=_mm_read_M_SWORD(modreader);				\
-			i->name##env[w].val=_mm_read_M_SWORD(modreader);				\
+			i->name##env[w].pos=_um_read_M_SWORD(modreader);				\
+			i->name##env[w].val=_um_read_M_SWORD(modreader);				\
 		}
 
       UNI_LoadEnvelope6 (vol);
@@ -356,17 +356,17 @@ loadinstr6 (void)
 #undef UNI_LoadEnvelope6
 
       if (universion == 0x103)
-	_mm_read_M_UWORDS (i->samplenumber, 120, modreader);
+	_um_read_M_UWORDS (i->samplenumber, 120, modreader);
       else
 	for (w = 0; w < 120; w++)
-	  i->samplenumber[w] = _mm_read_UBYTE (modreader);
-      _mm_read_UBYTES (i->samplenote, 120, modreader);
+	  i->samplenumber[w] = _um_read_UBYTE (modreader);
+      _um_read_UBYTES (i->samplenote, 120, modreader);
 
       i->insname = readstring ();
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
     }
@@ -386,34 +386,34 @@ loadinstr5 (void)
     {
       int u, numsmp;
 
-      numsmp = _mm_read_UBYTE (modreader);
+      numsmp = _um_read_UBYTE (modreader);
 
       memset (i->samplenumber, 0xff, INSTNOTES * sizeof (UWORD));
       for (u = 0; u < 96; u++)
-	i->samplenumber[u] = of.numsmp + _mm_read_UBYTE (modreader);
+	i->samplenumber[u] = of.numsmp + _um_read_UBYTE (modreader);
 
 #define UNI_LoadEnvelope5(name) 										\
-		i->name##flg=_mm_read_UBYTE(modreader);						\
-		i->name##pts=_mm_read_UBYTE(modreader);						\
-		i->name##susbeg=_mm_read_UBYTE(modreader);					\
+		i->name##flg=_um_read_UBYTE(modreader);						\
+		i->name##pts=_um_read_UBYTE(modreader);						\
+		i->name##susbeg=_um_read_UBYTE(modreader);					\
 		i->name##susend=i->name##susbeg;							\
-		i->name##beg=_mm_read_UBYTE(modreader);						\
-		i->name##end=_mm_read_UBYTE(modreader);						\
+		i->name##beg=_um_read_UBYTE(modreader);						\
+		i->name##end=_um_read_UBYTE(modreader);						\
 		for(u=0;u<12;u++) {												\
-			i->name##env[u].pos=_mm_read_I_SWORD(modreader);			\
-			i->name##env[u].val=_mm_read_I_SWORD(modreader);			\
+			i->name##env[u].pos=_um_read_I_SWORD(modreader);			\
+			i->name##env[u].val=_um_read_I_SWORD(modreader);			\
 		}
 
       UNI_LoadEnvelope5 (vol);
       UNI_LoadEnvelope5 (pan);
 #undef UNI_LoadEnvelope5
 
-      vibtype = _mm_read_UBYTE (modreader);
-      vibsweep = _mm_read_UBYTE (modreader);
-      vibdepth = _mm_read_UBYTE (modreader);
-      vibrate = _mm_read_UBYTE (modreader);
+      vibtype = _um_read_UBYTE (modreader);
+      vibsweep = _um_read_UBYTE (modreader);
+      vibdepth = _um_read_UBYTE (modreader);
+      vibrate = _um_read_UBYTE (modreader);
 
-      i->volfade = _mm_read_I_UWORD (modreader);
+      i->volfade = _um_read_I_UWORD (modreader);
       i->insname = readstring ();
 
       for (u = 0; u < numsmp; u++, s++, of.numsmp++)
@@ -424,20 +424,20 @@ loadinstr5 (void)
 	      wavcnt += UNI_SMPINCR;
 	      if (!(wh = realloc (wh, wavcnt * sizeof (UNISMP05))))
 		{
-		  _mm_errno = MMERR_OUT_OF_MEMORY;
+		  _um_errno = MMERR_OUT_OF_MEMORY;
 		  return 0;
 		}
 	      s = wh + (wavcnt - UNI_SMPINCR);
 	    }
 
-	  s->c2spd = _mm_read_I_UWORD (modreader);
-	  s->transpose = _mm_read_SBYTE (modreader);
-	  s->volume = _mm_read_UBYTE (modreader);
-	  s->panning = _mm_read_UBYTE (modreader);
-	  s->length = _mm_read_I_ULONG (modreader);
-	  s->loopstart = _mm_read_I_ULONG (modreader);
-	  s->loopend = _mm_read_I_ULONG (modreader);
-	  s->flags = _mm_read_I_UWORD (modreader);
+	  s->c2spd = _um_read_I_UWORD (modreader);
+	  s->transpose = _um_read_SBYTE (modreader);
+	  s->volume = _um_read_UBYTE (modreader);
+	  s->panning = _um_read_UBYTE (modreader);
+	  s->length = _um_read_I_ULONG (modreader);
+	  s->loopstart = _um_read_I_ULONG (modreader);
+	  s->loopend = _um_read_I_ULONG (modreader);
+	  s->flags = _um_read_I_UWORD (modreader);
 	  s->samplename = readstring ();
 
 	  s->vibtype = vibtype;
@@ -445,11 +445,11 @@ loadinstr5 (void)
 	  s->vibdepth = vibdepth;
 	  s->vibrate = vibrate;
 
-	  if (_mm_eof (modreader))
+	  if (_um_eof (modreader))
 	    {
 	      free (wh);
 	      wh = NULL;
-	      _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	      _um_errno = MMERR_LOADING_SAMPLEINFO;
 	      return 0;
 	    }
 	}
@@ -463,7 +463,7 @@ loadinstr5 (void)
 	  free (wh);
 	  wh = NULL;
 	}
-      _mm_errno = MMERR_LOADING_SAMPLEINFO;
+      _um_errno = MMERR_LOADING_SAMPLEINFO;
       return 0;
     }
   return 1;
@@ -535,7 +535,7 @@ UNI_Load (BOOL curious)
   SAMPLE *q;
 
   /* read module header */
-  _mm_read_UBYTES (mh.id, 4, modreader);
+  _um_read_UBYTES (mh.id, 4, modreader);
   if (mh.id[3] != 'N')
     universion = mh.id[3] - '0';
   else
@@ -544,38 +544,38 @@ UNI_Load (BOOL curious)
   if (universion >= 6)
     {
       if (universion == 6)
-	_mm_read_UBYTE (modreader);
+	_um_read_UBYTE (modreader);
       else
-	universion = _mm_read_M_UWORD (modreader);
+	universion = _um_read_M_UWORD (modreader);
 
-      mh.flags = _mm_read_M_UWORD (modreader);
-      mh.numchn = _mm_read_UBYTE (modreader);
-      mh.numvoices = _mm_read_UBYTE (modreader);
-      mh.numpos = _mm_read_M_UWORD (modreader);
-      mh.numpat = _mm_read_M_UWORD (modreader);
-      mh.numtrk = _mm_read_M_UWORD (modreader);
-      mh.numins = _mm_read_M_UWORD (modreader);
-      mh.numsmp = _mm_read_M_UWORD (modreader);
-      mh.reppos = _mm_read_M_UWORD (modreader);
-      mh.initspeed = _mm_read_UBYTE (modreader);
-      mh.inittempo = _mm_read_UBYTE (modreader);
-      mh.initvolume = _mm_read_UBYTE (modreader);
+      mh.flags = _um_read_M_UWORD (modreader);
+      mh.numchn = _um_read_UBYTE (modreader);
+      mh.numvoices = _um_read_UBYTE (modreader);
+      mh.numpos = _um_read_M_UWORD (modreader);
+      mh.numpat = _um_read_M_UWORD (modreader);
+      mh.numtrk = _um_read_M_UWORD (modreader);
+      mh.numins = _um_read_M_UWORD (modreader);
+      mh.numsmp = _um_read_M_UWORD (modreader);
+      mh.reppos = _um_read_M_UWORD (modreader);
+      mh.initspeed = _um_read_UBYTE (modreader);
+      mh.inittempo = _um_read_UBYTE (modreader);
+      mh.initvolume = _um_read_UBYTE (modreader);
 
       mh.flags &= (UF_XMPERIODS | UF_LINEAR | UF_INST | UF_NNA);
     }
   else
     {
-      mh.numchn = _mm_read_UBYTE (modreader);
-      mh.numpos = _mm_read_I_UWORD (modreader);
-      mh.reppos = (universion == 5) ? _mm_read_I_UWORD (modreader) : 0;
-      mh.numpat = _mm_read_I_UWORD (modreader);
-      mh.numtrk = _mm_read_I_UWORD (modreader);
-      mh.numins = _mm_read_I_UWORD (modreader);
-      mh.initspeed = _mm_read_UBYTE (modreader);
-      mh.inittempo = _mm_read_UBYTE (modreader);
-      _mm_read_UBYTES (mh.positions, 256, modreader);
-      _mm_read_UBYTES (mh.panning, 32, modreader);
-      mh.flags = _mm_read_UBYTE (modreader);
+      mh.numchn = _um_read_UBYTE (modreader);
+      mh.numpos = _um_read_I_UWORD (modreader);
+      mh.reppos = (universion == 5) ? _um_read_I_UWORD (modreader) : 0;
+      mh.numpat = _um_read_I_UWORD (modreader);
+      mh.numtrk = _um_read_I_UWORD (modreader);
+      mh.numins = _um_read_I_UWORD (modreader);
+      mh.initspeed = _um_read_UBYTE (modreader);
+      mh.inittempo = _um_read_UBYTE (modreader);
+      _um_read_UBYTES (mh.positions, 256, modreader);
+      _um_read_UBYTES (mh.panning, 32, modreader);
+      mh.flags = _um_read_UBYTE (modreader);
 
       mh.flags &= (UF_XMPERIODS | UF_LINEAR);
       mh.flags |= UF_INST | UF_NOWRAP;
@@ -598,7 +598,7 @@ UNI_Load (BOOL curious)
   if (oldtype)
     {
       int len = strlen (oldtype) + 20;
-      if (!(modtype = _mm_malloc (len)))
+      if (!(modtype = __um_malloc (len)))
 	return 0;
 #ifdef HAVE_SNPRINTF
       snprintf (modtype, len, "%s (was %s)", (universion >= 0x100) ? "APlayer" : "MikCvt2", oldtype);
@@ -608,7 +608,7 @@ UNI_Load (BOOL curious)
     }
   else
     {
-      if (!(modtype = _mm_malloc (10)))
+      if (!(modtype = __um_malloc (10)))
 	return 0;
 #ifdef HAVE_SNPRINTF
       snprintf (modtype, 10, "%s", (universion >= 0x100) ? "APlayer" : "MikCvt3");
@@ -627,9 +627,9 @@ UNI_Load (BOOL curious)
       of.initvolume = mh.initvolume;
     }
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -639,18 +639,18 @@ UNI_Load (BOOL curious)
   if (universion >= 6)
     {
       if (universion >= 0x100)
-	_mm_read_M_UWORDS (of.positions, of.numpos, modreader);
+	_um_read_M_UWORDS (of.positions, of.numpos, modreader);
       else
 	for (t = 0; t < of.numpos; t++)
-	  of.positions[t] = _mm_read_UBYTE (modreader);
-      _mm_read_M_UWORDS (of.panning, of.numchn, modreader);
-      _mm_read_UBYTES (of.chanvol, of.numchn, modreader);
+	  of.positions[t] = _um_read_UBYTE (modreader);
+      _um_read_M_UWORDS (of.panning, of.numchn, modreader);
+      _um_read_UBYTES (of.chanvol, of.numchn, modreader);
     }
   else
     {
       if ((mh.numpos > 256) || (mh.numchn > 32))
 	{
-	  _mm_errno = MMERR_LOADING_HEADER;
+	  _um_errno = MMERR_LOADING_HEADER;
 	  return 0;
 	}
       for (t = 0; t < of.numpos; t++)
@@ -727,13 +727,13 @@ UNI_Load (BOOL curious)
     return 0;
   if (universion >= 6)
     {
-      _mm_read_M_UWORDS (of.pattrows, of.numpat, modreader);
-      _mm_read_M_UWORDS (of.patterns, of.numpat * of.numchn, modreader);
+      _um_read_M_UWORDS (of.pattrows, of.numpat, modreader);
+      _um_read_M_UWORDS (of.patterns, of.numpat * of.numchn, modreader);
     }
   else
     {
-      _mm_read_I_UWORDS (of.pattrows, of.numpat, modreader);
-      _mm_read_I_UWORDS (of.patterns, of.numpat * of.numchn, modreader);
+      _um_read_I_UWORDS (of.pattrows, of.numpat, modreader);
+      _um_read_I_UWORDS (of.patterns, of.numpat * of.numchn, modreader);
     }
 
   /* tracks */
@@ -742,7 +742,7 @@ UNI_Load (BOOL curious)
   for (t = 0; t < of.numtrk; t++)
     if (!(of.tracks[t] = readtrack ()))
       {
-	_mm_errno = MMERR_LOADING_TRACK;
+	_um_errno = MMERR_LOADING_TRACK;
 	return 0;
       }
 
@@ -756,12 +756,12 @@ UNI_LoadTitle (void)
   int posit[3] =
   {304, 306, 26};
 
-  _mm_fseek (modreader, 3, SEEK_SET);
-  ver = _mm_read_UBYTE (modreader);
+  _um_fseek (modreader, 3, SEEK_SET);
+  ver = _um_read_UBYTE (modreader);
   if (ver == 'N')
     ver = '6';
 
-  _mm_fseek (modreader, posit[ver - '4'], SEEK_SET);
+  _um_fseek (modreader, posit[ver - '4'], SEEK_SET);
   return readstring ();
 }
 

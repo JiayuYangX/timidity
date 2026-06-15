@@ -91,8 +91,8 @@ STM_Test (void)
   UBYTE str[44];
   int t;
 
-  _mm_fseek (modreader, 20, SEEK_SET);
-  _mm_read_UBYTES (str, 44, modreader);
+  _um_fseek (modreader, 20, SEEK_SET);
+  _um_read_UBYTES (str, 44, modreader);
   if (str[9] != 2)
     return 0;			/* STM Module = filetype 2 */
 
@@ -109,9 +109,9 @@ STM_Test (void)
 static BOOL
 STM_Init (void)
 {
-  if (!(mh = (STMHEADER *) _mm_malloc (sizeof (STMHEADER))))
+  if (!(mh = (STMHEADER *) __um_malloc (sizeof (STMHEADER))))
     return 0;
-  if (!(stmbuf = (STMNOTE *) _mm_calloc (64U * 4, sizeof (STMNOTE))))
+  if (!(stmbuf = (STMNOTE *) __um_calloc (64U * 4, sizeof (STMNOTE))))
     return 0;
 
   return 1;
@@ -120,8 +120,8 @@ STM_Init (void)
 static void 
 STM_Cleanup (void)
 {
-  _mm_free (mh);
-  _mm_free (stmbuf);
+  __um_free (mh);
+  __um_free (stmbuf);
 }
 
 static void 
@@ -238,15 +238,15 @@ STM_LoadPatterns (void)
     {
       for (s = 0; s < (64U * of.numchn); s++)
 	{
-	  stmbuf[s].note = _mm_read_UBYTE (modreader);
-	  stmbuf[s].insvol = _mm_read_UBYTE (modreader);
-	  stmbuf[s].volcmd = _mm_read_UBYTE (modreader);
-	  stmbuf[s].cmdinf = _mm_read_UBYTE (modreader);
+	  stmbuf[s].note = _um_read_UBYTE (modreader);
+	  stmbuf[s].insvol = _um_read_UBYTE (modreader);
+	  stmbuf[s].volcmd = _um_read_UBYTE (modreader);
+	  stmbuf[s].cmdinf = _um_read_UBYTE (modreader);
 	}
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
 
@@ -265,44 +265,44 @@ STM_Load (BOOL curious)
   SAMPLE *q;
 
   /* try to read stm header */
-  _mm_read_string (mh->songname, 20, modreader);
-  _mm_read_string (mh->trackername, 8, modreader);
-  mh->unused = _mm_read_UBYTE (modreader);
-  mh->filetype = _mm_read_UBYTE (modreader);
-  mh->ver_major = _mm_read_UBYTE (modreader);
-  mh->ver_minor = _mm_read_UBYTE (modreader);
-  mh->inittempo = _mm_read_UBYTE (modreader);
+  _um_read_string (mh->songname, 20, modreader);
+  _um_read_string (mh->trackername, 8, modreader);
+  mh->unused = _um_read_UBYTE (modreader);
+  mh->filetype = _um_read_UBYTE (modreader);
+  mh->ver_major = _um_read_UBYTE (modreader);
+  mh->ver_minor = _um_read_UBYTE (modreader);
+  mh->inittempo = _um_read_UBYTE (modreader);
   if (!mh->inittempo)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
-  mh->numpat = _mm_read_UBYTE (modreader);
-  mh->globalvol = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->reserved, 13, modreader);
+  mh->numpat = _um_read_UBYTE (modreader);
+  mh->globalvol = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->reserved, 13, modreader);
 
   for (t = 0; t < 31; t++)
     {
       STMSAMPLE *s = &mh->sample[t];	/* STM sample data */
 
-      _mm_read_string (s->filename, 12, modreader);
-      s->unused = _mm_read_UBYTE (modreader);
-      s->instdisk = _mm_read_UBYTE (modreader);
-      s->reserved = _mm_read_I_UWORD (modreader);
-      s->length = _mm_read_I_UWORD (modreader);
-      s->loopbeg = _mm_read_I_UWORD (modreader);
-      s->loopend = _mm_read_I_UWORD (modreader);
-      s->volume = _mm_read_UBYTE (modreader);
-      s->reserved2 = _mm_read_UBYTE (modreader);
-      s->c2spd = _mm_read_I_UWORD (modreader);
-      s->reserved3 = _mm_read_I_ULONG (modreader);
-      s->isa = _mm_read_I_UWORD (modreader);
+      _um_read_string (s->filename, 12, modreader);
+      s->unused = _um_read_UBYTE (modreader);
+      s->instdisk = _um_read_UBYTE (modreader);
+      s->reserved = _um_read_I_UWORD (modreader);
+      s->length = _um_read_I_UWORD (modreader);
+      s->loopbeg = _um_read_I_UWORD (modreader);
+      s->loopend = _um_read_I_UWORD (modreader);
+      s->volume = _um_read_UBYTE (modreader);
+      s->reserved2 = _um_read_UBYTE (modreader);
+      s->c2spd = _um_read_I_UWORD (modreader);
+      s->reserved3 = _um_read_I_ULONG (modreader);
+      s->isa = _um_read_I_UWORD (modreader);
     }
-  _mm_read_UBYTES (mh->patorder, 128, modreader);
+  _um_read_UBYTES (mh->patorder, 128, modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -338,7 +338,7 @@ STM_Load (BOOL curious)
     return 0;
   if (!STM_LoadPatterns ())
     return 0;
-  ourISA = _mm_ftell (modreader);
+  ourISA = _um_ftell (modreader);
   ourISA = (ourISA + 15) & 0xfffffff0;	/* normalize */
 
   for (q = of.samples, t = 0; t < of.numsmp; t++, q++)
@@ -378,8 +378,8 @@ STM_LoadTitle (void)
 {
   CHAR s[20];
 
-  _mm_fseek (modreader, 0, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 20, modreader))
+  _um_fseek (modreader, 0, SEEK_SET);
+  if (!_um_read_UBYTES (s, 20, modreader))
     return NULL;
 
   return (DupStr (s, 20, 1));

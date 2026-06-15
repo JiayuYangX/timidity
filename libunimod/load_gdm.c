@@ -119,13 +119,13 @@ GDM_Test (void)
   /* test for gdm magic numbers */
   UBYTE id[4];
 
-  _mm_fseek (modreader, 0x00, SEEK_SET);
-  if (!_mm_read_UBYTES (id, 4, modreader))
+  _um_fseek (modreader, 0x00, SEEK_SET);
+  if (!_um_read_UBYTES (id, 4, modreader))
     return 0;
   if (!memcmp (id, "GDM\xfe", 4))
     {
-      _mm_fseek (modreader, 71, SEEK_SET);
-      if (!_mm_read_UBYTES (id, 4, modreader))
+      _um_fseek (modreader, 71, SEEK_SET);
+      if (!_um_read_UBYTES (id, 4, modreader))
 	return 0;
       if (!memcmp (id, "GMFS", 4))
 	return 1;
@@ -136,9 +136,9 @@ GDM_Test (void)
 static BOOL
 GDM_Init (void)
 {
-  if (!(gdmbuf = (GDMNOTE *) _mm_malloc (32 * 64 * sizeof (GDMNOTE))))
+  if (!(gdmbuf = (GDMNOTE *) __um_malloc (32 * 64 * sizeof (GDMNOTE))))
     return 0;
-  if (!(mh = (GDMHEADER *) _mm_malloc (sizeof (GDMHEADER))))
+  if (!(mh = (GDMHEADER *) __um_malloc (sizeof (GDMHEADER))))
     return 0;
 
   return 1;
@@ -147,8 +147,8 @@ GDM_Init (void)
 static void
 GDM_Cleanup (void)
 {
-  _mm_free (mh);
-  _mm_free (gdmbuf);
+  __um_free (mh);
+  __um_free (gdmbuf);
 }
 
 static BOOL
@@ -159,7 +159,7 @@ GDM_ReadPattern (void)
   UWORD length, x = 0;
 
   /* get pattern length */
-  length = _mm_read_I_UWORD (modreader) - 2;
+  length = _um_read_I_UWORD (modreader) - 2;
 
   /* clear pattern data */
   memset (gdmbuf, 255, 32 * 64 * sizeof (GDMNOTE));
@@ -169,12 +169,12 @@ GDM_ReadPattern (void)
   while (x < length)
     {
       memset (&n, 255, sizeof (GDMNOTE));
-      flag = _mm_read_UBYTE (modreader);
+      flag = _um_read_UBYTE (modreader);
       x++;
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
 
@@ -191,8 +191,8 @@ GDM_ReadPattern (void)
 	  if (flag & 0x20)
 	    {
 	      /* new note */
-	      n.note = _mm_read_UBYTE (modreader) & 127;
-	      n.samp = _mm_read_UBYTE (modreader);
+	      n.note = _um_read_UBYTE (modreader) & 127;
+	      n.samp = _um_read_UBYTE (modreader);
 	      x += 2;
 	    }
 	  if (flag & 0x40)
@@ -200,9 +200,9 @@ GDM_ReadPattern (void)
 	      do
 		{
 		  /* effect channel set */
-		  i = _mm_read_UBYTE (modreader);
+		  i = _um_read_UBYTE (modreader);
 		  n.effect[i >> 6].effect = i & 31;
-		  n.effect[i >> 6].param = _mm_read_UBYTE (modreader);
+		  n.effect[i >> 6].param = _um_read_UBYTE (modreader);
 		  x += 2;
 		}
 	      while (i & 32);
@@ -376,48 +376,48 @@ GDM_Load (BOOL curious)
   ULONG position;
 
   /* read header */
-  _mm_read_string (mh->id1, 4, modreader);
-  _mm_read_string (mh->songname, 32, modreader);
-  _mm_read_string (mh->author, 32, modreader);
-  _mm_read_string (mh->eofmarker, 3, modreader);
-  _mm_read_string (mh->id2, 4, modreader);
+  _um_read_string (mh->id1, 4, modreader);
+  _um_read_string (mh->songname, 32, modreader);
+  _um_read_string (mh->author, 32, modreader);
+  _um_read_string (mh->eofmarker, 3, modreader);
+  _um_read_string (mh->id2, 4, modreader);
 
-  mh->majorver = _mm_read_UBYTE (modreader);
-  mh->minorver = _mm_read_UBYTE (modreader);
-  mh->trackerid = _mm_read_I_UWORD (modreader);
-  mh->t_majorver = _mm_read_UBYTE (modreader);
-  mh->t_minorver = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->pantable, 32, modreader);
-  mh->mastervol = _mm_read_UBYTE (modreader);
-  mh->mastertempo = _mm_read_UBYTE (modreader);
-  mh->masterbpm = _mm_read_UBYTE (modreader);
-  mh->flags = _mm_read_I_UWORD (modreader);
+  mh->majorver = _um_read_UBYTE (modreader);
+  mh->minorver = _um_read_UBYTE (modreader);
+  mh->trackerid = _um_read_I_UWORD (modreader);
+  mh->t_majorver = _um_read_UBYTE (modreader);
+  mh->t_minorver = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->pantable, 32, modreader);
+  mh->mastervol = _um_read_UBYTE (modreader);
+  mh->mastertempo = _um_read_UBYTE (modreader);
+  mh->masterbpm = _um_read_UBYTE (modreader);
+  mh->flags = _um_read_I_UWORD (modreader);
 
-  mh->orderloc = _mm_read_I_ULONG (modreader);
-  mh->ordernum = _mm_read_UBYTE (modreader);
-  mh->patternloc = _mm_read_I_ULONG (modreader);
-  mh->patternnum = _mm_read_UBYTE (modreader);
-  mh->samhead = _mm_read_I_ULONG (modreader);
-  mh->samdata = _mm_read_I_ULONG (modreader);
-  mh->samnum = _mm_read_UBYTE (modreader);
-  mh->messageloc = _mm_read_I_ULONG (modreader);
-  mh->messagelen = _mm_read_I_ULONG (modreader);
-  mh->scrollyloc = _mm_read_I_ULONG (modreader);
-  mh->scrollylen = _mm_read_I_UWORD (modreader);
-  mh->graphicloc = _mm_read_I_ULONG (modreader);
-  mh->graphiclen = _mm_read_I_UWORD (modreader);
+  mh->orderloc = _um_read_I_ULONG (modreader);
+  mh->ordernum = _um_read_UBYTE (modreader);
+  mh->patternloc = _um_read_I_ULONG (modreader);
+  mh->patternnum = _um_read_UBYTE (modreader);
+  mh->samhead = _um_read_I_ULONG (modreader);
+  mh->samdata = _um_read_I_ULONG (modreader);
+  mh->samnum = _um_read_UBYTE (modreader);
+  mh->messageloc = _um_read_I_ULONG (modreader);
+  mh->messagelen = _um_read_I_ULONG (modreader);
+  mh->scrollyloc = _um_read_I_ULONG (modreader);
+  mh->scrollylen = _um_read_I_UWORD (modreader);
+  mh->graphicloc = _um_read_I_ULONG (modreader);
+  mh->graphiclen = _um_read_I_UWORD (modreader);
 
   /* have we ended abruptly? */
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
   /* any orders? */
   if (mh->ordernum == 255)
     {
-      _mm_errno = MMERR_LOADING_PATTERN;
+      _um_errno = MMERR_LOADING_PATTERN;
       return 0;
     }
 
@@ -438,13 +438,13 @@ GDM_Load (BOOL curious)
   /* read the order data */
   if (!AllocPositions (mh->ordernum + 1))
     {
-      _mm_errno = MMERR_OUT_OF_MEMORY;
+      _um_errno = MMERR_OUT_OF_MEMORY;
       return 0;
     }
 
-  _mm_fseek (modreader, mh->orderloc, SEEK_SET);
+  _um_fseek (modreader, mh->orderloc, SEEK_SET);
   for (i = 0; i < mh->ordernum + 1; i++)
-    of.positions[i] = _mm_read_UBYTE (modreader);
+    of.positions[i] = _um_read_UBYTE (modreader);
 
   of.numpos = 0;
   for (i = 0; i < mh->ordernum + 1; i++)
@@ -455,16 +455,16 @@ GDM_Load (BOOL curious)
     }
 
   /* have we ended abruptly yet? */
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
   /* time to load the samples */
   if (!AllocSamples ())
     {
-      _mm_errno = MMERR_OUT_OF_MEMORY;
+      _um_errno = MMERR_OUT_OF_MEMORY;
       return 0;
     }
 
@@ -472,25 +472,25 @@ GDM_Load (BOOL curious)
   position = mh->samdata;
 
   /* seek to instrument position */
-  _mm_fseek (modreader, mh->samhead, SEEK_SET);
+  _um_fseek (modreader, mh->samhead, SEEK_SET);
 
   for (i = 0; i < of.numins; i++)
     {
       /* load sample info */
-      _mm_read_UBYTES (s.sampname, 32, modreader);
-      _mm_read_UBYTES (s.filename, 12, modreader);
-      s.ems = _mm_read_UBYTE (modreader);
-      s.length = _mm_read_I_ULONG (modreader);
-      s.loopbeg = _mm_read_I_ULONG (modreader);
-      s.loopend = _mm_read_I_ULONG (modreader);
-      s.flags = _mm_read_UBYTE (modreader);
-      s.c4spd = _mm_read_I_UWORD (modreader);
-      s.vol = _mm_read_UBYTE (modreader);
-      s.pan = _mm_read_UBYTE (modreader);
+      _um_read_UBYTES (s.sampname, 32, modreader);
+      _um_read_UBYTES (s.filename, 12, modreader);
+      s.ems = _um_read_UBYTE (modreader);
+      s.length = _um_read_I_ULONG (modreader);
+      s.loopbeg = _um_read_I_ULONG (modreader);
+      s.loopend = _um_read_I_ULONG (modreader);
+      s.flags = _um_read_UBYTE (modreader);
+      s.c4spd = _um_read_I_UWORD (modreader);
+      s.vol = _um_read_UBYTE (modreader);
+      s.pan = _um_read_UBYTE (modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
       q->samplename = DupStr (s.sampname, 32, 0);
@@ -542,17 +542,17 @@ GDM_Load (BOOL curious)
   of.numtrk = of.numpat * of.numchn;
 
   /* jump to patterns */
-  _mm_fseek (modreader, mh->patternloc, SEEK_SET);
+  _um_fseek (modreader, mh->patternloc, SEEK_SET);
 
   if (!AllocTracks ())
     {
-      _mm_errno = MMERR_OUT_OF_MEMORY;
+      _um_errno = MMERR_OUT_OF_MEMORY;
       return 0;
     }
 
   if (!AllocPatterns ())
     {
-      _mm_errno = MMERR_OUT_OF_MEMORY;
+      _um_errno = MMERR_OUT_OF_MEMORY;
       return 0;
     }
 
@@ -560,7 +560,7 @@ GDM_Load (BOOL curious)
     {
       if (!GDM_ReadPattern ())
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
       for (u = 0; u < of.numchn; u++, track++)
@@ -568,7 +568,7 @@ GDM_Load (BOOL curious)
 	  of.tracks[track] = GDM_ConvertTrack (&gdmbuf[u << 6]);
 	  if (!of.tracks[track])
 	    {
-	      _mm_errno = MMERR_LOADING_TRACK;
+	      _um_errno = MMERR_LOADING_TRACK;
 	      return 0;
 	    }
 	}
@@ -581,8 +581,8 @@ GDM_LoadTitle (void)
 {
   CHAR s[32];
 
-  _mm_fseek (modreader, 4, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 32, modreader))
+  _um_fseek (modreader, 4, SEEK_SET);
+  if (!_um_read_UBYTES (s, 32, modreader))
     return NULL;
 
   return DupStr (s, 28, 0);

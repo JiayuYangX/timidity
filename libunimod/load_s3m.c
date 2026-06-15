@@ -117,8 +117,8 @@ S3M_Test (void)
 {
   UBYTE id[4];
 
-  _mm_fseek (modreader, 0x2c, SEEK_SET);
-  if (!_mm_read_UBYTES (id, 4, modreader))
+  _um_fseek (modreader, 0x2c, SEEK_SET);
+  if (!_um_read_UBYTES (id, 4, modreader))
     return 0;
   if (!memcmp (id, "SCRM", 4))
     return 1;
@@ -128,11 +128,11 @@ S3M_Test (void)
 static BOOL
 S3M_Init (void)
 {
-  if (!(s3mbuf = (S3MNOTE *) _mm_malloc (32 * 64 * sizeof (S3MNOTE))))
+  if (!(s3mbuf = (S3MNOTE *) __um_malloc (32 * 64 * sizeof (S3MNOTE))))
     return 0;
-  if (!(mh = (S3MHEADER *) _mm_malloc (sizeof (S3MHEADER))))
+  if (!(mh = (S3MHEADER *) __um_malloc (sizeof (S3MHEADER))))
     return 0;
-  if (!(poslookup = (UBYTE *) _mm_malloc (sizeof (UBYTE) * 256)))
+  if (!(poslookup = (UBYTE *) __um_malloc (sizeof (UBYTE) * 256)))
     return 0;
   memset (poslookup, -1, 256);
 
@@ -142,11 +142,11 @@ S3M_Init (void)
 static void
 S3M_Cleanup (void)
 {
-  _mm_free (s3mbuf);
-  _mm_free (paraptr);
-  _mm_free (poslookup);
-  _mm_free (mh);
-  _mm_free (origpositions);
+  __um_free (s3mbuf);
+  __um_free (paraptr);
+  __um_free (poslookup);
+  __um_free (mh);
+  __um_free (origpositions);
 }
 
 /* Because so many s3m files have 16 channels as the set number used, but really
@@ -167,11 +167,11 @@ S3M_GetNumChannels (void)
 
   while (row < 64)
     {
-      flag = _mm_read_UBYTE (modreader);
+      flag = _um_read_UBYTE (modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 1;
 	}
 
@@ -182,15 +182,15 @@ S3M_GetNumChannels (void)
 	    remap[ch] = 0;
 	  if (flag & 32)
 	    {
-	      _mm_read_UBYTE (modreader);
-	      _mm_read_UBYTE (modreader);
+	      _um_read_UBYTE (modreader);
+	      _um_read_UBYTE (modreader);
 	    }
 	  if (flag & 64)
-	    _mm_read_UBYTE (modreader);
+	    _um_read_UBYTE (modreader);
 	  if (flag & 128)
 	    {
-	      _mm_read_UBYTE (modreader);
-	      _mm_read_UBYTE (modreader);
+	      _um_read_UBYTE (modreader);
+	      _um_read_UBYTE (modreader);
 	    }
 	}
       else
@@ -210,11 +210,11 @@ S3M_ReadPattern (void)
 
   while (row < 64)
     {
-      flag = _mm_read_UBYTE (modreader);
+      flag = _um_read_UBYTE (modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
 
@@ -229,15 +229,15 @@ S3M_ReadPattern (void)
 
 	  if (flag & 32)
 	    {
-	      n->note = _mm_read_UBYTE (modreader);
-	      n->ins = _mm_read_UBYTE (modreader);
+	      n->note = _um_read_UBYTE (modreader);
+	      n->ins = _um_read_UBYTE (modreader);
 	    }
 	  if (flag & 64)
-	    n->vol = _mm_read_UBYTE (modreader);
+	    n->vol = _um_read_UBYTE (modreader);
 	  if (flag & 128)
 	    {
-	      n->cmd = _mm_read_UBYTE (modreader);
-	      n->inf = _mm_read_UBYTE (modreader);
+	      n->cmd = _um_read_UBYTE (modreader);
+	      n->inf = _um_read_UBYTE (modreader);
 	    }
 	}
       else
@@ -289,30 +289,30 @@ S3M_Load (BOOL curious)
   UBYTE pan[32];
 
   /* try to read module header */
-  _mm_read_string (mh->songname, 28, modreader);
-  mh->t1a = _mm_read_UBYTE (modreader);
-  mh->type = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->unused1, 2, modreader);
-  mh->ordnum = _mm_read_I_UWORD (modreader);
-  mh->insnum = _mm_read_I_UWORD (modreader);
-  mh->patnum = _mm_read_I_UWORD (modreader);
-  mh->flags = _mm_read_I_UWORD (modreader);
-  mh->tracker = _mm_read_I_UWORD (modreader);
-  mh->fileformat = _mm_read_I_UWORD (modreader);
-  _mm_read_string (mh->scrm, 4, modreader);
-  mh->mastervol = _mm_read_UBYTE (modreader);
-  mh->initspeed = _mm_read_UBYTE (modreader);
-  mh->inittempo = _mm_read_UBYTE (modreader);
-  mh->mastermult = _mm_read_UBYTE (modreader);
-  mh->ultraclick = _mm_read_UBYTE (modreader);
-  mh->pantable = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->unused2, 8, modreader);
-  mh->special = _mm_read_I_UWORD (modreader);
-  _mm_read_UBYTES (mh->channels, 32, modreader);
+  _um_read_string (mh->songname, 28, modreader);
+  mh->t1a = _um_read_UBYTE (modreader);
+  mh->type = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->unused1, 2, modreader);
+  mh->ordnum = _um_read_I_UWORD (modreader);
+  mh->insnum = _um_read_I_UWORD (modreader);
+  mh->patnum = _um_read_I_UWORD (modreader);
+  mh->flags = _um_read_I_UWORD (modreader);
+  mh->tracker = _um_read_I_UWORD (modreader);
+  mh->fileformat = _um_read_I_UWORD (modreader);
+  _um_read_string (mh->scrm, 4, modreader);
+  mh->mastervol = _um_read_UBYTE (modreader);
+  mh->initspeed = _um_read_UBYTE (modreader);
+  mh->inittempo = _um_read_UBYTE (modreader);
+  mh->mastermult = _um_read_UBYTE (modreader);
+  mh->ultraclick = _um_read_UBYTE (modreader);
+  mh->pantable = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->unused2, 8, modreader);
+  mh->special = _um_read_I_UWORD (modreader);
+  _um_read_UBYTES (mh->channels, 32, modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -331,41 +331,41 @@ S3M_Load (BOOL curious)
   /* read the order data */
   if (!AllocPositions (mh->ordnum))
     return 0;
-  if (!(origpositions = _mm_calloc (mh->ordnum, sizeof (UWORD))))
+  if (!(origpositions = __um_calloc (mh->ordnum, sizeof (UWORD))))
     return 0;
 
   for (t = 0; t < mh->ordnum; t++)
     {
-      origpositions[t] = _mm_read_UBYTE (modreader);
+      origpositions[t] = _um_read_UBYTE (modreader);
       if ((origpositions[t] >= mh->patnum) && (origpositions[t] < 254))
 	origpositions[t] = 255 /*mh->patnum-1 */ ;
     }
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
   poslookupcnt = mh->ordnum;
   S3MIT_CreateOrders (curious);
 
-  if (!(paraptr = (UWORD *) _mm_malloc ((of.numins + of.numpat) * sizeof (UWORD))))
+  if (!(paraptr = (UWORD *) __um_malloc ((of.numins + of.numpat) * sizeof (UWORD))))
     return 0;
 
   /* read the instrument+pattern parapointers */
-  _mm_read_I_UWORDS (paraptr, of.numins + of.numpat, modreader);
+  _um_read_I_UWORDS (paraptr, of.numins + of.numpat, modreader);
 
   if (mh->pantable == 252)
     {
       /* read the panning table (ST 3.2 addition.  See below for further
          portions of channel panning [past reampper]). */
-      _mm_read_UBYTES (pan, 32, modreader);
+      _um_read_UBYTES (pan, 32, modreader);
     }
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -378,31 +378,31 @@ S3M_Load (BOOL curious)
       S3MSAMPLE s;
 
       /* seek to instrument position */
-      _mm_fseek (modreader, ((long) paraptr[t]) << 4, SEEK_SET);
+      _um_fseek (modreader, ((long) paraptr[t]) << 4, SEEK_SET);
       /* and load sample info */
-      s.type = _mm_read_UBYTE (modreader);
-      _mm_read_string (s.filename, 12, modreader);
-      s.memsegh = _mm_read_UBYTE (modreader);
-      s.memsegl = _mm_read_I_UWORD (modreader);
-      s.length = _mm_read_I_ULONG (modreader);
-      s.loopbeg = _mm_read_I_ULONG (modreader);
-      s.loopend = _mm_read_I_ULONG (modreader);
-      s.volume = _mm_read_UBYTE (modreader);
-      s.dsk = _mm_read_UBYTE (modreader);
-      s.pack = _mm_read_UBYTE (modreader);
-      s.flags = _mm_read_UBYTE (modreader);
-      s.c2spd = _mm_read_I_ULONG (modreader);
-      _mm_read_UBYTES (s.unused, 12, modreader);
-      _mm_read_string (s.sampname, 28, modreader);
-      _mm_read_string (s.scrs, 4, modreader);
+      s.type = _um_read_UBYTE (modreader);
+      _um_read_string (s.filename, 12, modreader);
+      s.memsegh = _um_read_UBYTE (modreader);
+      s.memsegl = _um_read_I_UWORD (modreader);
+      s.length = _um_read_I_ULONG (modreader);
+      s.loopbeg = _um_read_I_ULONG (modreader);
+      s.loopend = _um_read_I_ULONG (modreader);
+      s.volume = _um_read_UBYTE (modreader);
+      s.dsk = _um_read_UBYTE (modreader);
+      s.pack = _um_read_UBYTE (modreader);
+      s.flags = _um_read_UBYTE (modreader);
+      s.c2spd = _um_read_I_ULONG (modreader);
+      _um_read_UBYTES (s.unused, 12, modreader);
+      _um_read_string (s.sampname, 28, modreader);
+      _um_read_string (s.scrs, 4, modreader);
 
       /* ScreamTracker imposes a 64000 bytes (not 64k !) limit */
       if (s.length > 64000)
         s.length = 64000;
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
 
@@ -434,7 +434,7 @@ S3M_Load (BOOL curious)
   for (t = 0; t < of.numpat; t++)
     {
       /* seek to pattern position (+2 skip pattern length) */
-      _mm_fseek (modreader, (long) ((paraptr[of.numins + t]) << 4) + 2, SEEK_SET);
+      _um_fseek (modreader, (long) ((paraptr[of.numins + t]) << 4) + 2, SEEK_SET);
       if (S3M_GetNumChannels ())
 	return 0;
     }
@@ -489,7 +489,7 @@ S3M_Load (BOOL curious)
   for (t = 0; t < of.numpat; t++)
     {
       /* seek to pattern position (+2 skip pattern length) */
-      _mm_fseek (modreader, (((long) paraptr[of.numins + t]) << 4) + 2, SEEK_SET);
+      _um_fseek (modreader, (((long) paraptr[of.numins + t]) << 4) + 2, SEEK_SET);
       if (!S3M_ReadPattern ())
 	return 0;
       for (u = 0; u < of.numchn; u++)
@@ -505,8 +505,8 @@ S3M_LoadTitle (void)
 {
   CHAR s[28];
 
-  _mm_fseek (modreader, 0, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 28, modreader))
+  _um_fseek (modreader, 0, SEEK_SET);
+  if (!_um_read_UBYTES (s, 28, modreader))
     return NULL;
 
   return (DupStr (s, 28, 0));

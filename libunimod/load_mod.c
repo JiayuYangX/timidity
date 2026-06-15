@@ -126,8 +126,8 @@ MOD_Test (void)
 {
   UBYTE id[4];
 
-  _mm_fseek (modreader, MODULEHEADERSIZE - 4, SEEK_SET);
-  if (!_mm_read_UBYTES (id, 4, modreader))
+  _um_fseek (modreader, MODULEHEADERSIZE - 4, SEEK_SET);
+  if (!_um_read_UBYTES (id, 4, modreader))
     return 0;
 
   /* find out which ID string */
@@ -141,7 +141,7 @@ MOD_Test (void)
 static BOOL 
 MOD_Init (void)
 {
-  if (!(mh = (MODULEHEADER *) _mm_malloc (sizeof (MODULEHEADER))))
+  if (!(mh = (MODULEHEADER *) __um_malloc (sizeof (MODULEHEADER))))
     return 0;
   return 1;
 }
@@ -149,8 +149,8 @@ MOD_Init (void)
 static void 
 MOD_Cleanup (void)
 {
-  _mm_free (mh);
-  _mm_free (patbuf);
+  __um_free (mh);
+  __um_free (patbuf);
 }
 
 /*
@@ -300,7 +300,7 @@ ML_LoadPatterns (void)
     return 0;
 
   /* Allocate temporary buffer for loading and converting the patterns */
-  if (!(patbuf = (MODNOTE *) _mm_calloc (64U * of.numchn, sizeof (MODNOTE))))
+  if (!(patbuf = (MODNOTE *) __um_calloc (64U * of.numchn, sizeof (MODNOTE))))
     return 0;
 
   for (t = 0; t < of.numpat; t++)
@@ -308,10 +308,10 @@ ML_LoadPatterns (void)
       /* Load the pattern into the temp buffer and convert it */
       for (s = 0; s < (64U * of.numchn); s++)
 	{
-	  patbuf[s].a = _mm_read_UBYTE (modreader);
-	  patbuf[s].b = _mm_read_UBYTE (modreader);
-	  patbuf[s].c = _mm_read_UBYTE (modreader);
-	  patbuf[s].d = _mm_read_UBYTE (modreader);
+	  patbuf[s].a = _um_read_UBYTE (modreader);
+	  patbuf[s].b = _um_read_UBYTE (modreader);
+	  patbuf[s].c = _um_read_UBYTE (modreader);
+	  patbuf[s].d = _um_read_UBYTE (modreader);
 	}
       for (s = 0; s < of.numchn; s++)
 	if (!(of.tracks[tracks++] = ConvertTrack (patbuf + s)))
@@ -329,22 +329,22 @@ MOD_Load (BOOL curious)
   BOOL is_orpheus = 0;
 
   /* try to read module header */
-  _mm_read_string ((CHAR *) mh->songname, 20, modreader);
+  _um_read_string ((CHAR *) mh->songname, 20, modreader);
   mh->songname[20] = 0;		/* just in case */
 
   for (t = 0; t < 31; t++)
     {
       s = &mh->samples[t];
-      _mm_read_string (s->samplename, 22, modreader);
+      _um_read_string (s->samplename, 22, modreader);
       s->samplename[22] = 0;	/* just in case */
-      s->length = _mm_read_M_UWORD (modreader);
-      s->finetune = _mm_read_UBYTE (modreader);
-      s->volume = _mm_read_UBYTE (modreader);
-      s->reppos = _mm_read_M_UWORD (modreader);
-      s->replen = _mm_read_M_UWORD (modreader);
+      s->length = _um_read_M_UWORD (modreader);
+      s->finetune = _um_read_UBYTE (modreader);
+      s->volume = _um_read_UBYTE (modreader);
+      s->reppos = _um_read_M_UWORD (modreader);
+      s->replen = _um_read_M_UWORD (modreader);
     }
 
-  mh->songlength = _mm_read_UBYTE (modreader);
+  mh->songlength = _um_read_UBYTE (modreader);
 
   /* this fixes mods which declare more than 128 positions. 
    * eg: beatwave.mod */
@@ -353,13 +353,13 @@ MOD_Load (BOOL curious)
       mh->songlength = 128;
     }
 
-  mh->magic1 = _mm_read_UBYTE (modreader);
-  _mm_read_UBYTES (mh->positions, 128, modreader);
-  _mm_read_UBYTES (mh->magic2, 4, modreader);
+  mh->magic1 = _um_read_UBYTE (modreader);
+  _um_read_UBYTES (mh->positions, 128, modreader);
+  _um_read_UBYTES (mh->magic2, 4, modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -448,8 +448,8 @@ MOD_LoadTitle (void)
 {
   CHAR s[21];
 
-  _mm_fseek (modreader, 0, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 20, modreader))
+  _um_fseek (modreader, 0, SEEK_SET);
+  if (!_um_read_UBYTES (s, 20, modreader))
     return NULL;
   s[20] = 0;			/* just in case */
 

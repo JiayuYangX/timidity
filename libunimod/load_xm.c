@@ -142,7 +142,7 @@ XM_Test (void)
 {
   UBYTE id[38];
 
-  if (!_mm_read_UBYTES (id, 38, modreader))
+  if (!_um_read_UBYTES (id, 38, modreader))
     return 0;
   if (memcmp (id, "Extended Module: ", 17))
     return 0;
@@ -154,7 +154,7 @@ XM_Test (void)
 static BOOL
 XM_Init (void)
 {
-  if (!(mh = (XMHEADER *) _mm_malloc (sizeof (XMHEADER))))
+  if (!(mh = (XMHEADER *) __um_malloc (sizeof (XMHEADER))))
     return 0;
   return 1;
 }
@@ -162,7 +162,7 @@ XM_Init (void)
 static void
 XM_Cleanup (void)
 {
-  _mm_free (mh);
+  __um_free (mh);
 }
 
 static int 
@@ -171,43 +171,43 @@ XM_ReadNote (XMNOTE * n)
   UBYTE cmp, result = 1;
 
   memset (n, 0, sizeof (XMNOTE));
-  cmp = _mm_read_UBYTE (modreader);
+  cmp = _um_read_UBYTE (modreader);
 
   if (cmp & 0x80)
     {
       if (cmp & 1)
 	{
 	  result++;
-	  n->note = _mm_read_UBYTE (modreader);
+	  n->note = _um_read_UBYTE (modreader);
 	}
       if (cmp & 2)
 	{
 	  result++;
-	  n->ins = _mm_read_UBYTE (modreader);
+	  n->ins = _um_read_UBYTE (modreader);
 	}
       if (cmp & 4)
 	{
 	  result++;
-	  n->vol = _mm_read_UBYTE (modreader);
+	  n->vol = _um_read_UBYTE (modreader);
 	}
       if (cmp & 8)
 	{
 	  result++;
-	  n->eff = _mm_read_UBYTE (modreader);
+	  n->eff = _um_read_UBYTE (modreader);
 	}
       if (cmp & 16)
 	{
 	  result++;
-	  n->dat = _mm_read_UBYTE (modreader);
+	  n->dat = _um_read_UBYTE (modreader);
 	}
     }
   else
     {
       n->note = cmp;
-      n->ins = _mm_read_UBYTE (modreader);
-      n->vol = _mm_read_UBYTE (modreader);
-      n->eff = _mm_read_UBYTE (modreader);
-      n->dat = _mm_read_UBYTE (modreader);
+      n->ins = _um_read_UBYTE (modreader);
+      n->vol = _um_read_UBYTE (modreader);
+      n->eff = _um_read_UBYTE (modreader);
+      n->dat = _um_read_UBYTE (modreader);
       result += 4;
     }
   return result;
@@ -378,33 +378,33 @@ LoadPatterns (BOOL dummypat)
     {
       XMPATHEADER ph;
 
-      ph.size = _mm_read_I_ULONG (modreader);
+      ph.size = _um_read_I_ULONG (modreader);
       if (ph.size < (mh->version == 0x0102 ? 8 : 9))
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
-      ph.packing = _mm_read_UBYTE (modreader);
+      ph.packing = _um_read_UBYTE (modreader);
       if (ph.packing)
 	{
-	  _mm_errno = MMERR_LOADING_PATTERN;
+	  _um_errno = MMERR_LOADING_PATTERN;
 	  return 0;
 	}
       if (mh->version == 0x0102)
-	ph.numrows = _mm_read_UBYTE (modreader) + 1;
+	ph.numrows = _um_read_UBYTE (modreader) + 1;
       else
-	ph.numrows = _mm_read_I_UWORD (modreader);
-      ph.packsize = _mm_read_I_UWORD (modreader);
+	ph.numrows = _um_read_I_UWORD (modreader);
+      ph.packsize = _um_read_I_UWORD (modreader);
 
       ph.size -= (mh->version == 0x0102 ? 8 : 9);
       if (ph.size)
-	_mm_fseek (modreader, ph.size, SEEK_CUR);
+	_um_fseek (modreader, ph.size, SEEK_CUR);
 
       of.pattrows[t] = ph.numrows;
 
       if (ph.numrows)
 	{
-	  if (!(xmpat = (XMNOTE *) _mm_calloc (ph.numrows * of.numchn, sizeof (XMNOTE))))
+	  if (!(xmpat = (XMNOTE *) __um_calloc (ph.numrows * of.numchn, sizeof (XMNOTE))))
 	    return 0;
 
 	  /* when packsize is 0, don't try to load a pattern.. it's empty. */
@@ -420,21 +420,21 @@ LoadPatterns (BOOL dummypat)
 		    {
 		      free (xmpat);
 		      xmpat = NULL;
-		      _mm_errno = MMERR_LOADING_PATTERN;
+		      _um_errno = MMERR_LOADING_PATTERN;
 		      return 0;
 		    }
 		}
 
 	  if (ph.packsize)
 	    {
-	      _mm_fseek (modreader, ph.packsize, SEEK_CUR);
+	      _um_fseek (modreader, ph.packsize, SEEK_CUR);
 	    }
 
-	  if (_mm_eof (modreader))
+	  if (_um_eof (modreader))
 	    {
 	      free (xmpat);
 	      xmpat = NULL;
-	      _mm_errno = MMERR_LOADING_PATTERN;
+	      _um_errno = MMERR_LOADING_PATTERN;
 	      return 0;
 	    }
 
@@ -454,7 +454,7 @@ LoadPatterns (BOOL dummypat)
   if (dummypat)
     {
       of.pattrows[t] = 64;
-      if (!(xmpat = (XMNOTE *) _mm_calloc (64 * of.numchn, sizeof (XMNOTE))))
+      if (!(xmpat = (XMNOTE *) __um_calloc (64 * of.numchn, sizeof (XMNOTE))))
 	return 0;
       for (v = 0; v < of.numchn; v++)
 	of.tracks[numtrk++] = XM_Convert (&xmpat[v * 64], 64);
@@ -484,54 +484,54 @@ LoadInstruments (void)
       memset (d->samplenumber, 0xff, INSTNOTES * sizeof (UWORD));
 
       /* read instrument header */
-      headend = _mm_ftell (modreader);
-      ih.size = _mm_read_I_ULONG (modreader);
+      headend = _um_ftell (modreader);
+      ih.size = _um_read_I_ULONG (modreader);
       headend += ih.size;
-      ck = _mm_ftell(modreader);
-      _mm_fseek(modreader,0,SEEK_END);
-      if ((headend<0) || (_mm_ftell(modreader)<headend) || (headend<ck)) {
-	_mm_fseek(modreader,ck,SEEK_SET);
+      ck = _um_ftell(modreader);
+      _um_fseek(modreader,0,SEEK_END);
+      if ((headend<0) || (_um_ftell(modreader)<headend) || (headend<ck)) {
+	_um_fseek(modreader,ck,SEEK_SET);
 	break;
       }
-      _mm_fseek(modreader,ck,SEEK_SET);
-      _mm_read_string (ih.name, 22, modreader);
-      ih.type = _mm_read_UBYTE (modreader);
-      ih.numsmp = _mm_read_I_UWORD (modreader);
+      _um_fseek(modreader,ck,SEEK_SET);
+      _um_read_string (ih.name, 22, modreader);
+      ih.type = _um_read_UBYTE (modreader);
+      ih.numsmp = _um_read_I_UWORD (modreader);
 
       d->insname = DupStr (ih.name, 22, 1);
 
       if ((SWORD) ih.size > 29)
 	{
-	  ih.ssize = _mm_read_I_ULONG (modreader);
+	  ih.ssize = _um_read_I_ULONG (modreader);
 	  if (((SWORD) ih.numsmp > 0) && (ih.numsmp <= XMNOTECNT))
 	    {
 	      XMPATCHHEADER pth;
 	      int p;
 
-	      _mm_read_UBYTES (pth.what, XMNOTECNT, modreader);
-	      _mm_read_I_UWORDS (pth.volenv, XMENVCNT, modreader);
-	      _mm_read_I_UWORDS (pth.panenv, XMENVCNT, modreader);
-	      pth.volpts = _mm_read_UBYTE (modreader);
-	      pth.panpts = _mm_read_UBYTE (modreader);
-	      pth.volsus = _mm_read_UBYTE (modreader);
-	      pth.volbeg = _mm_read_UBYTE (modreader);
-	      pth.volend = _mm_read_UBYTE (modreader);
-	      pth.pansus = _mm_read_UBYTE (modreader);
-	      pth.panbeg = _mm_read_UBYTE (modreader);
-	      pth.panend = _mm_read_UBYTE (modreader);
-	      pth.volflg = _mm_read_UBYTE (modreader);
-	      pth.panflg = _mm_read_UBYTE (modreader);
-	      pth.vibflg = _mm_read_UBYTE (modreader);
-	      pth.vibsweep = _mm_read_UBYTE (modreader);
-	      pth.vibdepth = _mm_read_UBYTE (modreader);
-	      pth.vibrate = _mm_read_UBYTE (modreader);
-	      pth.volfade = _mm_read_I_UWORD (modreader);
+	      _um_read_UBYTES (pth.what, XMNOTECNT, modreader);
+	      _um_read_I_UWORDS (pth.volenv, XMENVCNT, modreader);
+	      _um_read_I_UWORDS (pth.panenv, XMENVCNT, modreader);
+	      pth.volpts = _um_read_UBYTE (modreader);
+	      pth.panpts = _um_read_UBYTE (modreader);
+	      pth.volsus = _um_read_UBYTE (modreader);
+	      pth.volbeg = _um_read_UBYTE (modreader);
+	      pth.volend = _um_read_UBYTE (modreader);
+	      pth.pansus = _um_read_UBYTE (modreader);
+	      pth.panbeg = _um_read_UBYTE (modreader);
+	      pth.panend = _um_read_UBYTE (modreader);
+	      pth.volflg = _um_read_UBYTE (modreader);
+	      pth.panflg = _um_read_UBYTE (modreader);
+	      pth.vibflg = _um_read_UBYTE (modreader);
+	      pth.vibsweep = _um_read_UBYTE (modreader);
+	      pth.vibdepth = _um_read_UBYTE (modreader);
+	      pth.vibrate = _um_read_UBYTE (modreader);
+	      pth.volfade = _um_read_I_UWORD (modreader);
 
 	      /* read the remainder of the header
 	         (2 bytes for 1.03, 22 for 1.04) */
-	      if (headend>=_mm_ftell(modreader))
-	      for (u = headend - _mm_ftell (modreader); u; u--)
-		_mm_read_UBYTE (modreader);
+	      if (headend>=_um_ftell(modreader))
+	      for (u = headend - _um_ftell (modreader); u; u--)
+		_um_read_UBYTE (modreader);
 
 	      /* #@!$&% fix for K_OSPACE.XM and possibly others */
 	      if(pth.volpts > XMENVCNT/2)
@@ -539,7 +539,7 @@ LoadInstruments (void)
 	      if(pth.panpts > XMENVCNT/2)
 	        pth.panpts = XMENVCNT/2;
 
-	      if ((_mm_eof (modreader)) || (pth.volpts > XMENVCNT / 2) || (pth.panpts > XMENVCNT / 2))
+	      if ((_um_eof (modreader)) || (pth.volpts > XMENVCNT / 2) || (pth.panpts > XMENVCNT / 2))
 		{
 		  if (nextwav)
 		    {
@@ -551,7 +551,7 @@ LoadInstruments (void)
 		      free (wh);
 		      wh = NULL;
 		    }
-		  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+		  _um_errno = MMERR_LOADING_SAMPLEINFO;
 		  return 0;
 		}
 
@@ -603,44 +603,44 @@ LoadInstruments (void)
 			      free (wh);
 			      wh = NULL;
 			    }
-			  _mm_errno = MMERR_OUT_OF_MEMORY;
+			  _um_errno = MMERR_OUT_OF_MEMORY;
 			  return 0;
 			}
 		      if (!(wh = realloc (wh, wavcnt * sizeof (XMWAVHEADER))))
 			{
 			  free (nextwav);
 			  nextwav = NULL;
-			  _mm_errno = MMERR_OUT_OF_MEMORY;
+			  _um_errno = MMERR_OUT_OF_MEMORY;
 			  return 0;
 			}
 		      s = wh + (wavcnt - XM_SMPINCR);
 		    }
 
-		  s->length = _mm_read_I_ULONG (modreader);
-		  s->loopstart = _mm_read_I_ULONG (modreader);
-		  s->looplength = _mm_read_I_ULONG (modreader);
-		  s->volume = _mm_read_UBYTE (modreader);
-		  s->finetune = _mm_read_SBYTE (modreader);
-		  s->type = _mm_read_UBYTE (modreader);
-		  s->panning = _mm_read_UBYTE (modreader);
-		  s->relnote = _mm_read_SBYTE (modreader);
+		  s->length = _um_read_I_ULONG (modreader);
+		  s->loopstart = _um_read_I_ULONG (modreader);
+		  s->looplength = _um_read_I_ULONG (modreader);
+		  s->volume = _um_read_UBYTE (modreader);
+		  s->finetune = _um_read_SBYTE (modreader);
+		  s->type = _um_read_UBYTE (modreader);
+		  s->panning = _um_read_UBYTE (modreader);
+		  s->relnote = _um_read_SBYTE (modreader);
 		  s->vibtype = pth.vibflg;
 		  s->vibsweep = pth.vibsweep;
 		  s->vibdepth = pth.vibdepth * 4;
 		  s->vibrate = pth.vibrate;
-		  s->reserved = _mm_read_UBYTE (modreader);
-		  _mm_read_string (s->samplename, 22, modreader);
+		  s->reserved = _um_read_UBYTE (modreader);
+		  _um_read_string (s->samplename, 22, modreader);
 
 		  nextwav[of.numsmp + u] = next;
 		  next += s->length;
 
-		  if (_mm_eof (modreader))
+		  if (_um_eof (modreader))
 		    {
 		      free (nextwav);
 		      free (wh);
 		      nextwav = NULL;
 		      wh = NULL;
-		      _mm_errno = MMERR_LOADING_SAMPLEINFO;
+		      _um_errno = MMERR_LOADING_SAMPLEINFO;
 		      return 0;
 		    }
 		}
@@ -648,8 +648,8 @@ LoadInstruments (void)
 	      if (mh->version > 0x0103)
 		{
 		  for (u = 0; u < ih.numsmp; u++)
-		    nextwav[of.numsmp++] += _mm_ftell (modreader);
-		  _mm_fseek (modreader, next, SEEK_CUR);
+		    nextwav[of.numsmp++] += _um_ftell (modreader);
+		  _um_fseek (modreader, next, SEEK_CUR);
 		}
 	      else
 		of.numsmp += ih.numsmp;
@@ -657,25 +657,25 @@ LoadInstruments (void)
 	  else
 	    {
 	      /* read the remainder of the header */
-	      ck = _mm_ftell(modreader);
-	      _mm_fseek(modreader,0,SEEK_END);
-	      if ((headend<0) || (_mm_ftell(modreader)<headend) || (headend<ck)) {
-		_mm_fseek(modreader,ck,SEEK_SET);
+	      ck = _um_ftell(modreader);
+	      _um_fseek(modreader,0,SEEK_END);
+	      if ((headend<0) || (_um_ftell(modreader)<headend) || (headend<ck)) {
+		_um_fseek(modreader,ck,SEEK_SET);
 		break;
 	      }
-	      _mm_fseek(modreader,ck,SEEK_SET);
+	      _um_fseek(modreader,ck,SEEK_SET);
 
-	      for (u = headend - _mm_ftell (modreader); u; u--)
-		_mm_read_UBYTE (modreader);
+	      for (u = headend - _um_ftell (modreader); u; u--)
+		_um_read_UBYTE (modreader);
 
 	      /* last instrument is at the end of file in version 0x0104 */
-	      if(_mm_eof(modreader) && (mh->version<0x0104 || t<of.numins-1))
+	      if(_um_eof(modreader) && (mh->version<0x0104 || t<of.numins-1))
 		{
 		  free (nextwav);
 		  free (wh);
 		  nextwav = NULL;
 		  wh = NULL;
-		  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+		  _um_errno = MMERR_LOADING_SAMPLEINFO;
 		  return 0;
 		}
 	    }
@@ -695,7 +695,7 @@ LoadInstruments (void)
 	  free (wh);
 	  wh = NULL;
 	}
-      _mm_errno = MMERR_LOADING_SAMPLEINFO;
+      _um_errno = MMERR_LOADING_SAMPLEINFO;
       return 0;
     }
 
@@ -712,36 +712,36 @@ XM_Load (BOOL curious)
   char tracker[21], modtype[60];
 
   /* try to read module header */
-  _mm_read_string (mh->id, 17, modreader);
-  _mm_read_string (mh->songname, 21, modreader);
-  _mm_read_string (mh->trackername, 20, modreader);
-  mh->version = _mm_read_I_UWORD (modreader);
+  _um_read_string (mh->id, 17, modreader);
+  _um_read_string (mh->songname, 21, modreader);
+  _um_read_string (mh->trackername, 20, modreader);
+  mh->version = _um_read_I_UWORD (modreader);
   if ((mh->version < 0x102) || (mh->version > 0x104))
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
-  mh->headersize = _mm_read_I_ULONG (modreader);
-  mh->songlength = _mm_read_I_UWORD (modreader);
-  mh->restart = _mm_read_I_UWORD (modreader);
-  mh->numchn = _mm_read_I_UWORD (modreader);
-  mh->numpat = _mm_read_I_UWORD (modreader);
-  mh->numins = _mm_read_I_UWORD (modreader);
-  mh->flags = _mm_read_I_UWORD (modreader);
-  mh->tempo = _mm_read_I_UWORD (modreader);
-  mh->bpm = _mm_read_I_UWORD (modreader);
+  mh->headersize = _um_read_I_ULONG (modreader);
+  mh->songlength = _um_read_I_UWORD (modreader);
+  mh->restart = _um_read_I_UWORD (modreader);
+  mh->numchn = _um_read_I_UWORD (modreader);
+  mh->numpat = _um_read_I_UWORD (modreader);
+  mh->numins = _um_read_I_UWORD (modreader);
+  mh->flags = _um_read_I_UWORD (modreader);
+  mh->tempo = _um_read_I_UWORD (modreader);
+  mh->bpm = _um_read_I_UWORD (modreader);
   if (!mh->bpm)
     {
-      _mm_errno = MMERR_NOT_A_MODULE;
+      _um_errno = MMERR_NOT_A_MODULE;
       return 0;
     }
   t = mh->headersize - 20;
   if (t > sizeof(mh->orders)) t = sizeof(mh->orders);
-  _mm_read_UBYTES (mh->orders, t, modreader);
+  _um_read_UBYTES (mh->orders, t, modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -807,7 +807,7 @@ XM_Load (BOOL curious)
       if (!LoadPatterns (dummypat))
 	return 0;
       for (t = 0; t < of.numsmp; t++)
-	nextwav[t] += _mm_ftell (modreader);
+	nextwav[t] += _um_ftell (modreader);
     }
   else
     {
@@ -885,8 +885,8 @@ XM_LoadTitle (void)
 {
   CHAR s[21];
 
-  _mm_fseek (modreader, 17, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 21, modreader))
+  _um_fseek (modreader, 17, SEEK_SET);
+  if (!_um_read_UBYTES (s, 21, modreader))
     return NULL;
 
   return (DupStr (s, 21, 1));

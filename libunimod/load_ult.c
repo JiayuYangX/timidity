@@ -85,7 +85,7 @@ ULT_Test (void)
 {
   CHAR id[16];
 
-  if (!_mm_read_string (id, 15, modreader))
+  if (!_um_read_string (id, 15, modreader))
     return 0;
   if (strncmp (id, "MAS_UTrack_V00", 14))
     return 0;
@@ -110,19 +110,19 @@ ReadUltEvent (ULTEVENT * event)
 {
   UBYTE flag, rep = 1;
 
-  flag = _mm_read_UBYTE (modreader);
+  flag = _um_read_UBYTE (modreader);
   if (flag == 0xfc)
     {
-      rep = _mm_read_UBYTE (modreader);
-      event->note = _mm_read_UBYTE (modreader);
+      rep = _um_read_UBYTE (modreader);
+      event->note = _um_read_UBYTE (modreader);
     }
   else
     event->note = flag;
 
-  event->sample = _mm_read_UBYTE (modreader);
-  event->eff = _mm_read_UBYTE (modreader);
-  event->dat1 = _mm_read_UBYTE (modreader);
-  event->dat2 = _mm_read_UBYTE (modreader);
+  event->sample = _um_read_UBYTE (modreader);
+  event->eff = _um_read_UBYTE (modreader);
+  event->dat1 = _um_read_UBYTE (modreader);
+  event->dat2 = _um_read_UBYTE (modreader);
 
   return rep;
 }
@@ -137,13 +137,13 @@ ULT_Load (BOOL curious)
   UBYTE nos, noc, nop;
 
   /* try to read module header */
-  _mm_read_string (mh.id, 15, modreader);
-  _mm_read_string (mh.songtitle, 32, modreader);
-  mh.reserved = _mm_read_UBYTE (modreader);
+  _um_read_string (mh.id, 15, modreader);
+  _um_read_string (mh.songtitle, 32, modreader);
+  mh.reserved = _um_read_UBYTE (modreader);
 
-  if (_mm_eof (modreader))
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -158,10 +158,10 @@ ULT_Load (BOOL curious)
     if (!ReadLinedComment (mh.reserved, 32))
       return 0;
 
-  nos = _mm_read_UBYTE (modreader);
-  if (_mm_eof (modreader))
+  nos = _um_read_UBYTE (modreader);
+  if (_um_eof (modreader))
     {
-      _mm_errno = MMERR_LOADING_HEADER;
+      _um_errno = MMERR_LOADING_HEADER;
       return 0;
     }
 
@@ -174,20 +174,20 @@ ULT_Load (BOOL curious)
   for (t = 0; t < nos; t++)
     {
       /* try to read sample info */
-      _mm_read_string (s.samplename, 32, modreader);
-      _mm_read_string (s.dosname, 12, modreader);
-      s.loopstart = _mm_read_I_ULONG (modreader);
-      s.loopend = _mm_read_I_ULONG (modreader);
-      s.sizestart = _mm_read_I_ULONG (modreader);
-      s.sizeend = _mm_read_I_ULONG (modreader);
-      s.volume = _mm_read_UBYTE (modreader);
-      s.flags = _mm_read_UBYTE (modreader);
-      s.speed = (mh.id[14] >= '4') ? _mm_read_I_UWORD (modreader) : 8363;
-      s.finetune = _mm_read_I_SWORD (modreader);
+      _um_read_string (s.samplename, 32, modreader);
+      _um_read_string (s.dosname, 12, modreader);
+      s.loopstart = _um_read_I_ULONG (modreader);
+      s.loopend = _um_read_I_ULONG (modreader);
+      s.sizestart = _um_read_I_ULONG (modreader);
+      s.sizeend = _um_read_I_ULONG (modreader);
+      s.volume = _um_read_UBYTE (modreader);
+      s.flags = _um_read_UBYTE (modreader);
+      s.speed = (mh.id[14] >= '4') ? _um_read_I_UWORD (modreader) : 8363;
+      s.finetune = _um_read_I_SWORD (modreader);
 
-      if (_mm_eof (modreader))
+      if (_um_eof (modreader))
 	{
-	  _mm_errno = MMERR_LOADING_SAMPLEINFO;
+	  _um_errno = MMERR_LOADING_SAMPLEINFO;
 	  return 0;
 	}
 
@@ -218,14 +218,14 @@ ULT_Load (BOOL curious)
   if (!AllocPositions (256))
     return 0;
   for (t = 0; t < 256; t++)
-    of.positions[t] = _mm_read_UBYTE (modreader);
+    of.positions[t] = _um_read_UBYTE (modreader);
   for (t = 0; t < 256; t++)
     if (of.positions[t] == 255)
       break;
   of.numpos = t;
 
-  noc = _mm_read_UBYTE (modreader);
-  nop = _mm_read_UBYTE (modreader);
+  noc = _um_read_UBYTE (modreader);
+  nop = _um_read_UBYTE (modreader);
 
   of.numchn = ++noc;
   of.numpat = ++nop;
@@ -245,7 +245,7 @@ ULT_Load (BOOL curious)
   /* read pan position table for v1.5 and higher */
   if (mh.id[14] >= '3')
     for (t = 0; t < of.numchn; t++)
-      of.panning[t] = _mm_read_UBYTE (modreader) << 4;
+      of.panning[t] = _um_read_UBYTE (modreader) << 4;
 
   for (t = 0; t < of.numtrk; t++)
     {
@@ -256,9 +256,9 @@ ULT_Load (BOOL curious)
 	{
 	  rep = ReadUltEvent (&ev);
 
-	  if (_mm_eof (modreader))
+	  if (_um_eof (modreader))
 	    {
-	      _mm_errno = MMERR_LOADING_TRACK;
+	      _um_errno = MMERR_LOADING_TRACK;
 	      return 0;
 	    }
 
@@ -336,8 +336,8 @@ ULT_LoadTitle (void)
 {
   CHAR s[32];
 
-  _mm_fseek (modreader, 15, SEEK_SET);
-  if (!_mm_read_UBYTES (s, 32, modreader))
+  _um_fseek (modreader, 15, SEEK_SET);
+  if (!_um_read_UBYTES (s, 32, modreader))
     return NULL;
 
   return (DupStr (s, 32, 1));
