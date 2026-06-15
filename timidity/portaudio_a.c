@@ -51,8 +51,8 @@
 #include <pa_asio.h>
 #endif
 
-#ifdef AU_PORTAUDIO_DLL
-#include "w32_portaudio.h"
+#if defined(PORTAUDIO_V19) && defined(__W32__)
+#include <pa_win_wasapi.h>
 #endif
 
 #include "timidity.h"
@@ -112,10 +112,10 @@ padata_t pa_data;
 
 /* export the playback mode */
 
-#ifdef AU_PORTAUDIO_DLL
 static int open_output_asio(void);
 static int open_output_win_ds(void);
 static int open_output_win_wmme(void);
+static int open_output_win_wasapi(void);
 PlayMode portaudio_asio_play_mode = {
 	(SAMPLE_RATE),
     PE_16BIT|PE_SIGNED,
@@ -155,27 +155,21 @@ PlayMode portaudio_win_wmme_play_mode = {
     output_data,
     acntl
 };
-PlayMode * volatile portaudio_play_mode = &portaudio_win_wmme_play_mode;
-#define dpm (*portaudio_play_mode)
-
-#else
-
-#define dpm portaudio_play_mode
-
-PlayMode dpm = {
+PlayMode portaudio_win_wasapi_play_mode = {
 	(SAMPLE_RATE),
     PE_16BIT|PE_SIGNED,
     PF_PCM_STREAM|PF_BUFF_FRAGM_OPT|PF_CAN_TRACE,
     -1,
-    {32}, /* PF_BUFF_FRAGM_OPT  is need for TWSYNTH */
-	"Portaudio Driver", 'p',
+    {32},
+	"PortAudio(WASAPI)", 'W',
     NULL,
-    open_output,
+    open_output_win_wasapi,
     close_output,
     output_data,
     acntl
 };
-#endif
+PlayMode * volatile portaudio_play_mode = &portaudio_win_wmme_play_mode;
+#define dpm (*portaudio_play_mode)
 
 #if PORTAUDIO_V19
 int paCallback(  const void *inputBuffer, void *outputBuffer,
@@ -275,7 +269,6 @@ int paCallback(  void *inputBuffer, void *outputBuffer,
 
 }
 
-#ifdef AU_PORTAUDIO_DLL
 static int open_output_asio(void)
 {
 	portaudio_play_mode = &portaudio_asio_play_mode;
@@ -291,7 +284,11 @@ static int open_output_win_wmme(void)
 	portaudio_play_mode = &portaudio_win_wmme_play_mode;
 	return open_output();
 }
-#endif
+static int open_output_win_wasapi(void)
+{
+	portaudio_play_mode = &portaudio_win_wasapi_play_mode;
+	return open_output();
+}
 
 static int open_output(void)
 {
@@ -304,7 +301,6 @@ static int open_output(void)
 	if (dpm.name == NULL || ret == 0 || ret == EOF)
 		opt_pa_device_id = -2;
 	
-#ifdef AU_PORTAUDIO_DLL
 #if PORTAUDIO_V19
   {
 		if(&dpm == &portaudio_asio_play_mode){
@@ -313,28 +309,12 @@ static int open_output(void)
 			HostApiTypeId = paDirectSound;
 		} else if(&dpm == &portaudio_win_wmme_play_mode){
 			HostApiTypeId = paMME;
-		} else {
-			return -1;
-		}
-		if(load_portaudio_dll(0))
-				return -1;
-  }
-#else
-  {
-		if(&dpm == &portaudio_asio_play_mode){
-			if(load_portaudio_dll(PA_DLL_ASIO))
-				return -1;
-		} else if(&dpm == &portaudio_win_ds_play_mode){
-			if(load_portaudio_dll(PA_DLL_WIN_DS))
-				return -1;
-		} else if(&dpm == &portaudio_win_wmme_play_mode){
-			if(load_portaudio_dll(PA_DLL_WIN_WMME))
-				return -1;
+		} else if(&dpm == &portaudio_win_wasapi_play_mode){
+			HostApiTypeId = paWASAPI;
 		} else {
 			return -1;
 		}
   }
-#endif
 #endif
 	/* if call twice Pa_OpenStream causes paDeviceUnavailable error  */
 	if(pa_active == 1) return 0; 
@@ -349,7 +329,6 @@ static int open_output(void)
 		goto error2;
 	}
 #ifdef PORTAUDIO_V19
-#ifdef AU_PORTAUDIO_DLL
        {	
         PaHostApiIndex i, ApiCount;
 	i = 0;
@@ -364,10 +343,6 @@ static int open_output(void)
 	DeviceIndex = HostApiInfo->defaultOutputDevice;
 	if(DeviceIndex==paNoDevice) goto error;
         }
-#else
-	DeviceIndex = Pa_GetDefaultOutputDevice();
-	if(DeviceIndex==paNoDevice) goto error;
-#endif
 	DeviceInfo = Pa_GetDeviceInfo( DeviceIndex);
 	if(DeviceInfo==NULL) goto error;
 
@@ -412,6 +387,20 @@ static int open_output(void)
 		StreamParameters.suggestedLatency = DeviceInfo->defaultLowOutputLatency;
 	}
 	StreamParameters.hostApiSpecificStreamInfo = NULL;
+#if PORTAUDIO_V19
+	if(HostApiTypeId == paWASAPI) {
+		static PaWasapiStreamInfo wasapiInfo;
+		wasapiInfo.size = sizeof(PaWasapiStreamInfo);
+		wasapiInfo.hostApiType = paWASAPI;
+		wasapiInfo.version = 1;
+		wasapiInfo.flags = paWinWasapiAutoConvert;
+		wasapiInfo.channelMask = 0;
+		wasapiInfo.hostProcessorOutput = NULL;
+		wasapiInfo.hostProcessorInput = NULL;
+		wasapiInfo.threadPriority = eThreadPriorityNone;
+		StreamParameters.hostApiSpecificStreamInfo = &wasapiInfo;
+	}
+#endif
 	
 	if( SampleFormat == paInt16){
 		StreamParameters.sampleFormat = paInt16;
@@ -519,11 +508,6 @@ error:
 	ctl->cmsg(  CMSG_ERROR, VERB_NORMAL, "PortAudio error: %s\n", Pa_GetErrorText( err ) );
 error2:
 	Pa_Terminate(); pa_active = 0;
-#ifdef AU_PORTAUDIO_DLL
-#ifndef PORTAUDIO_V19
-  free_portaudio_dll();
-#endif
-#endif
 
 	return -1;
 }
@@ -606,21 +590,10 @@ static void close_output(void)
 	Pa_Terminate(); 
 	pa_active=0;
 
-#ifdef AU_PORTAUDIO_DLL
-#ifndef PORTAUDIO_V19
-  free_portaudio_dll();
-#endif
-#endif
-
 	return;
 
 error:
 	Pa_Terminate(); pa_active=0;
-#ifdef AU_PORTAUDIO_DLL
-#ifndef PORTAUDIO_V19
-  free_portaudio_dll();
-#endif
-#endif
 	ctl->cmsg(  CMSG_ERROR, VERB_NORMAL, "PortAudio error: %s\n", Pa_GetErrorText( err ) );
 	return;
 }

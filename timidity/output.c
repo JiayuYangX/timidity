@@ -91,13 +91,10 @@ extern PlayMode esd_play_mode;
 #endif /* AU_ESD */
 
 #ifdef AU_PORTAUDIO
-#ifndef AU_PORTAUDIO_DLL
-extern PlayMode portaudio_play_mode;
-#else
 extern PlayMode portaudio_asio_play_mode;
 extern PlayMode portaudio_win_ds_play_mode;
 extern PlayMode portaudio_win_wmme_play_mode;
-#endif
+extern PlayMode portaudio_win_wasapi_play_mode;
 #endif /* AU_PORTAUDIO */
 
 #ifdef AU_NPIPE
@@ -163,13 +160,10 @@ PlayMode *play_mode_list[] = {
 #endif /* AU_HPUX_ALIB */
 
 #if defined(AU_PORTAUDIO)
-#ifndef AU_PORTAUDIO_DLL
-  &portaudio_play_mode,
-#else
   &portaudio_asio_play_mode,
   &portaudio_win_ds_play_mode,
   &portaudio_win_wmme_play_mode,
-#endif
+  &portaudio_win_wasapi_play_mode,
 #endif /* AU_PORTAUDIO */
 
 #if defined(AU_NPIPE)
