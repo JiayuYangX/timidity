@@ -1,0 +1,600 @@
+======================================================================
+	TiMidity++ 安装指南
+
+					出雲正尚 (Masanao Izumo)
+					<iz@onicos.co.jp>
+					2004年03月01日
+					版本 2.13.0 或更高
+======================================================================
+
+本文档介绍如何在 UNIX 类系统上安装 TiMidity++。
+
+在 Windows 95/98/Me/NT/2000/XP/2003 上，可以通过 Cygwin 环境按照本文
+步骤生成 timidity.exe。Windows 用户请先安装 Cygwin（或 mingw）。
+
+现今的 Macintosh 使用 FreeBSD 用户层，因此本文所述方法应该可以照常
+工作。旧版 Macintosh ("Classic") 的安装方法不在本文档描述范围内。
+
+======================================================================
+基本安装步骤
+======================================================================
+
+TiMidity++ 使用 GNU autotools 构建。最简单的编译方法是：
+
+1. "cd" 到 TiMidity++ 源代码所在的目录，输入 "./configure" 来配置
+   软件包以适应您的系统。在旧版 System V 上使用 csh 时，可能需要输入
+   "/bin/sh configure" 以防止 csh 尝试自行执行 configure。configure
+   运行需要一些时间，期间会显示正在检查的功能信息。
+2. 输入 "make" 进行编译。
+   注意：此 make 方法需要 GNU make。如果您的系统将其安装为 gmake，
+   请输入 "gmake" 代替。
+3. 输入 "make install" 安装程序和所有数据文件及文档。
+
+======================================================================
+详细说明
+======================================================================
+
+完整的安装流程为：
+
+1. 执行 configure
+2. 根据需要编辑 common.makefile、Makefile、timidity.h
+3. make 编译
+4. 安装
+5. 设置音源数据
+
+下面对各步骤进行说明。注意，以下用 "%" 表示 shell 提示符。
+
+======================================================================
+configure
+======================================================================
+
+首先执行以下命令：
+
+% /bin/sh configure --help
+
+将会显示 configure 的众多选项。其中，--help、--prefix=PREFIX 等大多数
+选项是标准选项，与其他使用 autoconf 的软件包相同，无需担心其行为。
+
+此外还有一些 TiMidity++ 特有的选项，主要如下：
+
+--enable-debug
+  启用调试。将使用调试方法/信息进行编译。
+
+--without-x
+  TiMidity++ 默认使用 X。如果不希望链接 X 库，必须指定此选项。
+
+--enable-audio[=audio_list]
+  指定音频输出方式。--enable-audio=no 时，TiMidity++ 仅作为 MIDI 转
+  WAVE 转换器使用。
+
+  可指定的值包括：
+
+  * default: 自动选择
+  * oss: OSS /dev/dsp
+  * sun: SunOS /dev/audio
+  * hpux: hp-ux /dev/audio
+  * irix: IRIX audio library
+  * mme: OSF/1 MME
+  * sb_dsp: BSD/OS 2.0 /dev/sb_dsp
+  * w32: Windows MMS
+  * darwin: darwin(Mac OS X) 的 CoreAudio 框架
+  * alsa: ALSA pcm device
+  * alib: hp-ux network audio (Alib)
+  * nas: NAS
+  * portaudio: PortAudio
+  * jack: JACK
+  * arts: aRts
+  * esd: EsounD
+  * vorbis: ogg vorbis
+  * gogo: mp3 Gogo-No-Coder (仅限 Windows)
+
+--enable-interface[=interface_list]
+--enable-dynamic[=interface_list]
+  指定要使用的界面。如果使用 --enable-dynamic 代替 --enable-interface，
+  指定的界面将被动态链接，二进制文件会略小一些。
+
+  可指定的值包括：
+
+  * ncurses: ncurses 界面
+  * slang: S-Lang 界面
+  * motif: Motif 界面 (Lesstif 也可运行)
+  * tcltk: Tcl/Tk 界面
+  * emacs: Emacs 前端 (M-x timidity)
+  * vt100: 使用 vt100 终端控制码的全屏界面
+  * xaw: X Athena Widget 界面
+  * xskin: X skin 界面
+  * gtk: GTK+ 界面
+  * w32gui: 编译为 Windows GUI 二进制文件
+  * winsyn: 编译为 TiMidity++ Windows 合成器服务器
+  * alsaseq: 编译为 ALSA 音序器客户端
+
+  请注意：
+  --enable-interface=INTERFACE1,INTERFACE2,...
+  等同于
+  --enable-INTERFACE1=yes --enable-INTERFACE2=yes ...
+  同样地，
+  --enable-dynamic=INTERFACE1,INTERFACE2,...
+  等同于
+  --enable-INTERFACE1=dynamic --enable-INTERFACE2=dynamic ...
+
+--enable-network
+  启用网络支持。TiMidity++ 可通过 URL 句柄，以
+  http://foo.com.tw/bar/baz.mid 这样的格式指定 MIDI 文件位置，
+  实现网络播放。
+
+--enable-spectrogram
+  指定此选项后，TiMidity++ 可在 X 上打开窗口实时显示声音频谱图。
+
+--enable-wrd
+  WRD 是日本本地歌词内容格式。此选项启用 WRD 接口。
+
+* 传递给 configure 的环境变量和编译标志
+
+某些 MIDI 文件在处理前需要较多 CPU 资源。选择适当的优化方法可使
+TiMidity++ 流畅地播放这类 MIDI 文件。
+
+configure 会识别以下环境变量（如果已设置）：
+
+CC
+  C 编译器命令，例如 "/usr/bin/gcc"
+CFLAGS
+  传递给 ${CC} 的标志，例如 "-O2 -pipe"
+LDFLAGS
+  传递给链接器的标志，例如 "-L/usr/gnu/lib"
+CPPFLAGS
+  传递给预处理器的标志，例如 "-traditional-cpp"
+
+您的编译器可能有许多优化选项。例如，对于 ultrasparc/gcc，可指定：
+
+% env CFLAGS='-O3 -Wall -mv8 -funroll-all-loops -fomit-frame-pointer \
+	-mcpu=ultrasparc' /bin/sh configure [configure-options]...
+
+这样生成的二进制文件（有望）运行得更快。
+
+======================================================================
+编辑文件
+======================================================================
+
+如果 make 失败，或希望更改某些参数，可手动编辑 common.makefile、
+Makefile 或 timidity.h。
+
+* timidity.h 中的参数
+
+TiMidity++ 中有一些硬编码在二进制中的选项，这些在 timidity.h 中通过
+#define 定义。如需更改这些标志，必须修改相应的定义。
+
+** CONFIG_FILE
+
+根据需要编辑 CONFIG_FILE。默认为：
+
+#define CONFIG_FILE DEFAULT_PATH "/timidity.cfg"
+
+DEFAULT_PATH 与 Makefile 中的 TIMID_DIR 相同。
+
+如果要放置在其他路径，可指定为：
+
+#define CONFIG_FILE "/etc/timidity.cfg"
+
+** DECOMPRESSOR_LIST
+
+文件解压命令的设置（Windows 中请忽略）。默认为：
+
+#define DECOMPRESSOR_LIST { \
+		".gz", "gunzip -c %s", \
+		".bz2", "bunzip2 -c %s", \
+		".Z", "zcat %s", \
+		".zip", "unzip -p %s", \
+		".lha", "lha -pq %s", \
+		".lzh", "lha -pq %s", \
+		".shn", "shorten -x %s -", \
+		0 }
+
+TiMidity++ 可直接处理部分压缩格式，但对于不支持的格式将使用此处
+指定的解压命令。
+
+** PATCH_CONVERTERS
+
+音色文件转换命令的设置（Windows 中请忽略）。默认为：
+
+#define PATCH_CONVERTERS { \
+		".wav", "wav2pat %s", \
+		0 }
+
+** PATCH_EXT_LIST
+
+GUS/patch 文件扩展名的设置。在此指定的扩展名可在所有 *.cfg 中省略。
+默认为：
+
+#define PATCH_EXT_LIST { \
+		".pat", \
+		".shn", ".pat.shn", \
+		".gz", ".pat.gz", \
+		".bz2", ".pat.bz2", \
+		0 }
+
+** DEFAULT_PROGRAM
+
+默认乐器设置。默认为：
+
+#define DEFAULT_PROGRAM 0
+
+当没有 Program Change 事件时，使用此乐器编号。通常 0 是钢琴。
+
+此选项可通过命令行指定，保持默认即可。
+
+** DEFAULT_DRUMCHANNELS
+
+默认鼓通道设置。默认为：
+
+#define DEFAULT_DRUMCHANNELS {10, -1}
+
+数字是鼓通道列表，-1 是终止符。例如，如果希望能将第 10 和第 16
+通道默认设为鼓通道：
+
+#define DEFAULT_DRUMCHANNELS {10, 16, -1}
+
+此通道可通过命令行选项更改。
+
+** FLOAT_T
+
+浮点数类型。从以下两者中选择：
+
+* typedef double FLOAT_T;
+* typedef float FLOAT_T;
+
+许多具有 FPU 的机器上，double 运算比 float 更快。但也有部分机器
+情况相反。
+
+** (MAX|MIN)_OUTPUT_RATE
+
+播放采样率的上下限设置。默认为：
+
+#define MIN_OUTPUT_RATE 4000
+#define MAX_OUTPUT_RATE 65000
+
+一般无需更改。
+
+** DEFAULT_AMPLIFICATION
+
+主音量默认值设置。默认为：
+
+#define DEFAULT_AMPLIFICATION 70
+
+此数值为最大音量的百分比。默认 70% 在任何情况下都是不错的默认值。
+可通过命令行选项 (-A) 更改。
+
+** DEFAULT_RATE
+
+默认采样率。默认为：
+
+#define DEFAULT_RATE 44100
+
+如果拥有充沛的 CPU 资源、DAT 品质的 GUS/patch 并希望获得更好的
+音质：
+
+#define DEFAULT_RATE 48000
+
+是不错的选择。
+
+** DEFAULT_VOICES
+
+默认复音数设置。默认为：
+
+#define DEFAULT_VOICES 256
+
+DEFAULT_VOICES 是启动时的复音数。可通过命令行选项 (-p) 从 1 设置到
+内存允许的最大值。如果拥有强大的 CPU 资源：
+
+#define DEFAULT_VOICES 512
+
+可获得更好的和声效果。不过，128 复音数即可愉快地播放大部分 MIDI
+文件。超过 256 复音的 MIDI 文件极为罕见，即使在 R10000 级别的高性
+能 CPU 上，更多复音数也可能造成不堪重负，因此 DEFAULT_VOICES 保持
+256 左右是合适的。
+
+** AUDIO_BUFFER_BITS
+
+内部缓冲区大小。默认为：
+
+#define AUDIO_BUFFER_BITS 12
+
+此值应该无需更改。
+
+** CONTROLS_PER_SECOND
+
+TiMidity++ 不是每个采样都计算包络变化，而是一次计算多个采样。
+较小的 controls 值可获得更好音质，但会消耗更多 CPU。默认为：
+
+#define CONTROLS_PER_SECOND 1000
+
+可通过命令行更改。保持默认即可。
+
+** DEFAULT_RESAMPLATION
+
+插值引擎类型。默认为：
+
+#define DEFAULT_RESAMPLATION resample_gauss
+
+此定义使 TiMidity++ 在重新采样时使用类高斯插值，音质较好，
+但会消耗 CPU 资源。建议性能充足的机器保留此设置。其他选择
+（按速度排序）：
+
+#define DEFAULT_RESAMPLATION resample_none
+#define DEFAULT_RESAMPLATION resample_linear
+#define DEFAULT_RESAMPLATION resample_lagrange
+#define DEFAULT_RESAMPLATION resample_cspline
+#define DEFAULT_RESAMPLATION resample_gauss
+#define DEFAULT_RESAMPLATION resample_newton
+
+插值方法可通过命令行更改。如果要禁止用户更改，可取消注释以下行：
+
+#define FIXED_RESAMPLATION
+
+** USE_DSP_EFFECT
+
+DSP 效果设置，用于完善合唱、延迟、均衡器和插入效果。默认启用。
+
+#define USE_DSP_EFFECT
+
+一般无需更改。
+
+** LOOKUP_HACK
+
+默认未定义，如下所示：
+
+/* #define LOOKUP_HACK */
+/* #define LOOKUP_INTERPOLATION */
+
+此选项可节省少量 CPU 资源，但音质会明显下降。如果机器 CPU 资源不足，
+可尝试启用。注意：将以 8 比特精度计算 16 比特采样，音质恶化明显。
+
+** SMOOTH_MIXING
+
+定义此项可大幅减少因大幅音量/声像变化导致的爆音。略微增加的 CPU
+使用是值得的。默认为：
+
+#define SMOOTH_MIXING
+
+** FAST_DECAY
+
+包络速度设置。默认为：
+
+/* #define FAST_DECAY */
+
+此选项使包络速度加倍，可节省 CPU 资源。但由于声音释放时间缩短，
+音质会变差。此功能可通过命令行选项控制。
+
+** FRACTION_BITS
+
+TiMidity++ 使用定点数计算。默认为：
+
+#define FRACTION_BITS 12
+
+无需更改此值。
+
+** ADJUST_SAMPLE_VOLUMES
+
+GUS/patch 振幅调整设置。默认为：
+
+#define ADJUST_SAMPLE_VOLUMES
+
+此选项使 TiMidity 将各 GUS/patch 的振幅调整为相同音量。如果只使用
+经过精确调音的 GUS/patch 套装，可不定义此项。但使用各种来源的
+GUS/patch 时，音量会变得不均匀，建议定义此项。
+
+** DANGEROUS_RENICE
+
+默认禁用：
+
+/* #define DANGEROUS_RENICE -15 */
+
+如果希望通过 setuid root 提升 TiMidity++ 的进程优先级，可启用
+此选项。此选项仅适用于 UNIX。启用后，应按以下步骤安装：
+
+# chown root /usr/local/bin/timidity
+# chmod u+s /usr/local/bin/timidity
+
+注意：如果未启用 DANGEROUS_RENICE，则不应将 setuid 赋予 timidity。
+
+** MAX_DIE_TIME
+
+如果此值太小，会产生爆音。默认为：
+
+#define MAX_DIE_TIME 20
+
+建议保持此值。
+
+** LOOKUP_SINE
+
+#define LOOKUP_SINE
+
+在某些机器（特别是没有数学协处理器的 PC）上，查表获取正弦值比
+实时计算快得多。建议定义此项。
+
+** PRECALC_LOOPS
+
+重新采样优化设置。默认为：
+
+#define PRECALC_LOOPS
+
+这些优化在某些机器和编译器上不一定更快。视情况取消定义可能更好。
+
+** USE_LDEXP
+
+是否使用 ldexp() 的设置。默认禁用：
+
+/* #define USE_LDEXP */
+
+如果您的机器使用 ldexp() 进行浮点乘法比其它方式更快，可启用此选项。
+
+** DEFAULT_CACHE_DATA_SIZE
+
+预重新采样缓存大小。默认为：
+
+#define DEFAULT_CACHE_DATA_SIZE (2*1024*1024)
+
+即 2MB。可通过命令行更改，无需在此修改。超过 2MB 对性能提升不明显，
+且占用更多内存。
+
+* 网络相关设置
+
+如果启用了网络功能 (configure --enable-network)，请设置以下宏：
+
+** MAIL_DOMAIN
+
+指定邮件地址的域名。例如，如果邮件地址为 "iz@onicos.co.jp"：
+
+#define MAIL_DOMAIN "@onicos.co.jp"
+
+** MAIL_NAME
+
+UNIX 中不定义此项。Windows 中指定邮件名。例如，如果邮件地址为
+"iz@onicos.co.jp"：
+
+#define MAIL_NAME "iz"
+
+** TMPDIR
+
+临时目录的设置。默认禁用：
+
+/* #define TMPDIR "/var/tmp" */
+
+在 UNIX 中，如果此项未定义，TiMidity++ 将在环境变量 TMPDIR 指定
+的目录创建临时文件。如果 TMPDIR 也未定义，则在 /tmp 创建。在 Windows
+中，TMPDIR 变量被忽略，因此应通过此宏指定临时文件路径。
+
+** GS_DRUMPART
+
+通过 GS 专用消息识别 GS 鼓声部。
+
+#define GS_DRUMPART
+
+启用此功能。
+
+/* #define GS_DRUMPART */
+
+禁用此功能。
+
+* 日文处理相关选项
+
+有一些用于日文处理的选项。
+
+** JAPANESE
+
+如果系统为日文环境：
+
+#define JAPANESE
+
+否则注释掉：
+
+/* #define JAPANESE */
+
+** OUTPUT_TEXT_CODE
+
+指定输出文本编码（日文环境中）。可用的字符串有：
+
+AUTO
+  根据 LANG 环境变量自动检测 (仅 UNIX)
+ASCII
+  将不可读字符转换为 '.' (0x2e)
+NOCNV
+  不转换
+1251
+  从 windows-1251 转换到 koi8-r
+EUC
+  eucJP 输出
+JIS
+  JIS 输出
+SJIS
+  shift-JIS 输出
+
+在日文化 UNIX 系统中，以上所有值均可用。在 Windows 日文环境中，
+可用 "ASCII"、"NOCNV"、"SJIS"。如果环境不支持日文，请选择
+"ASCII" 或 "NOCNV"。
+
+此设置也可通过命令行控制。
+
+** MODULATION_WHEEL_ALLOW
+** PORTAMENTO_ALLOW
+** NRPN_VIBRATO_ALLOW
+** REVERB_CONTROL_ALLOW
+** FREEVERB_CONTROL_ALLOW
+** CHORUS_CONTROL_ALLOW
+** SURROUND_CHORUS_ALLOW
+** GM_CHANNEL_PRESSURE_ALLOW
+** VOICE_CHAMBERLIN_LPF_ALLOW
+** VOICE_MOOG_LPF_ALLOW
+** MODULATION_ENVELOPE_ALLOW
+** ALWAYS_TRACE_TEXT_META_EVENT
+** OVERLAP_VOICE_ALLOW
+** TEMPER_CONTROL_ALLOW
+
+MIDI 控制器的设置。默认为：
+
+#define MODULATION_WHEEL_ALLOW
+#define PORTAMENTO_ALLOW
+#define NRPN_VIBRATO_ALLOW
+/* #define REVERB_CONTROL_ALLOW */
+#define FREEVERB_CONTROL_ALLOW
+#define CHORUS_CONTROL_ALLOW
+/* #define SURROUND_CHORUS_ALLOW */
+/* #define GM_CHANNEL_PRESSURE_ALLOW */
+#define VOICE_CHAMBERLIN_LPF_ALLOW
+/* #define VOICE_MOOG_LPF_ALLOW */
+/* #define MODULATION_ENVELOPE_ALLOW */
+/* #define ALWAYS_TRACE_TEXT_META_EVENT */
+#define OVERLAP_VOICE_ALLOW
+#define TEMPER_CONTROL_ALLOW
+
+这些值可通过命令行选项更改，保持默认即可。
+
+======================================================================
+make 编译
+======================================================================
+
+编译只需输入 "make" 即可。
+
+...差点忘了，TiMidity++ 的 Makefile 需要 GNU 版本的 make。
+如果没有，请先获取。如果安装时使用了 "make" 以外的名称，
+请输入其实际名称。
+
+======================================================================
+安装
+======================================================================
+
+在 UNIX 及其兼容系统上，输入 "make install" 安装所有文件。
+也可以选择以下目标：
+
+install.bin
+  安装可执行文件
+install.tk
+  安装 Tcl/Tk 界面
+install.el
+  安装 Emacs 前端
+install.man
+  安装 man 手册页
+install
+  安装全部
+
+强烈建议在安装前通过 -n 选项确认安装目标：
+
+% make -n install
+
+======================================================================
+获取音源数据
+======================================================================
+
+TiMidity++ 本身不能发出声音。必须获取音源数据。可使用 GUS/patch
+或 SoundFont（或两者）作为音源数据。获取后需要编辑配置文件 (*.cfg)。
+默认配置文件为 /usr/local/share/timidity/timidity.cfg
+（Windows 中为 C:\WINDOWS\TIMIDITY.CFG）。
+
+音源数据在互联网上广泛存在，可从以下 URL 获取部分数据：
+
+* http://www.onicos.com/staff/iz/timidity/link.html#gus
+* http://www.onicos.com/staff/iz/timidity/dist/cfg/ (一些示例 *.cfg)
+* http://www.i.h.kyoto-u.ac.jp/~shom/timidity/ (10M 和 4M 音色包)
+* ftp://ftp.cdrom.com/pub/gus/sound/patches/files/ (GUS 站点)
+
+获取音色文件包后，解压到合适的目录，并在 *.cfg 中配置这些音源
+数据的名称和路径。

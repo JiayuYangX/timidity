@@ -1,0 +1,1330 @@
+2012-06-28  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configure.in: 将版本号改为 2.14.0
+
+2012-06-28  Yair K. <cesium2@gmail.com>
+
+	* interface/xaw_i.c: 在某些罕见情况下（具有特定构造文件名的文件，且 timidity 从同一目录执行），setDirACT 中缺少 NULL 检查可能导致崩溃。添加该检查。同时，为防万一再添加一个 NULL 检查。
+
+2012-06-26  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* NEWS: 为 2.14.0 添加新条目
+
+2012-06-25  Yair K. <cesium2@gmail.com>
+
+	* timidity/timidity.c: 如果 dl_load_file 失败，使 timidity 继续动态接口加载循环。之前，在该情况下它简单地返回 NULL，这意味着如果某个在目标接口之前加载的动态接口 dlopen 失败（例如，由于缺少依赖项或错误的符号链接），则根本无法加载所述目标（动态链接）接口。
+	* interface/TiMidity-uj.ad, interface/TiMidity.ad,
+	  interface/x_trace.c, interface/xaw_i.c: 使双击可以在对话框中打开/保存文件。同时移除了一些无用的类型转换，以及一个不再需要的操作（do-popdown()）。
+	* interface/x_trace.c: 使跟踪器在 Xft 情况下正确截断乐器名称列中的文本。
+
+2012-06-12  Yair K. <cesium2@gmail.com>
+
+	* interface/xaw_i.c: xaw 界面：多项修复
+	  - ARGB 转换器中存在一个差一错误。
+	  - 确保暂停按钮在未播放时不能被设置
+	  - 播放按钮反之亦然
+	  - 减少内存泄漏
+	* interface/TiMidity-uj.ad, interface/TiMidity.ad,
+	  interface/x_trace.c, interface/xaw_i.c, interface/xdnd.c:
+	  多项修复
+	  - 使播放按钮在自动启动已保存列表和保存文件时激活（两个代码块）。
+	  - 添加一些 const（大多数编译器不需要）
+	  - 将一些数字键盘的键符添加到资源文件中
+
+2012-06-05  Yair K. <cesium2@gmail.com>
+
+	* doc/C/README.xaw, interface/TiMidity-uj.ad,
+	  interface/TiMidity.ad, interface/xaw_i.c, interface/xdnd.c,
+	  interface/xdnd.h: xaw：正确设置 _NET_WM_ICON
+	  升级到新的 KDE 版本后，我注意到任务切换器不显示 timidity 的缩略图。显然它不认 WM_HINTS 位图。
+	  因此，附带的差异包含一个简单的转换器（1bit 位图->ARGB），用于正确设置 _NET_WM_ICON。它使用简单的 timidity.xbm 图标（我还有一个使用 pixmap/timidity.xpm 中的彩色图标的版本，但我更喜欢这个图标——我可以将其作为选项添加）。
+	  该差异还包括一些 #include 合理化以及资源重命名（"noPlaying" 在 .ad 文件与代码中的拼写不同）。
+
+2012-06-01  Takashi Iwai <tiwai@suse.de>
+
+	* interface/xskin_spectrum.c: [PATCH 1/9] 修复数组范围以下可能出现的无效访问
+	* interface/server_c.c: [PATCH 3/9] 修复 server_c.c:control_getcmd() 中参数的错误检查
+	  server_c.c:control_getcmd() 中的数组大小检查有误，因为 nparmas 在使用 MAX_GETCMD_PARAMS 检查之后才递增。此外，还存在其他错误，如当第一个 token 为 NULL 时 *nparams 未初始化等。
+	  总的来说，这段代码不必要地复杂。
+	  此补丁简化了代码并修复了数组大小检查。
+	  Bugzila: https://bugzilla.novell.com/show_bug.cgi?id=517719
+	* libunimod/mloader.c: [PATCH 4/9] 为函数声明添加缺失的 void 参数
+	* autoconf/utils.m4: [PATCH 5/9] 在 autoconf/utils.m4 中添加缺失的引号
+	* timidity/timidity.h: [PATCH 6/9] 添加 lzma 解压支持
+	* interface/emacs_c.c: [PATCH 7/9] 修复 emacs_c.c 中缺失的返回值
+	* timidity/smplfile.c: [PATCH 8/9] 修复 smplfile.c 中的类型双关问题
+	* autoconf/alsa.m4, autoconf/ao.m4, autoconf/arts.m4,
+	  autoconf/esd.m4, autoconf/gtk-2.0.m4, autoconf/gtk.m4,
+	  autoconf/libFLAC.m4, autoconf/libOggFLAC.m4,
+	  autoconf/ogg.m4, autoconf/vorbis.m4, configure.in:
+	  [PATCH 9/9] 使用 AS_HELP_STRING 使 --help 输出更具可读性
+
+2012-05-29  Yair K. <cesium2@gmail.com>
+
+	* doc/C/README.xaw, interface/TiMidity-uj.ad,
+	  interface/TiMidity.ad, interface/xaw_c.c, interface/xaw_i.c,
+	  interface/xaw_p.h: 使界面应用之前的音量。同时修复了一些小的显示问题（在以 '-ia' 启动并将 'Disp:Trace' 设置为 0 第一次初始化跟踪器时，移除 hidetrace 菜单项旁边的勾选标记；在没有文件加载时不允许激活播放按钮）。
+	* interface/x_trace.c, interface/x_trace.h, interface/xaw_i.c,
+	  interface/xdnd.c: 修复一些差一错误（其中一个阻止了在静音时显示通道编号[在跟踪模式下右键单击]，另一个在 xdnd.c 中导致 gcc -Wall 警告），并释放更多内存（减少 valgrind 警告）。
+	* timidity/miditrace.c: 恢复修复跟踪模式下的声音频谱
+
+2012-05-26  Hans de Goede <hdegoede@redhat.com>
+
+	* configure.in: configure：修复动态用户界面的构建
+	* timidity/mac_main.c, timidity/timidity.c: 添加 trysource 配置文件指令
+	  添加一个 "trysource" 配置文件指令，允许尝试引用其他配置文件，如果指定的文件缺失则继续运行而不报错。
+	  同时使用这一新功能清理了用户配置加载代码。
+	* interface/x_trace.c, interface/xaw_c.c: xaw 界面：修复 MAX_CHANNELS > 32 时的崩溃（由 Yair K.）
+	* configure.in, doc/C/README.xaw, interface/Makefile.am,
+	  interface/TiMidity-uj.ad, interface/TiMidity.ad,
+	  interface/x_trace.c, interface/x_trace.h, interface/xaw.h,
+	  interface/xaw_c.c, interface/xaw_i.c, interface/xaw_p.h,
+	  interface/xdnd.h: xaw 界面更新（由 Yair K.）
+	* timidity/timidity.h: 改进 timidity 默认设置（由 Yair K.）
+	* configure.in: configure：修复内置 X11 用户界面时的构建问题（由 Yair K. 报告）
+	* interface/xaw_i.c, interface/xdnd.c: 修复 clang 的编译器警告（由 Yair K.）
+	* interface/xaw_i.c: Xaw：修复 xdnd（由 Yair K.）
+
+2011-12-30  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* COPYING: 移除，因为是自动生成的文件
+	* Makefile.am, autogen.sh: 添加 autogen.sh
+
+2011-12-22  Hans de Goede <hdegoede@redhat.com>
+
+	* configure.in: [PATCH 18/18] configure：不要将 -lX11 添加到通用 LIBS 中
+	  这可以阻止 timidity 本身依赖 libX11，即使构建时没有内置任何需要 libX11 的接口。
+	  （由 TAMUKI Shoichi 修订）
+	* interface/x_sherry.c: 修复以适配 libpng 1.5 及更新版本
+
+2011-12-18  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* Makefile.in, aclocal.m4, autoconf/Makefile.in,
+	  autoconf/config.guess, autoconf/config.sub,
+	  autoconf/depcomp, autoconf/install-sh, autoconf/missing,
+	  autoconf/mkinstalldirs, config.h.in, configs/Makefile.in,
+	  configure, doc/C/Makefile.in, doc/Makefile.in,
+	  doc/ja_JP.eucJP/Makefile.in, interface/Makefile.in,
+	  interface/bitmaps/Makefile.in,
+	  interface/motif_bitmaps/Makefile.in,
+	  interface/pixmaps/Makefile.in, libarc/Makefile.in,
+	  libunimod/Makefile.in, script/Makefile.in,
+	  timidity/Makefile.in, utils/Makefile.in, windrv/Makefile.in:
+	  移除所有自动生成的文件
+
+2011-12-08  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/alsaseq_c.c: 大约 4 年前，合并了一个简单的补丁，它在不需要时禁用了 ALSA 音序器接口轮询。结果，当使用 ALSA 音序器接口时（timidity -iA -B2,8 -q0/0），导致了糟糕的声音。使用 "timidity -iA" 会有所改善，但实时响应太差，无法实际使用。
+	  因此，我恢复了该补丁作为临时解决方案。然后，又应用了另一个补丁，其工作正常。参见
+	  http://fedev.blogspot.com/2007/07/timidity-power-usage.html
+
+2011-12-07  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/playmidi.c: 大约 6 年前，合并了一个简单的补丁，它更改了在启用 opt_overlap_voice_allow 时持续音符不掉落的行为。也许这在某些情况下有好处，但它经常导致跟踪器显示缺失。因此，我恢复了该补丁作为临时解决方案。
+
+2011-12-06  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/Makefile.am, interface/timidity.el,
+	  interface/timidity.pel: 在 timidity.el 中自动设置 timidity 的绝对路径；添加待预处理的 timidity.pel 文件，并移除 timidity.el
+	* configure.in: 在 --enable-dynamic=emacs 和 --enable-dynamic=alsaseq 的情况下，分别使 make install 安装 timidity.el 和启用 ALSA 音序器接口的长选项（另外，autoreconf）
+
+2011-12-05  Hans de Goede <hdegoede@redhat.com>
+
+	* interface/tkmidity.ptcl, interface/tkpanel.tcl,
+	  script/dllutl.rb: [PATCH 11/17] 将 shebang 路径设为 /usr/bin/foo 而非 /usr/local/bin/foo
+	  这使打包者工作更轻松，需要使用非标准路径的人需要自行修复……
+	  （由 TAMUKI Shoichi 修订）
+
+2011-12-04  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configure.in: 支持 Tcl/Tk 8.5 并 autoreconf
+
+2011-12-04  Hans de Goede <hdegoede@redhat.com>
+
+	* timidity/esd_a.c: [PATCH 1/9] esd_a：不启动 ESD
+	  如果 ESD 尚未运行，不要启动它，尤其不要在 detect() 中启动！
+	* timidity/ao_a.c: [PATCH 2/9] libao：添加 detect() 函数
+	  目前大多数 Linux 发行版都使用 pulseaudio，而 libao 是从 timidity 使用 pulseaudio 的最佳方式。此补丁为 libao 添加了一个 detect 函数，它将使 libao 自动检测仅在 pulse 可用时成功，这样我们就可以在探测顺序中优先使用 libao 以获得 pulse，同时避免在应该直接使用 alsa 的系统上也使用 libao。
+	* timidity/output.c: [PATCH 3/9] 更改音频输出检测顺序
+	  首先尝试我们支持的各种桌面守护进程，仅在这些不可用时才使用系统原生声音系统。同时，在原生声音系统之前尝试 ALSA，因为 Linux 上的原生声音系统设置为 OSS，而 ALSA 绝对比 OSS 更优。
+	* doc/C/timidity.1, doc/C/timidity.cfg.5: [PATCH 4/9] 多项手册页修复
+	  由 Debian 提供（由 TAMUKI Shoichi 修订）
+	* interface/alsaseq_c.c, timidity/timidity.c: [PATCH 6/9] 当将在 ALSA 音序器模式下以守护进程运行时，更早 fork
+	  如果我们要为守护进程模式 fork，则需要更早 fork，因为某些输出库（pulseaudio）在 fork 之前初始化然后在子进程中使用会出问题。
+	* timidity/flac_a.c: [PATCH 7/9] flac_a：修复与新版 flac 的编译
+	  LEGACY_FLAC 测试仅在 Windows 上成功，因为 FLAC/export.h 位于 Windows #ifdef 块内。
+	  同时修复了各种编译器警告，包括至少 2 个真正的错误：
+	  1) 缺少 common.h 的包含意味着 safe_malloc 原型缺失，使编译器假定它返回 int -> 在 64 位上失败
+	  2) 错误处理测试中的 FLAC__STREAM_ENCODER_VERIFY_MISMATCH_IN_AUDIO_DATA 的 | 运算缺少 ()，并且一般来说这是错误的，因为这是一个枚举而不是标志字段。
+	* timidity/controls.c, timidity/effect.c, timidity/oss_a.c,
+	  timidity/playmidi.h, timidity/speex_a.c, timidity/wrd.h:
+	  [PATCH 8/9] 修复一系列：warning: implicit declaration of function ... 警告
+	* timidity/sndfont.c: [PATCH 9/9] sndfont：解决立体声样本之间缺少链接的 soundfont 文件问题
+	  某些 sf2 文件将其立体声样本之间的所有链接 ID 设置为 0，此补丁解决了该问题，至少对于在乐器层列表中直接相邻的 2 个匹配的左+右样本的文件有效。
+	* interface/gtk_i.c, interface/server_c.c, interface/tk_c.c,
+	  interface/wrdt_tty.c, interface/x_sherry.c, interface/xaw_c.c,
+	  interface/xaw_i.c, interface/xskin_c.c, libarc/unlzh.c,
+	  libunimod/load_far.c, libunimod/load_it.c, libunimod/mloader.c,
+	  libunimod/mlutil.c, timidity/ao_a.c, timidity/calcnewt.c,
+	  timidity/common.c, timidity/effect.c, timidity/esd_a.c,
+	  timidity/freq.c, timidity/instrum.c, timidity/loadtab.c,
+	  timidity/m2m.c, timidity/miditrace.c, timidity/output.c,
+	  timidity/playmidi.c, timidity/readmidi.c, timidity/recache.c,
+	  timidity/resample.c, timidity/reverb.c, timidity/smplfile.c,
+	  timidity/speex_a.c, timidity/timidity.c, utils/net.c,
+	  utils/nkflib.c: [PATCH 10/17] 修复/消除各种编译器警告
+	* configure.in: [PATCH 14/17] 消除关于 have_speex ac 缓存标识符的 autofoo 警告（由 TAMUKI Shoichi 进行 autoreconf）
+	* interface/Makefile.am, interface/dynamic_c.c,
+	  timidity/controls.c, timidity/timidity.c,
+	  (remove) interface/dynamic_c.c: [PATCH 15/17] 移除 dynamic_control_mode ControlMode
+	  这是 dynamic_interface_module() 重写之前的遗留物，不仅不再需要，其代码也是完全错误的，因为它仍然包含旧版 dynamic_interface_module() 的原型并尝试以旧版本的方式调用它，如果该代码路径被调用，将会发生糟糕的事情（tm）。幸运的是它从未被使用过，因此直接删除。（由 TAMUKI Shoichi 进行 autoreconf）
+	* timidity/dl_dlopen.c: [PATCH 16/17] 消除 dlsym 错误
+	  新的 dynamic_interface_module() 函数探测动态接口的方式导致只要拥有多个动态接口就总会遇到一些 dlsym 错误，因此消除这些错误。
+	* timidity/timidity.c: [PATCH 17/17] 修复 --help 输出中动态接口的列表显示
+
+2010-09-19  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/instrum.[ch]: 修复在上次提交中引入的一个错误，该错误偶尔会阻止替代乐器加载。
+	* timidity/instrum.c, timidity/readmidi.[ch]:
+	  修复一个错误：当使用 "soundfont" 指令时，忽略用户鼓声源乐器。
+	* timidity/playmidi.c: 修复一个错误：当使用 "soundfont" 指令指定 soundfont 且按需加载乐器时，忽略非标准鼓组。
+	* interface/w32g_pref.c: 修复潜在的未初始化指针访问。
+	* interface/w32g_syn.c: 为 twsyng 的一些菜单项添加访问键。
+
+2010-09-12  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/timidity.c (set_val_float_t):
+	  修复错误浮点值的错误消息。
+	* timidity/instrum.c: 修复一个错误：当使用 "soundfont" 指令指定 soundfont 时，忽略非标准鼓组。
+
+2010-08-28  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/timidity.c: 移除 LoadLibrary() 搜索路径中的当前目录，该函数在使用依赖 DLL 的输出格式时被调用。（Windows 可执行文件）
+	  Microsoft 安全公告 2269637 的快速修复。
+
+2010-07-10  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/sndfont.c: 修正 soundfont 中损坏的循环点，以避免重采样时的无限循环。
+
+2010-06-05  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/reverb.[ch]:
+	  修复插入效果 Lo-Fi 产生巨大噪音的问题。
+	* timidity/mix.c: Moog VCF 产生巨大噪音的临时解决方案。
+	* timidity/playmidi.c: 移除过时的滤波器频率上限。
+
+2010-05-23  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/readmidi.c, timidity/reverb.[ch]:
+	  修复 ch_3tap_delay 崩溃。
+	* timidity/sndfont.c:
+	  修复重用 soundfont 结构时的无限循环。
+
+2010-05-17  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/readmidi.c: 允许 XG SYSTEM ON 系统专用事件使用 0x10 以外的设备号。
+	* timidity/mix.c: 修复现有的用于表情、音量、声像等的防噼啪声最小音量渐变。
+	  将防噼啪声最小音量渐变扩展到包络幅度变化。
+
+2009-12-23  Yair K. <cesium2@gmail.com>
+
+	* timidity/sun_a.c (acntl):
+	  修复消息 PM_REQ_GETQSIZ, PM_REQ_GETFRAGSIZ。
+
+2009-12-19  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/readmidi.c: 修复加载长音乐时的崩溃。
+	* timidity/output.[ch], timidity/timidity.c:
+	  修复某些情况下默认设备编码损坏的问题。
+	* timidity/output.[ch], timidity/w32_a.c:
+	  修复 Windows 音频驱动程序 24 位输出。
+	* interface/w32g_syn.c: 更好的托盘图标移除。
+
+2009-10-04  Kentaro Sato <kentaro@ranvis.com>
+
+	* doc/C/timidity.1, doc/ja_JP.eucJP/timidity.1,
+	  timidity/reverb.[ch], timidity/timidity.c:
+	  为 --reverb 添加 Freeverb 参数选项。
+	* timidity/freq.c, timidity/sndfont.c:
+	  减少警告。
+
+2009-03-16  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/readmidi.c (gloom_list):
+	  修复程序变更时的 GM2 鼓通道问题
+	* timidity/playmidi.c (midi_drumpart_change): 美化
+
+2009-03-15  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/miditrace.c:
+	  修复跟踪模式下 Mac 声音频谱不同步的问题。
+	* timidity/reverb.c:
+	  恢复 r1.69 中导致差一错误的声像延迟更改。
+
+2009-03-15  Kentaro Sato <kentaro@ranvis.com>
+
+	* interface/w32g_c.c: 显示启动时报告的错误。
+	* interface/w32g_utl.c: 添加配置回退方案。
+	* timidity/midi_a.c: 移除未使用的局部变量。
+	* timidity/sndfont.c:
+	  CFG_FOR_SF_SUPPORT_FFT 可以从外部定义。（cfgforsf）
+
+2009-03-04  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/ncurs_c.c, timidity/readmidi.c:
+	  修复以适配 MAX_CHANNELS > 32
+	* timidity/playmidi.c (find_voice): 美化
+
+2008-12-06  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* configure.in: 修复 mingw 检测并用 ws2_32 替换 wsock32。
+	* timidity/w32_libOggFLAC_dll.c: 小修复。
+	* utils/getaddrinfo.c(新文件), utils/Makefile.am, utils/net.c:
+	  utils/net.h: Windows 2000 兼容网络。
+
+2008-05-22  Yair K. <cesium2@gmail.com>
+
+	* interface/xaw_i.c: 恢复一行代码。
+
+2008-05-22  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* utils/net.c: 修复不支持的 AI_ADDRCONFIG
+
+2008-05-21  Yair K. <cesium2@gmail.com>
+
+	* interface/server_c.c, libarc/url_ftp.c, libarc/url_http.c,
+	  libarc/url_news.c, timidity/timidity.c, utils/net.c:
+	  添加 ipv6 支持。
+	* timidity/sysdep.h: 包含更多可能的 LP64 定义。
+	* timidity/readmidi.c: 修复由 abc2mid 生成的损坏的卡拉 OK 文件。
+	* interface/xaw_i.c, interface/xaw.h: 使其兼容 xaw3d v1.5，样式更改。
+	* interface/TiMidity(-uj).ad: 将 useButtom、useRight 资源从 xaw_i.c 移至此。
+	* timidity/oss_a.c: 使用 0x7fff 参数获取最大片段数。稍微现代化 ioctls。
+
+2008-04-16  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* interface/w32g_pref.c: WIN64 与 AMD64 的小修复
+
+2008-04-16  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Yair K. 提供的补丁
+	* interface/xaw_i.c, interface/x_trace.c, interface/x_trace.h:
+	  xaw SIGSEGV 修复。
+
+2008-04-16  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Stas Sergeev 提供的一个补丁
+	* interface/alsaseq_c.c: 空闲时间补丁。
+
+2008-04-13  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* configure.in, doc/C/README.w32, doc/ja_JP.eucJP/README.w32,
+	  interface/Makefile.am, timidity/sysdep.h:
+	  更新关于为 Windows 编译的文件。
+	* interface/w32g.h, interface/w32g_c.c, interface/w32g_i.c,
+	  interface/w32g_pref.c, interface/w32g_ut2.c, interface/w32g_utl.c,
+	  timidity/controls.h, timidity/optcode.h, timidity/playmidi.c,
+	  timidity/sysdep.h, timidity/w32_a.c, timidity/reverb.c:
+	  支持 WIN64 与 AMD64
+
+2008-04-08  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/timidity.c: 修复隔代遗传（回退）并稍作更改
+
+2008-04-08  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/ao_a.c, timidity/portaudio_a.c, timidity/timidity.c,
+	  timidity/w32_a.c: 仅在 -o 选项中选���音频设备
+
+2008-04-06  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/timidity.c: 恢复输出设备 ID 的短选项 -Od(n)
+
+2008-04-06  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/w32_libFLAC_dll.c, timidity/w32_libFLAC_dll_g.h:
+	  支持新的 flac dll(1.2.1)
+
+2008-04-06  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/common.c, timidity/speex_a.c: 修复编译
+	* timidity/midi_a.c: Borland C 补丁
+
+2008-04-05  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/timidity.c: 移除输出设备 ID 的短选项 -Od(n)，因为 -O? 选项已被分配给输出格式
+	* TiMidity(-uj).ad, interface/Makefile.am: 修复小笔误，翻译成日语，并移至 interface 目录
+	TODO: 更新 timidity.1 手册页
+	      --output-devices=n
+	      --preserve-silence
+	TODO: 更新 ja_JP.eucJP/README.xaw
+
+2008-04-03  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Yair K. 提供的补丁
+	* interface/Makefile.am, bitmaps/Makefile.am, interface/arrow.xbm,
+	  interface/check.xbm, interface/off.xbm, interface/on.xbm: 移除
+
+2008-04-02  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Yair K. 提供的补丁
+	* timidity/common.c, common.makefile.in, configure.in,
+	  doc/C/README.xaw, interface/arrow.xbm, interface/check.xbm,
+	  interface/Makefile.am, interface/off.xbm, interface/on.xbm,
+	  interface/xaw_c.c, interface/xaw.h, interface/xaw_i.c,
+	  Makefile.am, Makefile.in, script/unix2dos.sh, timidity/aiff_a.c,
+	  timidity/au_a.c, timidity/common.c, timidity/flac_a.c,
+	  timidity/gogo_a.c, timidity/m2m.c, timidity/midi_a.c,
+	  timidity/modmid_a.c, imidity/output.h, timidity/playmidi.c,
+	  timidity/raw_a.c, timidity/speex_a.c, timidity/vorbis_a.c,
+	  timidity/wave_a.c: XAW 界面的一些改进。
+	* interface/bitmaps/arrow.xbm, interface/bitmaps/check.xbm,
+	  interface/bitmaps/fast.xbm, interface/bitmaps/keydown.xbm,
+	  interface/bitmaps/keyup.xbm, interface/bitmaps/off.xbm,
+	  interface/bitmaps/on.xbm, interface/bitmaps/slow.xbm,
+	  interface/xdnd.c, interface/xdnd.h, interface/x_trace.c,
+	  interface/x_trace.h, TiMidity.ad, TiMidity-uj.ad: 添加
+	* TiMidity.ad.in, TiMidity-uj.ad.in: 移除
+
+2008-04-01  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Milan Zamazal 提供的一个补丁
+	* timidity/playmidi.c, timidity/playmidi.h, timidity/readmidi.c,
+	  timidity/timidity.c: 添加 preserve-silence 选项
+
+2008-03-31  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Yair K. 提供的一个补丁
+	* configure.in, utils/support.c, utils/support.h: 修复 snprintf 崩溃
+
+2008-03-30  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	Yair K. 提供的补丁
+	* libarc/arc_tar.c: 修复存档添加崩溃
+	* timidity/reverb.c: 修复来自 Debian 的混响崩溃
+	* timidity/miditrace.c: 修复跟踪模式下的声音频谱
+	* autoconf/utils.m4, configure.in, timidity/Makefile.am,
+	  timidity/midi_a.c, timidity/output.c, timidity/reverb.c,
+	  timidity/reverb.h, timidity/sun_a.c, timidity/sysdep.h:
+	  支持 OpenBSD
+
+2008-03-28  Stas Sergeev <stsp@aknet.ru>
+
+	* timidity/midi_a.c: 移除 gnu 扩展
+
+2007-03-10  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* interface/npsyn_c.c, interface/rtsyn.h, interface/rtsyn_common.c,
+	  interface/rtsyn_npipe.c, timidity/npipe_a.c, timidity/playmidi.c,
+	  timidity/portaudio_a.c, timidity/timidity.c, utils/timer.c:
+	  Windows 命名管道接口。
+
+2007-02-09  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* interface.h.in: Windows 命名管道接口
+	* timidity/timidity.c: 修复笔误
+
+2007-02-09  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* configure.in, interface/Makefile.am, interface/rtsyn.h,
+	  interface/rtsyn_common.c, timidity/Makefile.am, timidity/output.c,
+	  timidity/timidity.c, timidity/controls.c:
+	  Windows 命名管道接口（新）
+	* interface/npsyn_c.c, interface/rtsyn_npipe.c, timidity/npipe_a.c:
+	  （添加）
+	* timidity/resample.c: 修复释放 gauss_table 的小问题。
+	* windrv/timiditydrv.c, windrv/timiwp_timidity.c:
+	  修复 WindowsMediaPlayer 相关问题。
+
+2007-01-28  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* interface/rtsyn_common.c: 修复系统专用检查
+	* timidity/portaudio_a.c, timidity/w32_a.c: 编译小修复
+	* timidity/timidity.c: w32 配置文件顺序更改（选项 > exe 目录 > win 目录）。w32 设置 stdin&out 为二进制模式
+	* windrv/Makefile.am, windrv/timiditydrv.idl: 重新添加 timidity.idl
+	* windrv/timiditydrv.c: 重新添加 MIDIOUTCAPS2A(W)
+
+2007-01-14  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/flac_a.c, timidity/gogo_a.c, timidity/speex_a.c,
+	  timidity/vorbis_a.c, timidity/wave_a.c, timidity/output_a.c:
+	  修复自动文件名
+
+2007-01-13  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/wave_a.c: 修复服务器接口。
+
+2007-01-12  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/wave_a.c: 修复自动文件名。
+
+2007-01-05  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/timidity.c (main): 修复当给定 "." 或不存在的存档名称时避免段错误
+
+2007-01-04  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	修复 -iW 和 timiditydrv.dll 声音问题。
+	* timidity/portaudio_a.c: 修复缓冲区溢出。
+
+2007-01-04  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/midi_a.c (M_FWRITE):
+	  保持对 gcc-2.95 及更早版本的向后兼容性
+	* timidity/timidity.c (parse_opt_output_device): 稍作更改
+
+2007-01-03  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	修复 -iW 和 timiditydrv.dll 声音问题。
+	* timidity/portaudio_a.c: 移除损坏的 acntl()。
+
+2007-01-01  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/timidity.c, timidity/w32_a.c,
+	  timidity/portaudio_a.c: 可以选择输出设备。
+
+2007-01-01  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/playmidi.[ch], timidity/readmidi.c:
+	  添加了对 GM2 主精细/粗调音、GS 主调音和 XG 主调音（4C 而非 27）系统专用的支持。
+	* timidity/readmidi.c: 修复疑似的笔误。
+	* libarc/unlzh.c: 恢复上次提交中一个无用的修复。
+
+2006-12-30  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* interfece/w32g_pref.c: 可以通过环境变量 TIMIDITY_CFG_EDITOR 更改 timidity.cfg 编辑器。
+
+2006-12-29  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/controls.[ch]: 更改 std_write() 的参数类型。
+	* timidity/midi_a.c: 改进系统独立性。
+	* libarc/unlzh.c: 修复命名为 CVE-2006-4335、CVE-2006-4337、CVE-2006-4338 的漏洞。
+
+2006-12-27  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/portaudio_a.c: 错误修复
+	* interface/w32g_pref.c, interface/w32g_pref.h,
+	  w32_portaudio_dll.c: Win GUI 中的 asio 对话框。
+
+2006-12-26  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/portaudio_a.c,
+	  timidity/w32_portaudio_dll.c: 修复 portaudio v19 支持，现在只使用一个名为 portaudio.dll 的 dll。
+
+2006-12-23  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* windrv/Makefile.am, windrv/timiditydrv.c: 摆脱 idl
+	* windrv/timiditydrv.idl: 已移除
+	* windrv/oemsetup.inf: 已移除
+	* doc/C/README.w32, doc/ja_JP.eucJP/README.w32: 已更新
+
+2006-12-23  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* configure.in, doc/C/README.w32, doc/ja_JP.eucJP/README.w32,
+	  interface/Makefile.am, interface/ncurs_c.c,
+	  interface/rtsyn_common.c, interface/rtsyn_winmm.c,
+	  interface/w32g_syn.c, interface/winsyn_c.c,
+	  interface/wrdt_w32g.c, libarc/Makefile.am, libarc/url_file.c,
+	  libarc/url_ftp.c, libarc/url_http.c, libarc/url_mem.c,
+	  libarc/url_news.c, libarc/url_newsgroup.c, libunimod/Makefile.am,
+	  libunimod/unimod.h, timidity/Makefile.am, timidity/aiff_a.c,
+	  timidity/aq.c, timidity/au_a.c, timidity/controls.c,
+	  timidity/flac_a.c, timidity/gogo_a.c, timidity/list_a.c,
+	  timidity/midi_a.c, timidity/miditrace.c, timidity/mod2midi.c,
+	  timidity/playmidi.c, timidity/playmidi.h, timidity/portaudio_a.c,
+	  timidity/raw_a.c, timidity/readmidi.c, timidity/recache.c,
+	  timidity/sndfont.c, timidity/sysdep.h, timidity/timidity.c,
+	  timidity/w32_a.c, timidity/w32_gogo.c,
+	  timidity/w32_libFLAC_dll.c, timidity/w32_libOggFLAC_dll.c,
+	  timidity/wave_a.c, utils/Makefile.am, utils/mblock.c,
+	  utils/readdir.h, utils/readdir_win.c, utils/support.c,
+	  utils/tmdy_getopt.h, windrv/Makefile.am: Pelles C 编译器支持
+
+2006-12-21  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	C++ 依赖被移除。
+	* configure.in: 移除 AC_PROG_CXX，始终为 midi_a.c 链接 winsock32
+	* windrv/timiditydrv.cpp: 已移除
+	* windrv/timiditydrv.c: 已添加
+	* windrv/Makefile_am: 移除 C++ 依赖
+
+2006-12-20  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/midi_a.c: Windows 编译器支持。
+	* timidity/effect.c: 移除重复定义。
+
+2006-12-18  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* timidity/midi_a.c: u_int8_t 必须是 uint8_t。
+	* timidity/flac_a.c: 修复 mingw 相关。
+
+2006-12-18  Keishi Suenaga <skeishi@yahoo.co.jp>
+
+	* autoconf/ogg.m4: 来自 libogg-1.1.3.tar.gz
+	* autoconf/vorbis.m4: 来自 libvorbis-1.1.2.tar.gz
+	* timidity/portaudio_a.c: 错误修复
+
+2006-12-14  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 扩展 midi 协议。
+	* timidity/midi_a.c: 新文件。
+
+2006-12-13  URABE Shyouhei <shyouhei@ruby-lang.org>
+
+	* timidity/flac_a.c: 合并来自 FLAC 团队的补丁。
+	* interface/xaw_i.c: 合并修复 gcc4 编译问题的补丁。
+	* interface/alsaseq_c.c, interface/emacs_c.c, interface/gtk_c.c,
+	  interface/mac_c.c, interface/motif_c.c, interface/ncurs_c.c,
+	  interface/portmidisyn_c.c, interface/server_c.c,
+	  interface/tk_c.c, interface/w32g_c.c, interface/w32g_syn.c,
+	  interface/winsyn_c.c, interface/xaw_c.c, interface/xskin_c.c,
+	  timidity/controls.h, timidity/playmidi.c, timidity/playmidi.h,
+	  timidity/sndfont.c, timidity/timidity.c:
+	  传播返回码
+
+2006-07-27  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* timidity/timidity.c (open_file): 修复随机播放时的核心转储。（释放文件问题）
+
+2006-06-02  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/common.c (open_file): 仅在加载 GUS/patch 乐器时忽略目录，以避免在 {gtk,motif,tcltk} 界面和 WRD 显示中出现问题
+	* timidity/timidity.c (main): 恢复修复：当路径*是*目录但*没有*以 '/' 为后缀时，为每个 argv 元素添加后缀 '/' 的补丁
+
+2006-05-31  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/instrum.c, timidity/readmidi.c:
+	  恢复并修复替代分配相关的问题
+
+2006-05-28  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/mac_c.c, interface/motif_c.c, interface/vt100_c.c,
+	  interface/xaw_c.c, timidity/sndfont.c:
+	  添加 ControlMode 的结构成员以适配新接口
+
+2006-05-26  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/timidity.c (main): free(files[i]) 循环通过释放之前已释放的内存导致段错误。files[] 中的字符串作为单个块分配，由 files[0] 指向，然后其他字符串指针指向 files[0] 块内的各个字符串。因此只应释放 files[0]。
+
+2006-05-12  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* coufigure.in: 修复 CFLAGS 问题
+
+2006-05-06  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: 添加 wcc386 检查。
+
+2006-04-14  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 添加 midi 协议。
+
+2006-03-21  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/aq.c: 使用了退出时释放的功能。
+	* timidity/instrum.c: 恢复了不必要的 r1.24 更改。
+	* timidity/resample.c: 恢复 gauss_table 为可重新分配，以允许接口动态更改 N-order。无泄漏。
+	* timidity/timidity.c: 恢复了 r1.173 围绕 mblock 的更改。
+	* libarc/arc.c: 更好的路径分隔符跳过。
+
+2006-03-19  Stas Sergeev <stsp@aknet.ru>
+
+	* timidity/timidity.c (main): dynamic_lib_root 的动态分配
+	* interface/server_c.c: 节省 CPU 功耗
+
+2006-02-04  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* configure.in, doc/ja_JP.eucJP/README.w32, timidity/Makefile.am,
+	  windrv/Makefile.am, windrv/timiditydrv.cpp, windrv/timiditydrv.def:
+	  timiditydrv.dll 可以使用 Digital Mars 编译
+	* timidity/portaudio_a.c: 使用 portaudio 启用 WRD。
+	* timidity/playmidi.c, interface/rtsyn_common.c, timidity/instrum.c,
+	  timidity/readmidi.c: 修复未释放的内存。
+
+2006-01-29  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* timidity/playmidy.c: 导出 reet_midi();
+	* interface/rtsyn_common.c: 错误修复
+	* timidity/portaudio_a.c: 延迟根据接口特性更改。
+
+2006-01-28  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	内存泄漏修复（使用 win_and dumb win_gui 检查）
+	* interface/w32g.h, interface/w32g_mag.c, interface/w32g_mag.h,
+	  interface/w32g_playlist.c, interface/w32g_subwin.c,
+	  interface/w32g_subwin.h, interface/w32g_utl.c, interface/w32g_utl.h,
+	  libarc/arc.c, timidity/aq.c, timidity/aq.h, timidity/instrum.c,
+	  timidity/instrum.h, timidity/playmidi.c, timidity/readmidi.c,
+	  timidity/readmidi.h, timidity/recache.c, timidity/recache.h,
+	  timidity/resample.c, timidity/resample.h, timidity/sffile.c,
+	  timidity/sndfont.c, timidity/timidity.c, timidity/wrdt.c,
+	  windrv/timiwp_timidity.c, interface/rtsyn_common.c:
+	  不在声音之间使用 free_global_mblock();
+
+2006-01-25  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* windrv/mmddk.h: 添加。LGPL 版本。
+	* windrv/Makefile.am, doc/ja_JP.eucJP/README.w32, doc/C/README.w32:
+	  不再依赖 NTDDK。
+	* interface/rtsyn_common.c: 使用选项 -U 调用 free_global_mblock()
+	* timidity/readmidi.c: Mingw gcc3 和 Borland C 技巧
+
+2006-01-23  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* timidity/mix.c, timidity/optcode.c, timidity/optcode.h,
+	  timidity/playmidi.c, timidity/reverb.c, timidity/timidity.c,
+	  timidity/wrd.h, timidity/wrdt.c: 抑制 Borland C 内联警告。
+
+2006-01-23  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* timidity/readmidi.c: XG 混响修复
+	* timidity/sysdep.h: Digital Mars 修复
+
+2006-01-21  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* timidity/portaudio_a.c: 错误修复
+	* interface/w32g_syn.c: Digital Mars 编译修复
+	* timidity/effect.c: 噪声整形噪声修复。
+
+2006-01-19  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	可以使用 Digital Mars 编译。
+	* configure.in, interface/Makefile.am, libarc/Makefile.am,
+	  libunimod/Makefile.am, timidity/Makefile.am, utils/Makefile.am,
+	  timidity/common.c, timidity/list_a.c, timidity/timidity.c,
+	  utils/support.c: 针对 Digital Mars 的更改。
+	* timidity/effect.c.orig: 噪声整形噪声技巧。
+	* script/unix2dos.sh: 添加。换行符转换（LF->CRLF）。
+
+2006-01-17  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* interface/w32g.h: 修复 LCD 数组大小不匹配导致的挂起。
+	* interface/w32g_pref.c, interface/w32g_utl.c:
+	  修复超过 256 个声音时 Win GUI 挂起的问题。
+	* timidity/reverb.h: 小修复。
+
+2006-01-16  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	抑制关于 Windows GUI 可执行文件的链接器错误。
+	* configure.in: 整理。
+	* interface/Makefile.am: 不将 tty 和 dumb 目标文件链接到 GUI 可执行文件。
+	* interface/w32g_i.c: Borland C volatile 链接问题修复。
+	* interface/w32g_ut2.c.orig: 小修复。
+	* timidity/controls.c, timidity/timidity.c, timidity/wrdt.c:
+	  GUI 可执行文件不使用 dumb 或 tty 控制。
+	* timidity/reverb.c: 不要在 .h 文件中定义公共变量。
+
+2006-01-15  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* configure.in: MSVC 编译修复
+	* windrv/timiditydrv.cpp: 使用 _beginthreadex 而非 CreateThread
+	* doc/ja_JP.eucJP/README.w32: 笔误
+	* script/Makefile.am: 添加 script/wpp386_w.sh
+	* interface/ncurs_c.c: 修复
+
+2006-01-12  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* doc/C/README.w32, doc/ja_JP.eucJP/README.w32:
+	  添加 wine wrc.exe 说明
+	* interface/Makefile.am: 添加 rc.exe 日语语言选项 -l0x11
+
+2006-01-12  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* configure.in: 添加 mkstemp 检查
+	* doc/C/README.w32, doc/ja_JP.eucJP/README.w32:
+	  关于 timiditydrv 编译
+	* windrv/Makefile.am: 改为使用 midl.exe
+	* windrv/dlldata.c, windrv/timiditydrv.h, windrv/timiditydrv_i.c,
+	  windrv/timiditydrv_p.c:
+	  已移除，因为将由 midl.exe 生成。
+
+2006-01-08  Keishi Suenaga <s_keishi@mutt.freemai.ne.jp>
+
+	* configure configure.in, utils/tmdy_getopt.h, doc/C/README.w32,
+	  doc/ja_JP.eucJP/README.w32, script/wcc386_w.sh, timidity/au_a.c,
+	  timidity/wave_a.c, utils/support.h: 针对 OpenWatcom 1.4 的更改
+
+2005-12-19  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 添加服务器版本。
+
+2005-12-03  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 不要忽略 SIGPIPE
+
+2005-11-26  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c (parse_opt_i): 修复当接口插件未找到时可能的空指针解引用。
+
+2005-11-26 Stas Sergeev <stsp@aknet.ru>
+
+	* interface/ncurs_c.c, interface/dumb_c.c, interface/slang_c.c,
+	  interface/tk_c.c, interface/emacs_c.c, interface/xskin_c.c,
+	  interface/gtk_c.c, interface/server_c.c, interface/alsaseq_c.c,
+	  interface/dynamic_c.c, timidity/controls.h, timidity/tables.c,
+	  timidity/raw_a.c, timidity/controls.c, timidity/flac_a.c,
+	  timidity/vorbis_a.c, timidity/au_a.c, timidity/wave_a.c,
+	  timidity/aiff_a.c, timidity/speex_a.c:
+	  当输出到 stdout 没有意义时发出警告
+
+2005-11-15  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/sysdep.h: [timidity-bugs-en:61] 添加 stdint.h 检查
+
+2005-11-02  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/playmidi.c: 更改了在启用 opt_overlap_voice_allow 时持续音符不掉落的行为。
+	* interface/rtsyn.h: 为 <sys/types.h> 添加了 #ifdef。
+
+2005-11-01  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* doc/ja_JP.eucJP/README.tk: 不是 -itt 而是 -ikt（感谢 AOKI Taichi @naist）
+
+2005-10-31  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 修复时序错误
+
+2005-10-31  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/timidity.c: 稍作更改
+
+2005-10-31  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* Makefile.am, configure.in, doc/C/README.w32, timidity/Makefile.am,
+	  timidity/timidity.c: 更改的文件
+	* windrv/Makefile.am, windrv/dlldata.c, windrv/oemsetup.inf,
+	  windrv/timiditydrv.cpp, windrv/timiditydrv.def,
+	  windrv/timiditydrv.h, windrv/timiditydrv.i,
+	  windrv/timiditydrv.idl, windrv/timiditydrv.inf,
+	  windrv/timiditydrv_i.c, windrv/timiditydrv_p.c,
+	  windrv/timiwp_timidity.c, windrv/timiwp_timidity.h:
+	  Windows 驱动程序已合并（新文件）
+
+2005-10-31  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* timidity/portaudio_a.c: ASIO4ALL 修复
+	* interface/rtsyn.h, interface/rtsyn_common.c: 稍作更改
+
+2005-10-30  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/playmidi.c, timidity/sndfont.c, timidity/timidity.c:
+	  稍作更改
+
+2005-10-28  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* timidity/w32_gogo.h: 小修复
+	* interface/w32g_utl.c, interface/w32g_syn.c: 针对 gcc4 Windows 的更改
+	* interface/rtsyn_portmidi.c, interface/rtsyn_winmm.c,
+	  timidity/playmidi.c, interface/rtsyn.h, timidity/instrum.h,
+	  timidity/sndfont.c, interface/rtsyn_common.c, timidity/timidity.c:
+	  新版 Windows 合成器模式。（新的 Windows 合成器）
+	  引入 --rtsyn-latency=(seconds) 长选项。
+	* doc/C/README.w32, doc/ja_JP.eucJP/README.w32: 相关更改。
+
+2005-10-22  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 修复 cmd_setbuf
+
+2005-09-30  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/xaw_i.c, interface/server_c.c, interface/soundspec.c,
+	  interface/motif_i.c, libarc/url_newsgroup.c, libarc/url_http.c,
+	  libarc/url.c, libarc/url_ftp.c, libarc/url_file.c,
+	  libarc/url_news.c, timidity/audriv_mme.c, timidity/wrd_read.c:
+	  使用 stderr 而不是 stdout
+
+2005-09-30  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/mod2midi.c: 将 ME_KEYPRESSURE 相关代码定义掉
+
+2005-09-28  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* interface/Makefile.am (EXTRA_DIST, install.dynamics):
+	  抱歉，此文件已损坏。
+
+2005-09-26  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c: 当 stdin 是管道时使用 stdout。
+
+2005-09-23  Stas Sergeev <stsp@aknet.ru>
+
+	* interface/server_c.c (cmd_open): 安全修复。
+
+2005-09-23  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: FreeBSD 的 tcltk 命名为 libtcl84 和 libtk84
+	* timidity/timidity.c (list_dyna_interface): 将动态接口列表器更改为某种试错机制。
+	* interface/*.txt: 已删除。（不再使用）
+
+2005-09-22  Mikhail Teterin <mi@aldan.algebra.com>
+
+	* timidity/playmidi.c (process_sysex_event): 修复笔误
+
+2005-09-22  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/smplfile.c: 修复当 Sampler 块的 dwSamplePeriod 错误地为 0 时可能发生的崩溃。
+
+2005-05-08  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c (dynamic_interface_module): 重写。
+	* timidity/dl_dyld.c (dl_find_symbol): 修复潜在的缓冲区溢出
+	* timidity/dl_dyld.c (dl_free): 实现 dl_free()
+
+2005-04-03  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/sndfont.c: 修复以编译 cfgforsf。
+
+2004-12-22  Ed Catmur <ed@catmur.co.uk>
+
+	* interface/gtk_i.c (Launch_Gtk_Process): 修复 GTK-2.6.0 中的断言错误
+
+2004-12-08  Kentaro Sato <kentaro@ranvis.com>
+
+	* libarc/arc.c:
+	  修复了紧接在 # 之后跳过平台特定路径分隔符的问题。
+
+2004-12-04  Henrique de Moraes Holschuh <hmh@debian.org>
+
+	* timidity/aRts_a.c (open_output): 修复 gcc >= 3.4.x [timidity-bugs-en:00025]
+
+2004-12-02  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* interface/ncurs_c.c: [timidity-bugs-ja:00118]
+	* timidity/timidity.c (list_dyna_interface): 错误修复：cmp 可能未初始化
+
+2004-11-03  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/resample.c (rs_vib_bidir): 禁用此函数的 PRECALC_LOOPS
+
+2004-11-03  Henrique de Moraes Holschuh <hmh@debian.org>
+
+	* timidity/aRts_a.c: 禁用 aRts 自动检测以避免段违规
+
+2004-11-03  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c (list_dyna_interface): 同上
+	* interface/dynamic_c.c (ctl_open): 修复编译错误
+
+2004-11-03  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/playmidi.c: 修复以正确处理非线性力度级别
+
+2004-10-27  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configure, autoconf/utils.m4, doc/{C,ja_JP.eucJP}/readme.dl,
+	  interface/Makefile.{am,in}, interface/{dumb,ncurs,slang,motif,tk,
+	  emacs,vt100,xaw,xskin,dynamic,mac,gtk,server,alsaseq,w32g,winsyn,
+	  portmidisyn}_c.c, timidity/controls.h, timidity/timiidty.c:
+	  修复以适配不区分大小写的文件系统
+	* interface/interface_[nsmkeTaigA].txt: 移除
+	* interface/if_{ncurses,slang,motif,tcltk,emacs,vt100,xaw,xskin,
+	  gtk,alsaseq}.txt: 添加
+
+2004-10-21  Henrique de Moraes Holschuh <hmh@debian.org>
+
+	* timidity/mod2midi.c (Voice_Play, Voice_SetPeriod):
+	  改进当 period2note 返回 -1 时的代码路径
+
+2004-10-21  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/mod2midi.c (period2note):
+	  当返回无效 period 时初始化 *finetune
+	* timidity/mod2midi.c (load_module_samples):
+	  没有名称的样本导致 NULL 指针读取
+	* timidity/mod2midi.c (period2note):
+	  删除多余的 \n
+
+2004-10-18  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* libunimod/mlutil.c (getAmigaPeriod): 避免除以零
+	* timidity/mod2midi.c: 将所有 VERB_NORMAL 和 VERB_VERBOSE 消息更改为 VERB_NOISY。
+
+2004-10-17  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* libunimod/mloader.c (SL_LoadSamples): 函数 `FreeSampleList' 的参数过多
+	* timidity/common.c, timidiyt/timidiyt.c: 避免 time.h 和 sys/time.h 的冲突
+	* timidity/aq.c: 修复错误原型（int -> void）
+	* timidity/wrd_read.c: #ifdef 移除未知 pragma
+	* configure.in, timidity/timidity.c: 不需要 <stdbool.h>
+	* timidity/Makefile.am: 错误修复
+
+2004-10-14  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* interface/w32g_i.c (MPanelMessageHaveMesssage): 修复笔误
+	* autoconf/alsa.m4, autoconf/ao.m4, autoconf/arts.m4,
+	  autoconf/esd.m4, autoconf/gtk-2.0.m4, autoconf/gtk.m4,
+	  autoconf/libFLAC.m4, autoconf/libOggFLAC.m4, autoconf/ogg.m4,
+	  autoconf/utils.m4, autoconf/vorbis.m4: 修复 M4 宏中引号不足问题。
+
+2004-10-09  Kentaro Sato <kentaro@ranvis.com>
+
+	* interface/mac_c.c, interface/wrdt_mac.c, timidity/wrd.h,
+	  utils/support.c: 修复以在 Mac OS 上编译。
+
+2004-10-03  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* NEWS: 为 2.13.2 添加新条目
+	* configure.in: 将版本号改为 2.13.2
+
+2004-10-02  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* interface/wrdt_wcon.c: 修复 print_ecmd() 的双重定义
+	* timidity/timidity.c (main): s/strcat/strncat/;
+
+2004-09-29  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* NEWS: 为 2.13.1 添加新条目
+
+2004-09-28  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: 将版本号改为 2.13.1
+
+2004-09-27  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* utils/support.c (vsnprintf): 确保 snpritnf() 返回以 \0 结尾的字符串
+	* interface/mac_c.c, interface/server_c.c, interface/w32g_c.c,
+	  interface/w32g_i.c, interface/wrdt_dumb.c, interface/wrdt_mac.c,
+	  interface/wrdt_tty.c, interface/wrdt_w32g.c, interface/xaw_i.c,
+	  interface/xskin_i.c, libarc/arc.c, timidity/audriv_al.c,
+	  timidity/audriv_mme.c, timidity/common.c, timidity/mac_qt_a.c,
+	  timidity/sun_a.c, timidity/timidity.c, timidity/wrdt_read.c:
+	  修复以使用 strn* 函数。
+
+2004-09-23  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* utils/support.h: 同上
+	* utils/support.c: 同上
+	* configure.in: 添加 strlcpy 和 strlcat
+
+2004-09-15  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/resample.c: 重新实现边界检查
+
+2004-09-09  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* interface/gtk_c.c (ctl_total_time): 同上。
+	* interface/gtk_i.c (handle_input): 修复计数器溢出（修复 [timidity-bugs-en:00032]）
+	* NEWS: 修复笔误。
+
+2004-09-07  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* freq.c: 大部分重写
+	  新的音高和和弦检测算法，比以前更稳健和准确。
+	* sndfont.c (main): CFG_FOR_SF_SUPPORT_FFT 相关代码已修改以适配新的 freq.c
+
+2004-09-03  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c: 添加 null_play_mode（修复 [timidity-bugs-en:00031]）
+	* timidity/timidity.c (parse_opt_h): 添加 show_ao_device_info() 的原型
+	* timidity/readmidi.c (check_midi_file): 修复以识别 .rmi 和 .mfi（修复 [timidity-bugs-en:00030]）
+
+2004-09-01  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c : 修复 W32 中的链接错误
+	* utils/support.h (S_ISDIR): 为没有 S_ISDIR 的平台定义 S_ISDIR
+	* interface/xaw_i.c: 避免在未启用跟踪器时文件选择器全黑，感谢 hmh@debian.org
+
+2004-08-28  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* playmidi.c (new_chorus_voice, new_chorus_voice_alternate):
+	  v1 和 v2 现在正确交换
+	* playmidi.c (process_sysex_event):
+	  对 XG 系统专用解析的多项修复
+	* readmidi.c: (parse_sysex_event_multi):
+	  对 XG 系统专用解析的多项修复
+	* reverb.c (do_filter_lowpass1_stereo):
+	  p->x1l 和 p->x1r 现在正确更新
+
+2004-08-22  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/mix.c (next_stage):
+	  在启用 opt_tva_attack 和/或 opt_tva_decay 时，缩放包络速率后添加了边界检查。这修复了当这些选项启用时之前出现的音符过短/无声问题。
+
+2004-07-10  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/alsaseq_c.c, interface/rtsyn_common.c,
+	  timidity/playmidi.c:
+	  抑制 MIDI 序列开头的强制调号移调
+
+2004-07-01  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/alsaseq_c.c, interface/rtsyn_common.c,
+	  timidity/playmidi.c:
+	  调整强制调号移调使演奏感觉自然
+
+2004-06-30  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/alsaseq_c.c, interface/rtsyn_common.c,
+	  timidity/playmidi.[ch], timidity/readmidi.c,
+	  timidity/timidity.[ch]:
+	  将 -K 和 -T 命令选项的结果反映到接口上
+	  改进强制调号计算
+	  将小节（bar）计数器的基数更改为 1（原先为 0）
+
+2004-06-14  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/loadtab.c, timidity/tables.[ch]:
+	  修复 -Z 命令选项中的错误
+
+2004-06-09 Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* timidity/reverb.c, timidity/tables.c,
+	  doc/C/README.w32, doc/ja_JP.eucJP/README.w32:
+	  针对 CbuilderX 的小修复。
+
+2004-06-02  Kentaro Sato <kentaro@ranvis.com>
+
+	* utils/support.[ch]: 为 Mac OS 实现了 stat() 的子集。
+
+2004-06-02  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* utils/support.h: 添加处理没有 <sys/stat.h> 的情况
+	* timidity/common.c: HAVE_SYS_STAT_H 的重生
+
+2004-06-01  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c (canonicalize_path): 修复笔误
+	* timidity/common.c: 修复 VC6 上的编译问题。
+
+2004-05-31 Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* configure.in:
+	  使用 Open Watcom 时必须使用动态链接运行时库。
+
+2004-05-31  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/common.c (open_file): 搜索普通文件时忽略目录
+	* timidity/timidity.c (main): 当路径*是*目录但*没有*以 '/' 为后缀时，为每个 argv 元素添加后缀 '/'。
+
+2004-05-31  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* timidity/instrum.h, timidity/instrum.c, timidity/m2m.c,
+	  timidity/mod2midi.c, timidity/playmidi.c, timidity/sndfont.c:
+	  在 instrum.h 中的 Sample 类型中添加了 root_freq_detected、transpose_detected 和 chord 变量。如果启用了环绕合唱，则对鼓和 MOD 样本应用音高检测。这允许确定渲染声音的真实音高，从而可以通过选择不接近半个周期的合唱延迟来避免环绕合唱声音抵消。
+	* playmidi.c (new_chorus_voice_alternate): 对环绕合唱的多项修复。对鼓和 MOD 样本使用音高检测。同时播放多个相似的鼓乐器（snare1 和 snare2，kick1 和 kick2）不再导致声音抵消和奇怪的感知声像。
+
+2004-05-31  Iwata <b6330015@ipc.kit.jp>
+
+	* interface/gtk_i.c (open_file_cb): 修复编译问题
+
+2004-05-30  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: 同上
+	* autoconf/Makefile.am (EXTRA_DIST): 同上
+	* autoconf/gtk-2.0.m4: 添加。
+
+2004-05-30  dai <dai@kip.iis.toyama-u.ac.jp>
+
+	* interface/gtk_i.c: GTK+ 2.x 支持
+
+2004-05-30  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* {interface,libarc,libunimod,timidity,utils}/Makefile.am,
+	  configure.in, interface.h.in, interface/ncurs_c.c,
+	  interface/vt100_c.c, libunimod/unimod_priv.h, timidity/common.c,
+	  timidity/gogo_a.c, timidity/sysdep.h, timidity/timidity.c,
+	  timidity/version.c, utils/support.h, utils/tmdy_getopt.h:
+	  可以在 Msys 或 Cygwin 环境中编译 OpenWatcom。
+	* doc/C/README.w32, doc/ja_JP.eucJP/README.w32, scripts/wcc386_w.sh:
+	  添加 Mingw、Borland C、Watcom C 和 Visual C 的编译说明
+
+2004-05-24  Eric A. Welsh <ewelsh@ccb.wustl.edu>
+
+	* libunimod/load_mod.c (ConvertNote): 错误修复
+
+2004-05-24  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* {interface,libarc,libunimod,timidity,utils}/Makefile.am,
+	  configure.in, interface/wrdt_wcon.c, timidity/flac_a.c,
+	  timidity/sysdep.h, timidity/timidity.c, timidity/wrdt.c,
+	  utils/nkflib.c, utils/support.h:
+	  可以在 Msys 或 Cygwin 环境中编译 VCC 或 BCC。
+	* interface.h.in, timidity/timidity.c:
+	  不要在 timw32g 和 twsyn 中使用 ANOTHER_MAIN。
+
+2004-05-23  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/timidity.c: 修复以使用 MrC 编译。
+
+2004-05-19  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/w32g_syn.c: 修复以适配 "current" 版本的情况
+	* timidity/timidity.c: 修复笔误
+
+2004-05-18  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* configure.in:
+	  在 Windows 中添加 gcc 选项 -mms-bitfield。
+	  修复 Windows 的 GOGO 检测。
+	  可以在 CYGWIN 和 MSYS 中使用 gccXXX。
+	  在 CYGWIN 和 MSYS 中启用动态链接 portaudio DLL。
+	  在 CYGWIN 和 MSYS 中启用动态链接 FLAC DLL。
+	* interface/Makefile.am:
+	  在 MSYS 中启用 wrdt_wcon.c。
+	  使 make clean 移除 *escaped.c *.res。
+	* interface/w32g_syn.c:
+	  如果未定义 TIMID_VERSION，则使用 PACKAGE_VERSION。
+	* timidity/portaudio_a.c:
+	  一个针对 pa_asio.dll 与 timwin32g 和 kxdriver（SB Live!）的技巧。
+
+2004-05-16  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/Makefile.{am,in}: 添加 FLAC/OggFLAC 的新文件
+
+2004-05-16  Saito <saito@intaa.net>
+
+	* configs/msc[67]-project.zip: 修复 FLAC/OggFLAC DLL。
+
+2004-05-16  Daisuke Aoki <dai@sweetparty.ne.jp>
+
+	* timidity/{flac_a.c,vorbis_a.c,w32_libFLAC_dll.c,w32_libFLAC_dll.h,
+	  w32_libFLAC_dll_g.h,w32_libFLAC_dll_i.h,w32_libOggFLAC_dll.c,
+	  w32_libOggFLAC_dll.h,w32_libOggFLAC_dll_g.h}:
+	  支持 FLAC/OggFLAC DLL。
+
+2004-05-16  Keishi Suenaga <s_keishi@mutt.freemail.ne.jp>
+
+	* interface/gogo_a.c:
+	  在 Win32CUI 界面中支持 MP3 GOGO 输出。
+
+2004-05-14  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configs/msc[67]-project.zip: 将版本更改为 "current"
+	* timidity/Makefile.{am,in}: 添加 w32_portaudio{.h,_dll.c}
+
+2004-05-14  Saito <saito@intaa.net>
+
+	* configs/msc[67]-project.zip: 修复 PortAudio DLL。
+	* timidity/w32g_pref.c: 修复笔误。
+	* timidity/mix.c: 修复包络相关问题。
+
+2004-05-14  Daisuke Aoki <dai@sweetparty.ne.jp>
+
+	* timidity/{output.c,portaudio_a.c,w32_portaudio.h,
+	  w32_portaudio_dll.c}: 支持 PortAudio DLL。
+
+2004-05-06  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/tclIndex: 恢复顺序
+
+2003-05-05  Chisato Yamauchi <cyamauch@hst.phyas.aichi-edu.ac.jp>
+
+	* TiMidity(-uj).ad.in, interface/xaw_i.c:
+	  更新 XAW 界面的 app-defaults 文件
+
+2004-05-03  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/ncurs_c.c, interface/server_c.c, interface/slang_c.c,
+	  interface/vt100_c.c, interface/w32g_{i,syn}.c, interface/xaw_i.c,
+	  timidity/timidity.c: 修复以适配 "current" 版本的情况
+
+2004-05-02  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* timidity/timidity.c (parse_opt_h): 同上。
+	* timidity/timidity.h (DEFAULT_RESAMPLATION): 同上。
+	* configure.in: --enable-spline 不工作
+
+2004-04-29  Saito <saito@intaa.net>
+
+	* timidity/reverb.c, timidity/optcode.h: 修复插入效果相关问题。
+
+2004-04-28  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/playmidi.c: 修复调律控制相关问题
+
+2004-04-27  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* doc/C/timidity.1, doc/ja_JP.eucJP/timidity.1: 更新
+
+2004-04-26  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* doc/C/timidity.1, doc/ja_JP.eucJP/timidity.1: 更新
+	* timidity/timidity.c:
+	  重命名 --flac-compression-level -> --flac-complevel
+
+2004-04-25  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* doc/C/timidity.1, doc/ja_JP.eucJP/timidity.1,
+	  doc/C/timidity.cfg.5, doc/ja_JP.eucJP/timidity.cfg.5: 更新
+	* interface/ncurs_c.c: 略作修复
+
+2004-04-25  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: 错误修复并 autoreconf
+
+2004-04-23  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/timidity.c: 修复了一个处理无名变量的错误。
+
+2004-04-23  Saito <saito@intaa.net>
+
+	* timidity/reverb.c, timidity/optcode.h: 修复噪音。
+
+2004-04-23  Iwata <b6330015@ipc.kit.jp>
+
+	* timidity/speex_a.c: 添加
+	* configure.in, timidity/output.c, timidity/timidity.c,
+	  timidity/Makefile.am: 添加 OggSpeex 支持
+
+2004-04-21  Saito <saito@intaa.net>
+
+	* timidity/flac_a.c: 修复 Win32GUI 界面中的文件名相关问题。
+
+2004-04-20  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/timidity.c: 略作修复
+
+2004-04-19  Saito <saito@intaa.net>
+
+	* timidity/flac_a.c: 修复 VC++ 环境。
+
+2004-04-18  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: 修复 libAO 检测
+	* autoconf/libFLAC.m4, autoconf/libOggFLAC.m4: 添加。
+	* configure.in: 更改为使用以上
+	* autoconf/Makefile.am: 同上
+
+2004-04-18  Iwata <b6330015@ipc.kit.jp>
+
+	* timidity/flac_a.c: 添加
+	* configure.in, timidity/output.c, timidity/timidity.c,
+	  timidity/Makefile.am: 添加 libFLAC 支持
+
+2004-04-14  Kentaro Sato <kentaro@ranvis.com>
+
+	* libarc/arc.c, timidity/timidity.c:
+	  从 $basedir 中移除尾部目录分隔符。
+
+2004-04-13  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* autoconf/ao.m4: 添加。
+	* configure.in: 更改为使用 ao.m4
+	* autoconf/Makefile.am (EXTRA_DIST): 同上。
+
+2004-04-13  Iwata <b6330015@ipc.kit.jp>
+
+	* timidity/ao_a.c: 添加。
+	* configure.in: 添加 libao 支持
+	* timidity/output.c: 同上。
+	* timidity/Makefile.am (EXTRA_timidity_SOURCES): 同上。
+	* timidity/timidity.c (parse_opt_h): 同上。
+
+2004-04-12  Kentaro Sato <kentaro@ranvis.com>
+
+	* timidity/common.[ch], timidity/timidity.c:
+	  *.cfg 的新语法：$VARIABLE / ${VARIABLE}
+	  它们在标记化之前被替换为特定字符串。
+	  $basedir 是唯一实现的变量，表示正在解析的 cfg 文件的基目录。
+
+2004-03-31  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* configure.in: 将版本更改为 'current' (timidity:3161)
+
+2004-03-29  URABE Shyouhei <shyouhei@ice.uec.ac.jp>
+
+	* Makefile.am (EXTRA_DIST): 为 ChangeLog.2 添加条目
+	* configure.in: 将版本更改为 'development'
+	* ChangeLog.2: 添加
+	* ChangeLog: 清空
+
+有关 2.13.0 之前的更改，请参阅 ChangeLog.2

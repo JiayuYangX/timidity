@@ -1,0 +1,251 @@
+2018-08-29  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/readmidi.c: 修复 CVE-2017-11546
+	  避免在播放过程中收到无效的拍号元事件时发生除零错误。
+	* NEWS, configure.in, interface/ncurs_c.c, interface/w32g_i.c,
+	  interface/w32g_res.rc, timidity/timidity.c: 将版本号升至 2.15.0
+	  - 更新版本至 2.15.0。
+	  - 将版权年份更新为 2018。
+	  - 更新 NEWS。
+
+2018-08-11  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configure.in: 支持 Tcl/Tk 8.6
+
+2016-06-04  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/readmidi.c: 修复片段播放相关问题
+	  增加一个简单的变通方案，修复某些 MIDI 文件无法向前定位到第一个时间片段的问题。
+	* doc/C/timidity.1, doc/ja_JP.eucJP/timidity.1, timidity/readmidi.c,
+	  timidity/readmidi.h, timidity/timidity.c: 改进片段播放选项的规格说明
+	  除了 [<分钟>:]<秒>[.<毫秒>] 的格式外，现在还支持 <小节>[.<拍>] 的格式。
+	  例如：-G11.4-16m
+
+2016-05-28  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/dumb_c.c: 在 dumb 接口跟踪模式中添加节拍器指示
+
+2016-05-25  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/dumb_c.c, interface/emacs_c.c, interface/gtk_c.c,
+	  interface/mac_c.c, interface/motif_c.c, interface/ncurs_c.c,
+	  interface/slang_c.c, interface/tk_c.c, interface/vt100_c.c,
+	  interface/w32g_c.c, interface/w32g_subwin3.c, interface/w32g_utl.c,
+	  interface/xaw_c.c, interface/xskin_c.c, timidity/controls.h,
+	  timidity/playmidi.c, timidity/readmidi.c, timidity/timidity.c,
+	  windrv/timiwp_timidity.c: 修复并改进片段播放相关功能
+	  - 修复指定多个 --segment (-G) 选项时的内存泄漏问题。现在也支持指定多个
+	    --segment (-G) 选项。例如：-G00:30-00:45 -G01:15-01:30
+	  - 修复用户实时控制加速/减速时片段时间的偏差问题。
+	  - 修复指定 --audio-buffer (-q) 选项时 opt_aq_fill_buff 的双重释放问题。
+	  - 改进片段播放精度，正确处理好 CTLE_CUEPOINT。
+	  - 修复 apply_controls() 中 midi_time_ratio 改变时 sample_count 的调整问题。
+
+2016-05-15  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* doc/C/timidity.1, doc/ja_JP.eucJP/timidity.1, timidity/mac_qt_a.c,
+	  timidity/playmidi.c, timidity/playmidi.h, timidity/readmidi.c,
+	  timidity/readmidi.h, timidity/timidity.c: 增加片段播放选项支持
+	  (-G, --segment)
+	  仅播放由逗号分隔的时间片段所指定的子片段。每个时间片段由破折号分隔的
+	  开始-结束时间值定义。从开始播放到结束。
+
+2016-04-04  Alexander Myltsev <myltsev@yandex-team.ru>
+
+	* timidity/readmidi.c: 修复 --preserve-silence 导致第一个音符被吞掉的问题。
+
+2016-03-21  Stian Skjelstad <stian.skjelstad@gmail.com>
+
+	* timidity/mfi.c: inline，在新版 gcc 中默认为 "extern inline"
+	  在新版 gcc 中，"inline" 默认为 extern 而非 static（若未指定）。
+	  这会在编译末尾导致链接问题。大多数此类情况已修复（或通过 #ifdef 处理），
+	  仅剩下 timidity/mfi.c 中的这两处小问题。
+
+2016-03-19  SATO Kentaro <kentaro@ranvis.com>
+
+	* README, README.ja, doc/C/timidity.1, doc/C/timidity.cfg.5,
+	  doc/ja_JP.eucJP/timidity.1, doc/ja_JP.eucJP/timidity.cfg.5: 从文档中
+	  移除已不属于的域名 URL。
+
+2015-04-21  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* doc/ja_JP.eucJP/timidity.1: 修复日文手册页
+	* autogen.sh: autogen.sh: 以不依赖 VCS 的方式创建 ChangeLog
+
+2015-04-21  Stas Sergeev <stsp@users.sourceforge.net>
+
+	* doc/C/timidity.1: 修复手册页
+	* autogen.sh: autogen.sh: 创建 automake 所需的 ChangeLog
+
+2015-04-21  Tobias Markus <tobbi@mozilla-uk.org>
+
+	* timidity/timidity.c: 修复 coverity 检测到的内存泄漏问题
+
+2014-08-21  yta <yta@inter7.jp>
+
+	* timidity/w32_a.c: 修复空指针访问问题（Windows 音频驱动输出）
+	  添加 DriverClosing 和 OutputWorking 标志。如果 TiMidity++ 在
+	  output_data 的停止过程中调用了 close_output，应用程序会导致空指针
+	  访问。修改后，WaitForBuffer(1) 将停止直到从 output_data 返回。
+	* timidity/reverb.c: 修复混响缓冲区溢出问题
+	  添加检查索引上限的代码。当 reverb_status_gs.character 的值为 6 或 7
+	  时，TiMidity++ 会出现缓冲区溢出。当"混响时间"的值为 -64 时，
+	  info->index 会被设置为超出范围的值。
+
+2014-08-15  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/ncurs_c.c, interface/w32g_i.c, interface/w32g_res.rc,
+	  timidity/timidity.c: 将版权年份更新为 2014
+	  将版权年份更新为 2014，并将旧的电子邮件地址替换为新的。
+
+2014-08-15  yta <yta@inter7.jp>
+
+	* windrv/mmddk.h, windrv/timiditydrv.c: 修复 Windows 驱动程序
+	  添加 DriverCallback API。驱动程序必须调用 DriverCallback API。
+	  修改后，某些 MIDI 音序器将不再冻结：XGWorks、Domino 等。
+
+2014-06-09  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configure.in, timidity/timidity.c: 修复 ssize_t 类型测试及条件编译
+	  修复 ssize_t 类型测试，因为旧版 autoconf 不支持 AC_TYPE_SSIZE_T 宏。
+	  同时，修复旧版 MinGW 的条件编译。
+
+2014-05-24  SATO Kentaro <kentaro@ranvis.com>
+
+	* timidity/flac_a.c, timidity/timidity.c: 条件编译的小修复。
+	* configure.in, timidity/timidity.c: 回滚部分修复并添加 ssize_t 类型
+	  测试。
+
+2011-06-21  SATO Kentaro <kentaro@ranvis.com>
+
+	* libarc/url_http.c: 修复 HTTP 代理在 http URL 上不工作的问题。
+
+2009-12-19  SATO Kentaro <kentaro@ranvis.com>
+
+	* timidity/aq.c: 修复运行时采样大小变化导致的崩溃。
+
+2011-05-07  SATO Kentaro <kentaro@ranvis.com>
+
+	* timidity/flac_a.c, timidity/timidity.c, timidity/timidity.h,
+	  timidity/wave_a.c, utils/net.c, windrv/timiditydrv.c: 修复 Windows 上
+	  的一些编译问题。
+	* interface/w32g_i.c: 更改 Windows GUI 音量滑块的最大值。
+	  W32GUI 接口的音量控制目前改变的是渲染放大系数，而非播放音量。
+
+2014-05-22  SATO Kentaro <kentaro@ranvis.com>
+
+	* interface/w32g_res.rc: 更新 Windows 资源中的版本号。
+
+2014-05-13  Yair K <cesium2@gmail.com>
+
+	* timidity/ao_a.c: 修复 ao 选项崩溃问题
+	  将 ao_options 初始化为 NULL，以避免在未指定选项时发生崩溃。
+	* interface/tk_c.c: 修复 tk 接口在 tk8.6 下的编译问题
+	  在 8.6 中不允许直接访问 interp->result，因此改用
+	  Tcl_GetStringResult。同时将 MAX_TK_MIDI_CHANNELS 增大以消除编译警告。
+
+2013-12-12  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* interface/Makefile.am: 在 Makefile 中为 escape_sjis.pl 添加 ./ 前缀
+	  以便执行该脚本
+
+2013-11-06  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* configure.in, interface/ncurs_c.c, timidity/playmidi.c,
+	  timidity/playmidi.h, timidity/timidity.c, windrv/timiditydrv.c:
+	  收集各种修复
+	  - 修复 vwprintw 以适配新版 PDCurses
+	  - 修复 control_mode_event 参数以使用 ptr_size_t
+	  - 修复 read_config_file 使其可在另一个 main 中使用
+	  - 修复 windrv/timiditydrv.c 中 MIDIOUTCAPS2 相关的问题
+
+2013-11-04  Yale Zhang <yzhang1985@gmail.com>
+
+	* windrv/timiditydrv.c, windrv/timiditydrv.def: 改进 Windows MIDI 驱动
+	  - 不再将所有 MIDI 消息发送到工作线程进行播放。改为直接调用事件处理
+	    函数（配合互斥锁）。这简化了代码并减少了延迟。
+	  - 将初始化移到工作线程创建之前——否则 TiMidity++ 可能在第一条消息
+	    到达之前尚未初始化（我在使用 VMPK 时确实遇到了这个问题，VMPK
+	    在启动时会立即发送音色库和音色变更消息）
+	* timidity/w32_a.c: 重构 w32_a.c 并禁用调试消息
+
+2013-11-03  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* timidity/output.c, timidity/timidity.c, utils/getaddrinfo.c,
+	  utils/tmdy_getopt.h: 修复以适配 MinGW 环境
+
+2012-10-20  Yair K <cesium2@gmail.com>
+
+	* timidity/ao_a.c: 允许通过环境变量设置 ao 后端选项
+	  通过 TIMIDITY_AO_OPTIONS 环境变量让 libao 后端设置 ao 选项。
+	  该变量接受以逗号分隔的 "key=value" 键值对。
+	  例如：TIMIDITY_AO_OPTIONS="use_mmap=1,id=1" 用于 ALSA ao 后端。
+	  TIMIDITY_AO_OPTIONS="server=example.com:4713" 等。
+	  注意：1. 在 libao 中，后面的选项优先于前面的选项。
+	  2. 空格不会被去除，而是原样传入。3. 若为 "key=," 的形式，空字符串
+	  将作为值传递给 ao。
+
+2012-10-20  Kyle Guinn <elyk03@gmail.com>
+
+	* doc/C/timidity.cfg.5:
+	  修复 timidity.cfg.5 中的笔误。
+	  修复 timidity.cfg.5 中的笔误。补丁由 Kyle Guinn 发送。
+
+2012-09-05  TAMUKI Shoichi <tamuki@linet.gr.jp>
+
+	* ChangeLog, ChangeLog.3, Makefile.am: 将 ChangeLog 移至 ChangeLog.3
+	  移除 ChangeLog，它将由 git log 生成。
+	* configure.in, interface/Makefile.am, interface/tclIndex: 移除
+	  tclIndex，因其为自动生成的文件
+	  auto_mkindex 现在将使用 tclsh 而非 wish 运行。
+
+2012-08-20  Yair K <cesium2@gmail.com>
+
+	* interface/Makefile.am, interface/tk_c.c, interface/tkpanel.tcl:
+	  将 xbm 位图内嵌到 tcl 接口本身中
+	  将 xbm 位图内嵌到 tcl 接口本身中，而非作为系统中的文件存在。
+	  另外，稍微推迟包含 tcl.h 以避免 reverb.h 上的重定义警告。
+	* TODO, configure.in, interface/xaw_i.c: Xaw 接口：小改进
+	  * 去除 expandDir 中不必要的参数
+	  * 释放 XawListShowCurrent 返回的内存
+	  * 从 TODO 中移除过时的注释
+
+2012-08-20  Hans de Goede <hdegoede@redhat.com>
+
+	* interface/server_c.c, interface/server_defs.h, timidity/midi_a.c:
+	  始终使用本地的 OSSv3 MIDI 音序器定义
+	  来自 NetBSD pkgsrc:
+	  http://www.netbsd.org/docs/software/packages.html
+	  MIDI 输出模式和服务器接口都尝试收集本地 MIDI 宏定义，而非使用自己
+	  的定义。问题在于某些系统有一个"兼容性" soundcard.h 文件，configure
+	  能够检测到该文件，但它并不包含 MIDI 定义（例如 NetBSD 的
+	  libossaudio）。因此始终使用内部定义。
+	  在 server_defs.h 中添加注释，说明如果需要，如何仍然从系统获取定义。
+
+2012-08-20  Yair K <cesium2@gmail.com>
+
+	* libunimod/load_669.c, libunimod/load_amf.c, libunimod/load_dsm.c,
+	  libunimod/load_far.c, libunimod/load_gdm.c, libunimod/load_imf.c,
+	  libunimod/load_it.c, libunimod/load_m15.c, libunimod/load_med.c,
+	  libunimod/load_mod.c, libunimod/load_mtm.c, libunimod/load_okt.c,
+	  libunimod/load_s3m.c, libunimod/load_stm.c, libunimod/load_stx.c,
+	  libunimod/load_ult.c, libunimod/load_uni.c, libunimod/load_xm.c,
+	  libunimod/mlutil.c, libunimod/unimod.h, libunimod/unimod_priv.h:
+	  从 mikmod.hg.sf.net 引入部分修复
+	  从 mikmod.hg.sf.net 引入针对 CVE-2009-0179、CVE-2009-3996、
+	  CVE-2010-2546 和 CVE-2010-2971 的部分修复。同时，与该版本一样将
+	  大部分函数静态化。可能需要更多测试。
+
+2012-08-20  Hans de Goede <hdegoede@redhat.com>
+
+	* interface/xskin_c.c: 回滚以恢复必需的 ctl_speana_data 函数
+	  来自 gentoo timidity++-2.14.0 软件包：
+	  这将回滚来自以下提交的部分内容：
+	  http://timidity.git.sourceforge.net/git/gitweb.cgi?p=timidity/timidi
+	  ty;a=commit;h=e73b53437dbc1e57e61dd4d0c1407784797b08d9
+	  否则 TiMidity++ 将无法编译，错误如下：
+	  ../interface/libinterface.a(xskin_c.o): In function `ctl_event':
+	  xskin_c.c:(.text+0x17c): undefined reference to `ctl_speana_data'
+	  collect2: error: ld returned 1 exit status
+
+关于 2.14.0 之前的变更，请参见 ChangeLog.3

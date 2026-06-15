@@ -1,0 +1,715 @@
+-- 1.3.8
+Tue Apr 6 1999
+Summary:
+    * 修复了一些 bug 或问题。
+
+Date: Sun, 4 Apr 1999 18:14:43 +1000 (EST)
+From: David Gibson <david@gibson.dropbear.id.au>
+Files: timidity/linux_a.c
+    两个 bug 均在 Linux 音频驱动中。首先，该驱动以读写方式打开 /dev/dsp，
+    而实际上只需要写入。其次，代码使用硬编码常量 8 和 16 来设置 /dev/dsp
+    的输出格式，在大端序机器（如 PowerPC）上会失败。此补丁使代码使用 glibc
+    定义的 #define 常量。
+
+Date: Sun Apr  4 21:05:37 JST 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/x_wrdwindow.c
+   修复为将未定义的颜色代码更改为默认颜色（白色）。
+
+Date: Sat, 03 Apr 1999 22:07:45 +0900 (JST)
+From: Yoshishige ARAI <ryo2@on.rim.or.jp>
+Files: interface/xaw_i.c doc/C/README.xaw doc/ja_JP.ujis/README.xaw
+    修复了 XAW 的 bug。
+    修改了 XAW 文档的一些描述。
+
+Date: Wed Mar 31 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/playmidi.c
+    修复了鼓声部识别的 bug。
+Files: interface/ncurs_c.c
+    修复了 comment_indicator_buffer 缓冲区溢出的 bug。
+
+From: Takaya Nogami <t-nogami@happy.email.ne.jp>
+Date: Sat, 27 Mar 1999 10:38:11 +0900
+Files: interface/VTPrsTbl.c timidity/output.c
+    为 MIMPI WRD 启用了 @esc(2j) 命令清屏功能。
+    在 output.c 中包含了 <string.h>。
+
+-- 1.3.7
+Summary:
+Tue Mar 30 1999
+    * 修复了一些 bug 或问题。
+    * 在 GTK 界面中，启用了从播放列表中删除已加载文件的功能。
+
+Date: Tue Mar 30 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/gtk_p.c  interface/motif_p.c
+    使用 select() 替代 ioctl/FIONREAD。
+
+Date: Mon, 29 Mar 1999 21:08:16 +1000 (EST)
+From: ggt@netspace.net.au (Glenn Trigg)
+    通过双击右键列表条目，启用了从播放列表中删除已加载文件的功能。
+
+From: Masanao Izumo <mo@goice.co.jp>
+Date: Mon Mar 29 1999
+Files: timidity/support.h
+    修复了 getopt() 的原型不匹配问题。
+Files: configure.in interface/ncurs_c.c
+    添加了 PDcurses 的 configure 测试。
+    将 COMMAND_BUFFER_SIZE 增大到 4096。
+
+Date: Sat Mar 27 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/playmidi.c
+    修复为忽略 LSB 数据输入。
+Files: timidity/readmidi.c
+    当控制 MIDI 事件值超过 127 时，将其设为 127。
+Files: timidity/readmidi.c
+    修复当 play_system_mode 不是 DEFAULT_SYSTEM_MODE 时，不更改为
+    GM_SYSTEM_MODE。
+
+Date: Thu, 25 Mar 1999 23:41:46 -0600 (CST)
+From: "Eric A. Welsh" <ewelsh@gpc.ibc.wustl.edu>
+Files: interface/ncurs_c.c
+    在 ncurs_c.c 的 cmsg() 中，有一个 #ifdef __BORLANDC__ 添加了 nl()。
+    这应改为包含 __WIN32__ && ! __CYGWIN32__，因为标准 Win32 在发出 \n
+    时不会执行 \r。
+Files: interface/ncurs_c.c interface/vt100_c.c
+    修复了非 .KAR 文件但包含歌词文件的歌词显示 bug。在所有我拥有的非 .KAR
+    歌词文件中，'\n' 出现在 '\r' 应该在的位置，而 '\r' 则出现在非常奇怪的
+    位置，导致执行回车的位置非常糟糕。'\n' 也会对 -int 显示产生不良影响，
+    因为 '\n' 会导致文本跑到单行输出之外。
+
+Summary:
+Tue Mar 23 1999
+    * 在 XAW 界面中，添加了新的用户界面。
+    * 修复了一些 bug。
+
+-- 1.3.6
+Date: Sat, 20 Mar 1999 22:01:43 +0900 (JST)
+From: Yoshishige ARAI <ryo2@on.rim.or.jp>
+Files: configure.in interface/xaw_i.c
+    为 Motif 链接选项添加了 -lXext。
+    在 XAW 上，启用了加载对话框文本中通过 `Backspace' 键进行选择和删除的功能。
+
+Date: Fri, 19 Mar 1999 20:54:15 -0500 (EST)
+From: Franklin Chen <chen@dahmer.pscico.cs.cmu.edu>
+Files: configure.in interface/slang_c.c
+    在 Linux Red Hat 5.2 上：<slang.h> 必须改为 <slang/slang.h>。
+    添加了 <slang/slang.h> 的 configure 测试，若找到则包含之
+    （由 Masanao Izumo <mo@goice.co.jp> 完成）
+
+Date: Mon Mar 15 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/common.c libarc/url.c
+    修复了 Windows 的 bug。
+
+Date: Fri Mar 12 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: utils/support.c
+    修复了 strncasecmp() 的 bug
+
+Date: Wed, 10 Mar 1999 14:00:18 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface/xaw_c.c
+    修复了 XAW 界面的 bug。
+
+Date: Wed, 10 Mar 1999 03:09:31 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface/xaw_c.c interface/xaw_i.c
+    XAW 界面的补丁：
+    * 修复了 `Save Config' 相关的 bug
+    * 添加了 `Add All' 按钮
+    * 检查了指定文件是否为 MIDI 文件
+    * 更改了文件加载窗口的键盘焦点
+    * 将更改后的目录存储到文件加载对话框
+    * 使用 XtVaSetValues() 替代 XtSetValues()
+
+Date: Tue, 09 Mar 1999 20:41:19 +0900
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/xaw_i.c
+    XAW 界面关于力度条的补丁。
+
+-- 1.3.5
+Mon Mar 8 1999
+Summary:
+    * 在 XAW 界面中，添加了新的用户界面。
+    * 添加了 AM_EXEEXT configure 测试。
+
+Date: Mon Mar 8 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: configure.in
+    添加了 AM_EXEEXT configure 测试。
+
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Date: Sat, 06 Mar 1999 23:36:24 +0900 (JST)
+Files: interface/{xaw_i.c,xaw_c.c,xaw.h}
+	doc/C/README.xaw doc/ja_JP.ujis/README.xaw
+    XAW 界面的补丁。
+    修复了一些问题并更改了一些界面。
+    添加了 XAW 界面的文档。
+
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Date: Thu, 04 Mar 1999 03:06:04 +0900 (JST)
+Files: interface/xaw_i.c
+    XAW 界面的补丁。
+    修复了一些 bug 并更改了一些界面。
+
+Date: Wed, 03 Mar 1999 00:21:46 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface/{xaw_i.c,xaw_c.c,xaw.h,on.xbm,off.xbm}
+    XAW 界面的补丁。
+    添加了用于选择播放的列表窗口。
+    添加了用于更改 timidity 扩展模式（-E）的控制窗口。
+
+-- 1.3.4
+Mon Mar 1 1999
+Summary:
+    * 在 XAW 界面中，修复了 MIDI 标题显示的 bug。
+    * 在 GTK 界面中：
+      修复了按钮高亮问题。
+      添加了由 Tim Allen 提供的新窗口管理器图标。
+      定义了 wmclass 和 wmname，使 TiMidity 对窗口管理器更加友好。
+    * 修复了其他 bug 或问题。
+
+Date: Sat Feb 27 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/xaw_c.c
+    在 XAW 界面中，修复了 MIDI 标题显示的 bug。
+
+Fri Feb 26 JST 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/au_a.c timidity/wave_a.c timidity/aiff_a.c
+    处理了打开时的写入错误。
+Files: timidity/instrum.h
+    修复了 inst_map_table 缓冲区溢出的 bug。
+Files: utils/support.c
+    修复了 strdup 实现的 bug。
+
+Date: Fri, 26 Feb 1999 22:45:34 +1100 (EST)
+From: ggt@netspace.net.au (Glenn Trigg), thristian@usa.net (Tim Allen)
+Files: interface/gtk_i.c
+    在 GTK 界面中：
+      修复了按钮高亮问题。我忘记了 mask！
+      添加了由 Tim Allen 提供的漂亮彩色图标。
+      定义了 wmclass 和 wmname，使 TiMidity 对窗口管理器更加友好。
+
+Date: Thu, 25 Feb 1999 01:17:45 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface/xaw_i.c
+    修复了级联文件选择弹出菜单的问题。
+
+-- 1.3.3
+Wed Feb 24 1999
+Summary:
+    * 在 Windows 中使用 WAVE_MAPPER 进行 waveOutOpen()。
+    * 将 inflate 重命名为 zip_inflate，deflate 重命名为 zip_deflate。
+    * 修改以移植到某些操作系统。
+    * 改进了 XAW 界面。
+    * 在 strdup 不存在时添加了其实现。
+    * 修复了 MIDI 重置不更新程序显示的 bug。
+    * 在 timidity.h 中添加了 `extern errno'。
+    * 修复了非跟踪模式下 XAW 几何问题。
+    * 当 GLOB_BRACE 未定义时不调用 glob()。
+
+Date: Wed Feb 24 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/win_a.c
+    为 waveOutOpen() 使用 WAVE_MAPPER。
+Files: libarc/url_dir.c interface/ncurs_c.c interface/xaw_i.c
+    添加了 S_ISDIR 宏定义（如果未定义）。在 NeXTSTEP 的 /usr/include/
+    或 /usr/include/sys/ 下没有该宏的定义。它定义在
+    /usr/include/bsd/sys/stat.h 中，但我不包含此文件，因为可能会发生冲突。
+Files: interface/xaw_i.c timidity/timidity.h
+    将 strstr 和 strncasecmp 实现移至 timidity.h 和 support.c。
+
+Date: Mon Feb 22 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/audriv_none.c
+    移除了错误代码。
+Files: libarc/{zip.h,arc.c,inflate.c,url_inflate.c,arc_tar.c,deflate.c}
+	timidity/readmidi.c
+    将 inflate 重命名为 zip_inflate，deflate 重命名为 zip_deflate。
+Files: utils/support.c timidity/timidity.c timidity/timidity.h
+	libarc/url_dir.c
+    修改以移植到某些操作系统（如 NeXTSTEP）。
+    在 strdup() 和 getcwd() 不存在时添加了实现。
+    在 <getopt.h> 不存在时，在 timidity.c 中添加了 `optind' 和 `optarg' 的声明。
+    在 timidity.h 中包含了 <sys/types.h>。
+    在 url_dir.c 中包含了 <sys/fcntl.h>（为 S_ISDIR）。
+
+Date: Sat, 20 Feb 1999 14:06:25 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface/{xaw_i.c,xaw_c.c,xaw.h,arrow.xbm}
+    改进了 XAW 界面。
+       - 文件选择的级联下拉菜单。
+       - 添加了时间条。
+       - 在菜单中添加了自动退出、重复和随机播放的开关。
+       - 添加了快捷键：
+         CTRL-M：文本显示开/关
+         CTRL-T：跟踪显示开/关
+         CTRL-S：随机播放开/关
+         CTRL-R：重复播放开/关
+       - 在右上角按钮上显示 GM、GS、XG。
+       - 更改了右上角按钮的功能。
+         鼠标左键点击：文本显示开/关
+         鼠标中键点击：跟踪显示开/关
+         鼠标右键点击：更改窗口大小。
+       - 在窗口底部显示音色数和 MIDI 标题。
+
+Date: Tue Feb 16 1999
+From Masanao Izumo <mo@goice.co.jp>
+Files: timidity/playmidi.c
+    修复了 MIDI 重置不更新程序显示的 bug。
+
+Date: Mon Feb 15 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity.h
+    在 timidity.h 中添加了 `extern errno'。
+
+Date: Fri, 12 Feb 1999 12:46:51 +0900
+From: "KINOSHITA, K." <kino@krhm.jvc-victor.co.jp>
+Files: interface/xaw_i.c
+    修复了非跟踪模式下 XAW 的几何问题。
+Files: interface/gtk_i.c
+    当 GLOB_BRACE 未定义时不调用 glob()。
+
+-- 1.3.2
+Wed Feb 10 1999
+Summary:
+    * 为 BSD/OS 打了补丁。
+    * 更改了 motif 界面的图标。
+    * 更改了 xaw 和 Tck/Tk 界面的排序算法。
+    * 修复了 Tcl/Tk 界面的 bug 和问题。
+
+Date: Wed Feb 10 1999
+From: Masanao Izumo <mog@goice.co.jp>
+Files: configure.h timidity/timidity.h
+    如果 configure 找到 <machine/endian.h>，则在 timidity.h 中包含之。
+Files: interface/tkpanel.tcl
+    修复了 Tcl/Tk 界面的 bug：如果在随机播放模式下添加文件，可能会出错。
+    Tck 可能访问超出 Stat(SuffleList) 范围的数据。
+
+Date: Tue, 09 Feb 1999 04:11:55 +0900
+From: (Masahiko Kimoto) <kimoto@ohnolab.org>
+Files: configure.in timidity/linux_a.c timidity/timidity.h
+    为 BSD/OS 打了补丁。
+
+Date: Mon, 08 Feb 1999 07:42:46 -0500
+From: Roger Fujii <rmf@unixbox.lookhere.com>
+Files: interface/motif_i.c
+	interface/motif_bitmaps/{Makefile.in,Makefile.am,back.xbm,fwd.xbm,
+	next.xbm,pause.xbm,prev.xbm,quit.xbm,restart.xbm,timidity.xbm,Makefile}
+    附件中是 motif 界面更好看的 xbm 图标，以及防止最后一个按钮在窗口调整
+    大小时改变大小的修复。
+
+Date: Mon Feb  8 JST 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/ncurs_c.c
+    修改了 ncurs_c.c。
+
+Date: Sun Feb 7 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/vt100_c.c
+    修复了 Windows 的 bug。Windows API 的 select() 不适用于文件描述符，
+    但 EGCS 的可以。
+Files: interface/browser.tcl
+    将 `lsort -dictionary' 改为 `lsort -ascii'。
+
+Date: Sat, 6 Feb 1999 10:44:42 +0100 (CET)
+From: Peter Kleiweg <kleiweg@let.rug.nl>
+Files: interface/xaw_i.c
+    更改了 xaw 界面的排序算法。现在目录列在常规文件之前。
+
+Date: Sat, 6 Feb 1999 01:45:20 +0100 (CET)
+From: Peter Kleiweg <kleiweg@let.rug.nl>
+Files: interface/tkpanel.tcl
+    修复了 Tck/Tk 界面问题：
+	proc MakeShuffleList 有缺陷。它生成的数字列表存在"空洞"。
+	当列表中最后一个数字被播放后会导致错误。
+	此外，在 Tk 中，每首新歌开始时，全局 X11 选择会发生变化。
+	当我在另一个应用程序中进行剪切粘贴操作时，这非常烦人。
+	我甚至可能丢失正在移动的数据。因此我在 tkpanel 中更改了此行为。
+
+-- 1.3.1
+Fri Feb 5 1999
+Summary:
+    * 修复了一些 bug。
+    * 启用了使用 MINGW32 的 gcc 编译。
+      （该软件包没有 dir.h（该文件包含了 <dirent.h> 和 <direct.h>），
+       因此 configure 的 AC_HEADER_DIRENT 部分全部失败。它去哪儿了？）
+
+Date: Fri Feb 5 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/Makefile.am
+    将 support.$(so) 链接到各个动态界面。
+Date: Thu Feb 4 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity.c
+    修复了当在 *.cfg 中指定超出范围的程序编号时导致核心转储的 bug。
+    此 bug 由 Erik Inge Bolso 报告。谢谢。
+Files: INSTALL INSTALL.jp
+    添加了关于在 CYGNUS 上安装的说明。
+Files: configure.in utils/{net.c,net.h}
+    当 `AC_CHECK_FUNC(socket)' 失败时使用 WINSOCK（Windows API -lwsock32），
+    并在 open_socket() 中首次调用 WSAStartup()。WINSOCK 是使用 MINGW32
+    软件包的 gcc 编译所需的。
+Files: acinclude, configure.in
+    添加了 Windows API 的测试。
+Files: libarc/url_dir.c
+    修复并改进了 url_dir.c 中关于 URL_DIR_CACHE_ENABLE 实现的 bug。
+Files: timidity/timidity.h configure.in
+    修复了一些编译错误。
+
+-- 1.3.0
+Wed Feb 3 1999
+Summary:
+    * 修复了 Xaw 和 Tcl/Tk 界面的一些问题。
+    * 修改以在 cygnus 上编译。
+    * 创建了 support.c 来定义缺失的函数。
+    * 使用 `strerror()' 替代 `sys_errlist[]'。
+    * 导入了 1999.1.7 发布的 Macintosh 源码。
+    * 根据 WORDS_BIGENDIAN 定义 BIG_ENDIAN 或 LITTLE_ENDIAN。
+    * Configure/Makefile 修改：
+	- 启用了在 cygnus 上配置。
+        - 移除了 FreeBSD 上的 -aout 编译器标志。
+        - 移除了 -Wall 编译器标志。
+	- 不在任何 Makefile 中使用 `+=' 操作。旧版 GNU make 可能不
+	  识别追加操作符。
+    * 改进了 XAW 界面的跟踪播放。
+    * 改进了混响音效。
+    * 修复了 MIME/Multipart 的 bug。
+
+
+Date: Tue, 2 Feb 1999 21:15:14 +0100 (CET)
+From: Peter Kleiweg <kleiweg@let.rug.nl>
+Files: interface/{browser.tcl,xaw_i.c,tkmidity.ptcl}
+    修复了 Xaw 和 Tcl/Tk 界面的一些问题：
+    - 在 Xaw 界面的文件打开对话框中，文件/目录列表未排序。
+    - 在 Tcl/Tk 界面的文件打开对话框中，目录列表已排序，但文件列表未排序。
+    - 在某些机器上没有 17 点阵字体。将 17 点阵字体的使用改为 18 点阵字体。
+
+Date: Wed Feb 3 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/{win_a.c,timidity.c,playmidi.c}
+    修改以在 CYGNUS/gcc 上编译。
+    片段优化。
+
+Date: Tue Feb 2 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: utils/support.c timidity/timidity.h
+    定义了缺失的函数，并在 timidity.h 中声明了它们。
+Files: timidity/output.c timidity/output.h
+    添加了 output_encoding_string() 函数，用于显示编码名称。
+Files: interface/{wrdt_wincon.c,vt100_c.c}
+	timidity/{playmidi.c,win_a.c}
+    修改以在 CYGNUS/gcc 上编译。
+Files: interface{gtk_p.c,motif_p.c,tk_c.c} libarc/url.c
+	timidity/{aiff_a.c,au_a.c,audriv_al.c,audriv_sun.c,bsd20_a.c,common.c,
+	dl_dlopen.c,dl_hpux.c,hpux_d_a.c,linux_a.c,raw_a.c,readmidi.c,
+	timidity.c,timidity.h,wave_a.c}
+    使用 `strerror()' 替代 `sys_errlist[]'。
+    如果 HAVE_ERRNO_H 为 true，则在 timidity.h 中包含 <errno.h>。
+Files: timidity/{mac_a.c,mac_com.h,mac_dlog.c,mac_main.c,mac_main.h,mac_qt_a.c,
+	mac_soundspec.c}
+	interface/{mac_c.c,mac_c.h,mac_loadBMP.c,mac_loadBMP.h,mac_mag.c,
+	mac_mag.h,mac_skin.c,mac_skin.h,mac_trace.c,mac_wrdwindow.c,
+	mac_wrdwindow.h,wrdt_mac.c}
+	utils/{mac_readdir.c,mac_readdir.h,mac_util.c,mac_util.h}
+    导入了 1999.1.7 发布的 Macintosh 源码。
+Files: timidity/timidity.h
+    如果 WORDS_BIGENDIAN 在 config.h 中定义，则定义 BIG_ENDIAN，
+    否则定义 LITTLE_ENDIAN。
+Files: utils/timer.c
+    如果有 HAVE_GETTIMEOFDAY 则使用 gettimeofday()，否则使用 Windows API。
+Files: configure.in utils/Makefile.am libarc/url_dir.c
+    修改了关于 opendir() 的实现。
+
+Date: Mon Feb 1 1999
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+    改进了 XAW 界面在跟踪模式下的显示。
+
+Date: Fri Jan 29 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: configure.in
+    在 FreeBSD 上，创建共享对象库存在问题。
+    Netscape 插件需要 `aout' 格式，但我在 ELF 环境的 FreeBSD 下没有足够的
+    知识来构建 aout 格式。所以我只是移除了 -aout 编译器标志。
+Files: doc/ja_JP.ujis/timidity.cfg.5
+    将 `Kairyouban' 更改为 `TiMidity++'。
+Files: INSTALL, INSTALL.jp
+    添加了一些说明。
+Files: common.makefile.in
+    从编译器选项中移除了 -Wall 选项。
+    展开了 `+=' 宏定义。
+    在 CPPFLAGS 中定义 @EXTRADEFS@ 而非 DEFS。
+
+Date: Thu, 28 Jan 1999
+From: Masaki Kiryu <mkiryu@mb.kcom.ne.jp>
+Files: timidity/reverb.{c,h}
+    改进了混响音效。
+
+Date: Wed Jan 27 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: libarc/arc_mime.c
+    修复了关于 multipart/mixed 的 MIME 归档器 bug。
+    你现在可以播放 MIME/Multipart 文件中的 MIDI。例如：
+    % timidity mail:~/Mail/inbox/1234
+    我认为 MIME/Multipart 是一种归档文件格式。:-)
+
+-- 1.2.1
+Mon Jan 25 1999
+Summary:
+    * 修复了一些配置问题。
+    * 添加了 --enable-dynamic `configure' 选项。
+
+Date: Mon Jan 25 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: acinclude.m4 configure.in
+    修复了一些配置问题：
+	* 移除了重复的 -lXpm 选项。
+	* 不更改编译器标志的顺序。
+	* 等等...
+Files: interface/gtk_c.c
+    实现了 interface_g_loader()
+Files: timidity/dl_dlopen.c
+    在 dl_find_symbol() 的错误消息中添加了 "\n"
+
+Date: Mon, 25 Jan 1999 01:18:27 +0900 (JST)
+From: nork@lb.u-tokai.ac.jp (Norikatsu Shigemura)
+Files: configure.in
+    为创建 FreeBSD UMP 打了补丁。
+
+Date: Fri Jan 22 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: configure.in
+    添加了 --enable-dynamic configure 选项。它可启用始终编译动态链接代码。
+Files: timidity/gtk_i.c
+    在 Solaris 上，界面中 glob() 的标志不同。
+    所以我只是更改了在 Solaris 上不调用 glob()。
+
+Date: Thu, 21 Jan 1999 12:53:18 +0900
+From: "KINOSHITA, K." <kino@krhm.jvc-victor.co.jp>
+Files: timidity/timidity.c
+    移除了无效的语句。
+
+Date: Thu, 21 Jan 1999 03:40:38 +0900
+From: Ueyama Rui <rui@po.teleway.ne.jp>
+Files: interface/pixmaps/{fast,slow,restart,keyup,keydown}.xpm
+    报告了一些 Gtk pixmaps 文件缺失。已添加它们。
+
+-- 1.2.0
+Thu Jan 21 JST 1999
+Summary:
+    * XAW 界面：
+      - 更改了随机播放和重复播放的按钮位图
+      - 修改了一些实现。
+    * GTK 界面：
+      - 添加了升高/降低音高的按钮（及实现）。
+      - 添加了加快/减慢速度的按钮（及实现）。
+    * 查找 TIMIDITY_SOUND_CARD 和 TIMIDITY_PCM_DEVICE 环境变量来选择
+      ALSA 的 PCM 设备。
+    * 创建了 interface.h 来定义 TiMidity 界面的 IA_* 宏。此文件由
+      configure 自动生成。
+    * 修复了一些 bug。
+
+Date: Thu, 21 Jan 1999 01:33:58 +0900 (JST)
+From: nork@lb.u-tokai.ac.jp (Norikatsu Shigemura)
+Files: configure.in
+    修复了关于 FreeBSD 动态界面的 configure bug。
+
+Date: Wed Jan 20 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/xskin_spectrum.c
+    如果 soundspec 未启用，则不定义 xskin_spe_ana() 和 xskin_wave()。
+Files: configure.in interface.h.in timidity/{Makefile.am,timidity.c,controls.c}
+    修复了在某些机器上 tcl 需要 -dl 的配置 bug。
+    IA_* 宏放入 interface.h 中。interface.h 由 configure 自动生成。
+
+Date: Tue, 19 Jan 1999 23:16:33 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface{bitmaps/Makefile.am,bitmaps/Makefile.in,bitmaps/random.xbm,
+	bitmaps/repeat.xbm,xaw.h,xaw_i.c}
+    修改了 XAW 界面：
+      - 将 Form Widget 更改为 Box Widget。
+      - 更改了图标位图
+      - 废弃了 MSGWINDOW 宏配置。消息窗口始终启用。
+
+Date: Tue, 19 Jan 1999 17:54:53 +0900
+From: Takanori Watanabe <takawata@shidahara1.planet.sci.kobe-u.ac.jp>,
+      Glenn Trigg <ggt@netspace.net.au>
+Files: interface{emacs_c.c,gtk_c.c,gtk_h.h,gtk_i.c,gtk_p.c,ncurs_c.c,
+	pixmaps/Makefile.in,vt100_c.c}
+	timidity/{controls.h,playmidi.c,timidity.c,wrd_read.c}
+    来自 Glenn Trigg 的补丁：
+    更改（大致）如下：
+      - 添加了升高/降低音高的按钮（及实现）。
+      - 添加了加快/减慢速度的按钮（及实现）。
+      - 修复了在无文件启动然后加载文件并尝试播放时导致崩溃的 bug。
+      - 修复了拼写错误 RC_TOGGLE_DURMCHAN => RC_TOGGLE_DRUMCHAN。
+      - 为两个宏添加了大括号以消除编译器警告。
+
+Date: Tue, 19 Jan 1999 00:21:35 +0900
+From: Yamahata Isaku <yamahata@kusm.kyoto-u.ac.jp>
+Files: alsa_a.c
+    查找 TIMIDITY_SOUND_CARD 和 TIMIDITY_PCM_DEVICE 环境变量来选择 PCM 设备。
+
+-- 1.1.1
+Mon Jan 18 1999
+Summary:
+    * 修复了一些 bug。
+    * 修改使 xaw 界面可以在没有任何 MIDI 文件的情况下运行。
+
+Date: Mon Jan 18 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/{xaw_i.c,xaw_c.c} timidity/common.c
+    修复了一些 bug。
+
+Date: Mon Jan 18 1999
+From: takawata@shidahara1.planet.sci.kobe-u.ac.jp
+Files: configure.in
+    修复了关于 OffiX 的配置 bug。
+    修复了关于 ALSA 的配置 bug。
+Files: interface/{xaw_c.c,xaw_i.c} timidity/timidity.c
+    修改使 xaw 界面可以在没有任何 MIDI 文件的情况下运行。
+
+Date: Mon Jan 18 1999
+From: "KINOSHITA, K." <kino@krhm.jvc-victor.co.jp>
+Files: configure.in
+    当指定了 --enabel-tcltk=dynamic 的 configure 选项时移除了 -ltcl。
+Files: interface/Makefile.am
+    修改了一些安装操作。使用 `$(INSTALL_DATA)' 替代
+    `$(INSTALL) -m 644'
+
+Files: interface/{dumb_c.c,dynamic_c.c,emacs_c.c}
+    在某些编译器上，`stdout' 不能赋值给全局语句中的任何变量。
+    修复了此问题。
+Files: configure.in config.h.in timidity/timidity.c
+    添加了 HAVE_GETOPT_H 宏。
+Files: configure.in
+    修复了无 --with-x 时 configure 的 bug。
+Files: timidity/Makefile.am
+    修复了 `make install' 而非 `make; make install' 的问题
+
+-- 1.1.0
+Mon Jan 18 1999
+Summary:
+    * 修复了 xaw 界面在无跟踪模式下的 bug。
+    * 添加了 UMP 软件包的配置。
+    * 修改了 configure 和 Makefile。
+    * 在 xaw 界面中添加了跟踪模式。
+    * 支持了 OffiX 配置。
+    * 修复了一些 bug。
+
+Date: Mon Jan 18 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: interface/xaw_i.c
+    修复了 xaw 界面在无跟踪模式下的 bug。
+Files: configure* */Makefile*
+    添加了 UMP 软件包的配置。
+    修改了 configure 和 Makefile。
+
+Date: Sat, 16 Jan 1999 02:18:01 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: interface/{xaw.h,xaw_c.c,xaw_i.c}
+    在 xaw 界面中添加了跟踪模式。
+
+Date: Fri, 15 Jan 1999 14:26:17 +0900
+From: Takanori Watanabe <takawata@shidahara1.planet.sci.kobe-u.ac.jp>
+Files: configure.in interface/xaw.h interface/xskin_loadBMP.c
+    支持了 OffiX 配置。新增的 configure 选项如下：
+	--enable-offix
+	    为 XAW 打开 OffiX 界面。
+	--with-offix-includes=[dir]
+	    指定 Offix 库的包含目录。
+	--with-offix-libs=[dir]
+	    指定 Offix 的库目录。
+    修复了 tkl/tk 的 configure bug。
+    在 xskin_loadBMP.c 中包含了 config.h。
+
+-- 1.0.1
+Thu Jan 14 1999
+Summary:
+    * 在 vsnprintf() 和 snprintf() 不存在时定义它们。
+    * 修复了某些界面中 '\n' 导致的消息传输问题。
+    * 修改了手册安装。
+    * 在检查 libXaw 之前先检查 libXaw3d。
+    * 修复了 ALSA 配置问题。
+    * 为 OffiX 界面做了修改。
+    * Tcl/tk 界面可以在没有 MIDI 文件参数的情况下启动。
+    * 修改了 doc/C/README.xskin
+
+Date: Thu Jan 14, 1999
+From: Masanao Izumo <mo@goice.co.jp>
+Files: timidity/common.c interface/{motif_c.c,slang_c.c,vt100_c,ncurs_c.c,c,
+	xaw_i.c,xaw_c.c,tk_c.c,wrdt_x.c}
+    在 vsnprintf() 和 snprintf() 不存在时定义它们。并在各处使用之。
+    修复了 Tck/Tk 中 '\n' 导致的消息传输问题（未完成）。
+Files: interface/xaw_c.c interface/xaw_i.c
+    修复了 XAW 中 '\n' 导致的消息传输问题。
+Files: configure.in doc/Makefile* doc/*/Makefile*
+    修改了手册安装。
+Files: configure.in interface/xaw.h
+    在检查 libXaw 之前先检查 libXaw3d。
+    修改了 xaw.h 中的注释。
+
+Date: Tue, 12 Jan 1999 22:00:26 +0900
+From: Yamahata Isaku <yamahata@kusm.kyoto-u.ac.jp>
+Files: configure.in acinclude.m4
+    修复了 ALSA 配置问题。
+
+Date: Tue, 12 Jan 1999 21:25:32 +0900
+From: Takanori Watanabe <takawata@shidahara1.planet.sci.kobe-u.ac.jp>
+Files: interface/xaw.h interface/xaw_i.c
+    为 xaw 修改以支持 OffiX 文件拖放界面（需要 libDnd）。
+    此界面默认不启用。如果你想构建它，请在 interface/xaw.h 中定义
+    OFFIX 并链接 libDnd。
+    xaw.h:WIDGET_IS_LABEL_WIDGET 默认未定义。
+
+Date: Tue, 12 Jan 1999 11:38:16 +0900
+From: "KINOSHITA, K." <kino@krhm.jvc-victor.co.jp>
+Files: interface/tk_c.c interface/tkpanel.tcl interface/timidity.c
+    Tcl/tk 界面可以在没有 MIDI 文件参数的情况下启动。
+
+Date: Sun, 10 Jan 1999 18:58:17 +0900 (JST)
+From: Yoshishige Arai <ryo2@on.rim.or.jp>
+Files: doc/C/README.xskin
+    修复了拼写和语法。
+
+-- 1.0.0
+1/6, 1999
+与 0.2i 相比的主要变更：
+   * 使用 `configure' 脚本安装。
+   * 音频与界面控制的同步。
+   * 使用 GUS/patch 和 SoundFont 作为音色数据。
+   * 通过网络播放 MIDI 文件（UNIX 版本）。
+   * 播放归档文件中的 MIDI 文件。
+   * 不仅播放 SMF 文件，还支持 MOD、RCP/R36/G18/G36。
+   * 可处理 32 通道数据。
+   * 可将用户界面作为动态链接模块处理（UNIX 版本）。
+   * 可显示声音频谱图（UNIX 或 Macintosh 版本）。
+   * 自动检测 MIDI 文件模式（GM/GS/XG）。
+   * 自动检测鼓通道（GS/XG）。
+   * 可显示 MIMPI 的 WRD 文件（日本主要的卡拉 OK 系统之一）。
+   * 日文本地化。
+   * 改进了新的 curses 界面。
+   * 添加了新的界面：
+	VT100、X Athena Widget、Emacs、skin、gtk
+   * 创建了预计算重采样缓存。
+   * 启用了私有用户配置（~/.timidity.cfg）。
+   * 添加了一些效果。
+   * 播放时可控制以下内容：
+	- 更改鼓声部
+	- 加载音色文件
+	- 升高/降低音高
+	- 加快/减慢速度
+	- 升高/降低最大音色数（受编译时 MAX_VOICES 宏的限制）
+   * 可输出 Sun 音频文件（*.au）
+   * 可输出 G.711 A-Law 编码
+   * 显示命令行帮助时使用 PAGER 环境变量指定的分页程序
+   * 支持以下新的 MIDI 事件：
+	ChannelPressure、ModulationWheel、
+	Portamento、ReverbEffect、ChorusEffect、RPN+/-、
+	Mono/Poly Part、Lyric、KARAOKE-Part(@KMIDI)、
+	以及 SystemExclusiveMessages
+   * 修复了许多 bug（即在原版中发现的 bug）。

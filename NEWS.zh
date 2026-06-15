@@ -1,0 +1,471 @@
+2018年8月29日
+    * 发布版本 2.15.0。
+    * 新增分段播放选项 (-G, --segment)，由 Yotam Medini <yotam.medini@gmail.com>
+      贡献大量代码。
+    * 在 dumb 接口追踪模式中添加节拍器指示器。
+    * 支持通过 TIMIDITY_AO_OPTIONS 环境变量为 libao 后端设置 ao 选项。
+    * 修复 CVE-2009-0179、CVE-2009-3996、CVE-2010-2546 和 CVE-2010-2971。
+    * 修复 CVE-2017-11546。
+    * 支持 Tcl/Tk 8.6。
+    * 改进 Windows MIDI 驱动。
+    * ... 以及许多其他错误修复。
+
+2012年6月29日
+    * 发布版本 2.14.0。
+    * 新增 --reverb 选项用于 Freeverb 参数控制。
+    * 新增 --preserve-silence 选项。
+    * 新增 "trysource" 配置文件指令，允许尝试加载其他配置文件，
+      若指定文件不存在则继续运行而不报错。
+    * 支持 GM2 主调音粗调/微调、GS 主调音和 XG 主调音（4C 而非 27）系统专有信息。
+    * 允许 XG SYSTEM ON 系统专有信息使用 0x10 以外的设备号。
+    * 修复 GNU gzip 中存在的多个漏洞同样适用于 lha：
+      CVE-2006-4335、CVE-2006-4337 和 CVE-2006-4338。
+    * 支持 lzma 解压缩。
+    * 支持 IPv6。
+    * 支持 libpng 1.5 及更新版本。
+    * 支持 Tcl/Tk 8.5。
+    * 兼容 xaw3d v1.5，样式变更。
+    * 多项 XAW 界面改进（参见 README.xaw）。
+    * 支持 Windows 命名管道接口。
+    * ... 以及许多其他错误修复。
+
+2004年10月4日
+    * 发布版本 2.13.2。
+      这是一个错误修复版本，修复了 Win32 平台上的编译错误。
+      其他所有平台不受此影响，因此如果您不在 Windows 上编译
+      TiMidity++，则无需更新。
+
+2004年9月29日
+    * 发布版本 2.13.1。
+    * 新增支持的输出格式
+          * libao
+          * FLAC
+          * Speex
+    * 配置文件
+          * 新语法 ${variable}：在分词之前替换为特定字符串。
+            ${basedir} 是目前唯一实现的变量，表示正在解析的
+            cfg 文件的基础目录。
+    * Windows 特定功能
+          * 在 CUI 模式下支持 MP3 GOGO 输出
+          * 支持 Portaudio DLL
+          * 支持 FLAC/OggFLAC DLL
+    * 界面
+          * GTK+2 支持
+          * XAW 界面的新应用默认设置。
+
+2004年3月29日
+    * 发布版本 2.13.0。
+    * 新增支持的平台
+          * Mac OS X 原生
+          * ALSA 0.9 及更新版本
+          * Ogg Vorbis RC3 及更新版本
+          * aRts
+          * JACK
+          * Windows 合成器模式 (TWSYMTH)
+          * PortAudio
+          * PortMIDI 合成器模式
+    * 新增支持的输入格式
+          * MFi（i-Mode 旋律格式）
+          * RMI
+    * 支持 Tcl/Tk 8.3/8.4
+    * 律制控制
+          * 试用纯律演奏 (-Zpure)
+          * 支持调律音调控制调音 (MTS)
+          * 支持调律类型控制调音 (MTS)
+          * 支持用户自定义调律条目 (MTS)
+          * 按调律类型的通道静音
+    * 非伪混响引擎（Schroeder 和 Freeverb）
+    * 板式混响器
+    * 调制包络支持
+    * 逐音色低通滤波器（Chamberlin 和 Moog VCF）
+    * 插入/变化效果支持
+          * 失真
+          * 过载
+          * OD1 / OD2
+          * 六重合唱
+          * Lo-Fi
+          * 立体声均衡器
+    * 支持移调
+    * SoundFont
+          * 支持立体声采样
+          * 支持 SF2 音阶调音
+          * 支持采样链接
+    * 参数编号
+          * NRPN 鼓音高粗调和微调
+          * NRPN 鼓乐器 TVA 电平
+          * NRPN 颤音速率和颤音深度
+          * RPN 调音程序选择
+          * GM2 RPN 调制范围
+    * 新增支持的系统专有信息
+          * GS SysEx 音高偏移微调
+          * GS SysEx 音色映射
+          * GS SysEx 混响电平
+          * GS SysEx 混响时间
+          * GS SysEx 音符关
+          * GS SysEx 力度感应深度/偏移
+          * GS SysEx TONE MAP-0 编号
+          * GS/XG SysEx 力度限制和音符限制
+          * XG SysEx 混响/合唱类型
+          * XG SysEx 鼓组设置
+          * XG 干声电平相关 SysEx
+          * GM2 SysEx 系统开启
+          * 支持 GS SysEx 校验和计算
+    * GM2 支持
+          * GM2 音量曲线
+          * GM2 声像表
+          * GM2 SysEx 批量调音转储 (MTS)
+          * GM2 SysEx 单音符调音变更 (MTS)
+          * 其他 MIDI 调音标准相关 SysEx（见上文）
+    * 支持通道层（GS - Rx.通道 / XG - Rcv 通道）
+    * 支持 XG 多重均衡和声部均衡
+    * 重采样引擎
+          * 修正高斯重采样
+          * 牛顿多项式
+    * 16位输出的噪声整形
+    * 自动音量补偿
+    * 用户音量曲线控制
+          * 音量曲线默认值也已更改
+    * 实时通道静音支持
+    * 非线性声像定位
+    * 支持 RCP/R36/G18/G36 MIDI 数据的 ME_TIMESIG/ME_KEYSIG
+    * 支持 RCP 速度渐变
+    * 支持 WAV 和 AIFF 文件作为采样数据
+    * 支持 NeoWrd
+    * 命令行选项
+          * 支持 getopt_long()
+          * 变更过多，请参考 timidity(1)
+    * 配置文件
+          * 路径名可用 "" 引用
+          * 新选项
+                * note=
+                * pan=
+                * strip=tail
+                * amp
+                * fc=
+                * q=
+                * (trem|mod)(pitch|fc)=
+                * fc(keyf|velf)=
+                * qvelf=
+                * scl(note|tune)=
+                * ADSR 类型选项
+          * map 命令的新映射
+                * gm2[drum]
+                * sc8850[drum]
+          * 新扩展命令
+                * #extension copymap
+                * #extension legato
+                * #extension level
+                * #extension playnote
+                * #extension (reverb|chorus|delay)send
+                * #extension damper
+                * #extension rnddelay
+          * 新命令
+                * drumset
+    * 包含 VC6 和 VC7 的项目文件
+
+2002年1月18日
+    * 发布版本 2.11.3。
+    * 新增配置文件选项 "tune="
+
+2002年1月12日
+    * 发布版本 2.11.2。
+
+2001年12月29日
+    * 发布版本 2.11.1。
+
+2001年12月27日
+    * 发布版本 2.11.0。
+    * Windows GUI 配置菜单已更改。
+    * Windows GUI 版本支持 vorbis。
+    * Windows GUI 版本支持 gogo。
+    * (ncurses 界面) 音频队列监视器从3位数改为4位数。
+    * (Sun 音频): 支持通过 AUDIODEV 环境变量指定音频设备文件。
+    * 更新 Win32GUI 版本。
+    * 改进 GS SysEx
+    * 新增起音/释音/衰减时间（CC/NRPN 音色/NRPN 鼓）
+    * 新增鼓电平
+    * 新增 CC#94 伪延迟（类似合唱方式）
+    * 调整混响电平
+    * 新增共鸣滤波器
+    * 修改包络起音
+    * 调整力度
+    * 支持用户鼓组（SC-88）
+    * 新增一些 GS SysEx。
+    * 升级开发环境：
+        automake 1.5 + autoconf 2.5x + libtool 1.4.x
+    * Vorbis 1.0 支持
+    * MOD 转 MIDI。
+    * -EFchorus=2 为默认值。
+    * 支持 RIFF MIDI。
+
+2001年3月18日
+    * 发布版本 2.10.4。
+
+2001年3月10日
+    * 发布版本 2.10.3。
+
+2000年11月2日
+    * 发布版本 2.10.2。
+
+2000年10月18日
+    * 发布版本 2.10.1。
+
+2000年8月9日
+    * 发布版本 2.10.0。
+    * 如果省略 `-o' 命令行选项，可以分别写入每个分离的 wav 文件。
+      输出文件名自动根据输入 MIDI 文件名生成，文件扩展名改为 ".wav"。
+    * configure: 新增选项。
+        --with-includes=DIRS
+                指定包含目录（冒号分隔）
+        --with-libraries=DIRS
+                指定库目录（冒号分隔）
+    * Ogg Vorbis 输出。
+    * ALSA MIDI 序列器客户端。
+
+2000年7月5日
+    * 发布版本 2.9.5。
+    * 升级 Windows 版本。
+
+2000年5月24日
+    * 发布版本 2.9.4。
+    * 支持 ALSA 0.6
+
+2000年5月8日
+    * 发布版本 2.9.3。
+    * 启用鼓弯音。此修复同时启用鼓合唱、调制轮、
+      滑音和其他鼓弯音控制。
+
+2000年4月10日
+    * 发布版本 2.9.2。
+
+2000年3月21日
+    * 发布版本 2.9.1。
+    * 新命令行选项 -T n：
+        调整速度至 n%；120=以 NTSC Amiga 的时序播放 MOD 文件。
+
+2000年2月27日
+    * 发布版本 2.9.0。
+    * 支持完整模块 MIDI 文件。
+
+2000年2月7日
+    * 发布版本 2.8.2。
+    * 支持 ALSA 0.5
+
+1999年11月29日
+    * 发布版本 2.8.1。
+
+1999年11月24日
+    * 发布版本 2.8.0。
+    * 在 GTK 界面中，新增支持打印 .kar 文件的歌词，
+      并使文件之间的文本区域清除。
+    * 新命令行选项：-M <name>
+        -M auto: 使用 *.mid.wav 或 *.mid.aiff 代替 MIDI 到 WAVE
+                 转换。PCM 文件格式必须为16位采样且采样率与
+                 timidity 的速率相同。
+        -M none: 禁用此功能（默认）
+        -M <filename>: 使用指定文件。
+    * 在 GTK 界面中，新增支持打印 .kar 文件的歌词，
+      并使文件之间的文本区域清除。
+    * 重采样中选择波形插值的新配置选项。
+        --with-spline=linear    线性插值（默认）
+        --with-spline=cubic     三次插值
+        --with-spline=lagrange  拉格朗日插值
+        --with-spline=no        无插值
+    * 新命令行选项 `-m N' 用于指定延音时间（毫秒）。
+        -m 1    有效行为如同忽略所有延音，
+                音量渐变与正常第3阶段相同。
+        -m 0    禁用延音渐变，产生恒定音量的延音。
+                （默认）
+        -m 3000 全音量的音符在开始延音后将衰减3秒
+                （假设常规第3阶段速率不会使其衰减更久）。
+                较弱音符当然会更早消失。
+
+1999年10月12日
+    * 发布版本 2.7.0。
+    * 默认启用立即声像调整 (-F)。
+    * GS SysEx 用于库+音色变更。
+    * 错误修复。
+
+1999年9月27日
+    * 发布版本 2.6.1。
+    * 支持 XG 多重声部数据参数变更 SysEx 事件。
+    * 新增 Channel 结构成员 `int pan_random' 用于随机声像标志。
+      注意所有动态界面必须重新编译，因为 `Channel' 结构的大小已更改。
+    * 错误修复。
+
+1999年9月21日
+    * 发布版本 2.6.0。
+    * 一些配置和安装已更改。
+    * -EFchorus=2 用于环绕声而非失谐合唱。
+    * 错误修复。
+
+1999年8月27日
+    * 发布版本 2.5.1。
+    * 错误修复。
+
+1999年8月26日
+    * 发布版本 2.5.0。
+    * 升级 Windows GUI。
+    * 真彩 X Window 的 MIMPI WRD 运行更加稳定。
+    * 在 ncurses 界面中，支持显示 GSLCD。
+    * 在 ncurses 界面中，支持显示超过16个通道。
+      终端必须能够显示超过24行才能显示超过16个通道。
+    * 在 Windows 上，如果二进制文件使用 Cygwin 编译，
+      同时识别 `\' 和 `/' 作为路径分隔符。
+    * 改进 CSPLINE_INTERPOLATION 和 LAGRANGE_INTERPOLATION。
+    * 追踪播放时减少 CPU 占用。
+    * 错误修复。
+
+1999年8月11日
+    * 发布版本 2.4.1。
+    * 错误修复。
+
+1999年8月9日
+    * 发布版本 2.4.0。
+    * 简化归档库 (libarc) 代码。
+    * 在 linux 上，修复音频队列分析问题。
+
+1999年8月1日
+    * 发布版本 2.3.0。
+    * 使 Windows GUI 代码更优雅。
+    * 在 Windows GUI 中支持 MIDI 到 WAVE 转换。
+
+1999年7月26日
+    * 新功能：自动复音缩减。
+
+1999年7月19日
+    * 发布版本 2.2.0。
+    * 支持通过 `-q' 选项指定软缓冲区大小
+    * 支持在 FreeBSD-ELF 环境下构建 UMP。
+
+1999年7月9日
+    * 发布版本 2.1.1。
+
+1999年6月10日
+    * 发布版本 2.1.0。
+    * 支持重采样中的多点插值。
+      支持三次样条曲线和拉格朗日插值。
+    * 支持 linux axp
+    * 使用 -Z <file> 选项加载频率表。
+
+1999年4月28日
+    * 发布版本 2.0.2。
+
+1999年4月25日
+    * 发布版本 2.0.1。
+
+1999年4月17日
+    版本 2.0.0 的主要变更：
+    * 自动音色缩减
+      如果机器没有足够的运算能力实时播放 MIDI，
+      TiMidity 会自动减少音色。
+    * 音频缓冲
+      TiMidity 具有内部音频缓冲区。TiMidity 在缓冲区
+      填满之前不会开始播放。
+    * 支持 Windows GUI。
+    * 支持 Sherry WRD。
+    * 支持 NAS（网络音频系统）输出。
+    * 支持 EsounD 输出。
+    * 支持实时播放流式 MIDI。流格式与 OSS /dev/sequencer 流相同。
+      参见 interface/server_c.c 中的协议说明
+    * 支持从 part of soundfont 分配音色。
+    * 降低追踪播放时的平均 CPU 负载。
+      v1 采用忙等待方法同步音频和界面，v2 则不是。
+    * 混响和合唱效果默认启用。可以通过命令行选项禁用
+      它们的控制。
+    * DEFAULT_VOICES 现在为 64。可以通过修改 `timidity.h'
+      来更改此值。
+    * 修改混响优化实现（算法未更改）
+    * 新增 sun_a.c，修改自原始 TiMidity。移除 audriv_sun.c，
+      因为此版本不使用它。
+    * 实现更改'n'界面音频采样率的功能。
+    * 默认使用鼓组0的 `altassign'。
+    * 新增 -EF 选项用于效果。
+      废弃 -b、-n、-EC、-Ec、-ER、-Er 和 -r 选项。
+      请使用 -EFdelay=?  代替 -b?,
+           -EFns=?    代替 -n?,
+           -EFchorus=0 代替 -EC,
+           -EFchorus=1 代替 -Ec,
+           -EFreverb=0 代替 -ER,
+           -EFreverb=1 代替 -Er,
+           -EFreverb=2 代替 -r。
+    * 完全调整滑音控制时间。
+    * 扩展播放列表文件（.m3u、.pls 和 .asx）。
+    * s/win32/w32/gi
+
+* 1999年3月23日
+    发布 TiMidity++ v1.3.6。
+    * 在 XAW 界面中，新增用户界面。
+
+* 1999年3月8日
+    发布 TiMidity++ v1.3.5。
+    * 在 XAW 界面中，新增用户界面。
+
+* 1999年3月1日
+    发布 TiMidity++ v1.3.4。
+    * 修复一些错误和问题。
+    * 为 GTK 添加新的窗口管理器图标。
+
+* 1999年2月24日
+    发布 TiMidity++ v1.3.3。
+    * 改进 XAW 界面。
+    * 修复一些错误和问题。
+
+* 1999年2月10日
+    发布 TiMidity++ v1.3.2。
+    * 修复一些错误和问题。
+    * 更改 motif 界面图标。
+    * 更改 xaw 和 tcktl 界面的排序算法。
+
+* 1999年2月5日
+    发布 TiMidity++ v1.3.1。
+    * 修复一些错误。
+    * 支持使用 MINGW32 的 gcc 编译。
+
+* 1999年2月3日
+    发布 TiMidity++ v1.3.0。
+    从 v1.2.x 开始的新功能和主要变更：
+    * 支持在 cygnus 上配置和编译。
+    * 改进追踪播放的 XAW 界面。
+    * 改进混响音效。
+    * 修复 MIME/Multipart 错误。
+
+* 1999年1月25日
+    发布 TiMidity++ v1.2.1。
+    添加缺失的文件。
+    修复一些配置问题。
+    新增 --enable-dynamic 配置选项。
+
+* 1999年1月21日
+    发布 TiMidity++ v1.2.0。
+    从 v1.1.x 开始的新功能和主要变更：
+    * XAW 界面：
+      - 更改随机和重复的按钮位图
+      - 修改一些实现。
+    * Gtk 界面：
+      - 新增升高和降低音高的按钮（及实现）。
+      - 新增增加和减少速度的按钮（及实现）。
+    * 查找 TIMIDITY_SOUND_CARD 和 TIMIDITY_PCM_DEVICE 环境变量
+      来选择 ALSA 的 PCM 设备。
+    * 新增 interface.h 来定义 TiMidity 界面的 IA_* 宏。
+      此文件由 configure 自动生成。
+
+* 1999年1月18日
+    发布 TiMidity++ v1.1.1。
+    v1.1.0 存在配置问题，因此 v1.1.1 立即发布。
+    修复一些配置错误。
+    修改 xaw 界面使其可以在没有 MIDI 文件的情况下运行。
+
+* 1999年1月18日
+    发布 TiMidity++ v1.1.0。
+    支持 OffiX 文件拖放界面（xaw）。
+    支持 UMP 配置。
+
+* 1999年1月14日
+    发布 TiMidity++ v1.0.1。
+    修改 OffiX 文件拖放界面（xaw）。如果需要构建此功能，
+    请在 interface/xaw.h 中定义 OFFIX 并链接 libDnd。
+
+* 1999年1月6日
+    发布 TiMidity++ v1.0.0。
+    参见 `ChangeLog' 了解从原始 TiMidity 0.2i 以来的主要变更
