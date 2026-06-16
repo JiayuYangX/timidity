@@ -129,6 +129,9 @@ extern PlayMode speex_play_mode;
 #ifdef AU_GOGO
 extern PlayMode gogo_play_mode;
 #endif /* AU_GOGO */
+#ifdef AU_LAME
+extern PlayMode lame_play_mode;
+#endif /* AU_LAME */
 #endif /* !__MACOS__ */
 
 extern PlayMode midi_play_mode;
@@ -195,6 +198,9 @@ PlayMode *play_mode_list[] = {
 #ifdef AU_GOGO
   &gogo_play_mode,
 #endif /* AU_GOGO */
+#ifdef AU_LAME
+  &lame_play_mode,
+#endif /* AU_LAME */
   &list_play_mode,
 #endif /* __MACOS__ */
   &midi_play_mode,

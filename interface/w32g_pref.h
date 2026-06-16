@@ -95,10 +95,10 @@ extern int vorbisConfigDialog(void);
 
 #endif // AU_VORBIS
 
-#ifdef AU_PORTAUDIO_DLL
+#if defined(AU_PORTAUDIO) && defined(__W32__)
 
 extern int asioConfigDialog(void);
 
-#endif //AU_PORTAUDIO_DLL
+#endif // AU_PORTAUDIO
 
 #endif /* __W32G2_PREF_H__ */

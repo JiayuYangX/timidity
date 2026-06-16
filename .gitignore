@@ -2,6 +2,8 @@
 *.o
 *.exe
 Makefile
+/autom4te.cache/
+/configure~
 /common.makefile
 /stamp-*
 /config.log

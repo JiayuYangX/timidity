@@ -25,7 +25,7 @@ for arg in "$@"; do
 done
 
 CONFIGURE_OPTS="--build=x86_64-w64-mingw32 --host=i686-w64-mingw32 --prefix="
-AUDIO_OPTS="--enable-audio=w32,vorbis,gogo,ogg,flac,portaudio"
+AUDIO_OPTS="--enable-audio=w32,vorbis,gogo,ogg,flac,portaudio,lame"
 GUI_OPTS="--enable-network --enable-w32gui"
 CONSOLE_OPTS="--enable-ncurses --enable-vt100 --enable-winsyn --enable-network --with-ncurses=/mingw32"
 
@@ -35,20 +35,13 @@ export CFLAGS="-std=gnu89 -O2 -Wno-incompatible-pointer-types"
 patch_makefiles() {
     local gui=$1
     cd timidity
-    sed -i 's/-DAU_VORBIS_DLL //;s/-DAU_PORTAUDIO_DLL //;s/-DAU_FLAC_DLL //' Makefile
-    sed -i 's/-DAU_FLAC /-DAU_FLAC -DFLAC__NO_DLL -DNCURSES_STATIC /' Makefile
-
     if [ "$gui" = "yes" ]; then
-        sed -i 's/^LDFLAGS = .*$/LDFLAGS =  -mwindows -L\/lib -static -static-libgcc -Wl,--allow-multiple-definition/' Makefile
-        sed -i 's/^LIBS = .*$/LIBS = -lm  -lncursesw    -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lole32  -lws2_32 -lportaudio -lwinmm -lole32 -L\/lib -lvorbis -lm -lvorbisenc -L\/lib -lFLAC -logg -lsetupapi -loleaut32 -lstdc++/' Makefile
+        sed -i 's/^LDFLAGS = .*$/LDFLAGS =  -mwindows -static -static-libgcc/' Makefile
     else
-        sed -i 's/^LDFLAGS = .*$/LDFLAGS =  -L\/lib -static -static-libgcc -Wl,--allow-multiple-definition/' Makefile
-        sed -i 's/^LIBS = .*$/LIBS = -lm  -lncursesw       -lws2_32 -lportaudio -lwinmm -lole32 -L\/lib -lvorbis -lm -lvorbisenc -L\/lib -lFLAC -logg -lsetupapi -loleaut32 -lstdc++/' Makefile
+        sed -i 's/^LDFLAGS = .*$/LDFLAGS =  -static -static-libgcc/' Makefile
     fi
 
     cd ../interface
-    sed -i 's/-DAU_VORBIS_DLL //;s/-DAU_PORTAUDIO_DLL //;s/-DAU_FLAC_DLL //' Makefile
-    sed -i 's/ -DAU_GOGO / -DNCURSES_STATIC -DAU_GOGO /' Makefile
     rm -f *.o libinterface.a
     make -j4
     cd ..
@@ -59,7 +52,7 @@ build_console() {
     ./configure $CONFIGURE_OPTS $CONSOLE_OPTS $AUDIO_OPTS
     patch_makefiles "no"
     cd timidity
-    rm -f portaudio_a.o output.o timidity.exe
+    rm -f portaudio_a.o output.o lame_a.o timidity.exe
     make -j4
     strip timidity.exe
     cp timidity.exe "$OUTDIR/timidity.exe"
@@ -72,7 +65,7 @@ build_gui() {
     ./configure $CONFIGURE_OPTS $GUI_OPTS $AUDIO_OPTS
     patch_makefiles "yes"
     cd timidity
-    rm -f portaudio_a.o output.o timidity.exe
+    rm -f portaudio_a.o output.o lame_a.o timidity.exe
     make -j4
     strip timidity.exe
     cp timidity.exe "$OUTDIR/timw32g.exe"

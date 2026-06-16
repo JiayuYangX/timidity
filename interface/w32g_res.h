@@ -5,6 +5,7 @@
 #define IDD_DIALOG_SEARCHBOX            102
 #define IDD_DIALOG_VORBIS               103
 #define IDD_DIALOG_GOGO                 104
+#define IDD_DIALOG_LAME                 105
 #define IDD_PREF_PLAYER_EN              106
 #define IDD_PREF_TIMIDITY1_EN           107
 #define IDD_PREF_TIMIDITY2_EN           108
@@ -14,6 +15,8 @@
 #define IDM_MENU_MAIN_EN                112
 #define IDD_DIALOG_VORBIS_EN            113
 #define IDD_DIALOG_GOGO_EN              114
+#define IDD_DIALOG_ASIO                 115
+#define IDD_DIALOG_LAME_EN              116
 #define IDD_DIALOG_ONE_LINE_EN          118
 #define IDD_DIALOG_ONE_LINE             119
 #define IDB_BITMAP_KEYBORD42x20         122
@@ -335,6 +338,25 @@
 #define IDM_MHONLINEHELP                40004
 #define IDM_MHONLINEHELPCFG             40005
 #define IDM_MHBTS                       40006
+
+/* LAME dialog controls */
+#define IDC_COMBO_LAME_VBR_QUALITY       2110
+#define IDC_COMBO_LAME_CBR_BITRATE       2111
+#define IDC_COMBO_LAME_ENCODE_MODE       2112
+#define IDC_CHECK_LAME_ENCODE_MODE       2113
+#define IDC_COMBO_LAME_ALGO_QUALITY      2114
+#define IDC_CHECK_LAME_ALGO_QUALITY      2115
+#define IDC_EDIT_LAME_LOWPASS            2116
+#define IDC_CHECK_LAME_LOWPASS           2117
+#define IDC_CHECK_LAME_DEFAULT           2118
+#define IDC_CHECK_LAME_VBR               2119
+#define IDC_CHECK_LAME_COMMANDLINE_OPTS  2120
+#define IDC_EDIT_LAME_COMMANDLINE_OPTION 2121
+
+/* ASIO dialog controls */
+#define IDC_COMBO_ASIO_DEVICE            2122
+#define IDC_BUTTON_ASIO_CONTROL_PANEL    2123
+
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -343,7 +365,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         40007
-#define _APS_NEXT_CONTROL_VALUE         2109
+#define _APS_NEXT_CONTROL_VALUE         2124
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
