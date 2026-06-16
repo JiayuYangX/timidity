@@ -2888,13 +2888,13 @@ static void MPanelInit(HWND hwnd)
 	strcpy(MPanel.Font,"Arial Bold");
 	switch(PlayerLanguage){
    case LANGUAGE_ENGLISH:
-		strcpy(MPanel.FontLang,"Times New Roman");
-		strcpy(MPanel.FontLangFixed,"Times New Roman");
+		strcpy(MPanel.FontLang,"新宋体");
+		strcpy(MPanel.FontLangFixed,"新宋体");
      	break;
 	default:
 	case LANGUAGE_JAPANESE:
-		strcpy(MPanel.FontLang,"ＭＳ Ｐ明朝");
-		strcpy(MPanel.FontLangFixed,"ＭＳ 明朝");
+		strcpy(MPanel.FontLang,"新宋体");
+		strcpy(MPanel.FontLangFixed,"新宋体");
 		break;
 	}
 	rc = MPanel.rcTitle;

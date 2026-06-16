@@ -882,12 +882,12 @@ void w32g_initialize(void)
 	w32g_output_dir[0] = '\0';
 
     strcpy(DocFileExt,DEFAULT_DOCFILEEXT);
-    strcpy(SystemFont,"ＭＳ 明朝");
-    strcpy(PlayerFont,"ＭＳ 明朝");
-    strcpy(WrdFont,"ＭＳ 明朝");
-    strcpy(DocFont,"ＭＳ 明朝");
-    strcpy(ListFont,"ＭＳ 明朝");
-    strcpy(TracerFont,"ＭＳ 明朝");
+    strcpy(SystemFont,"新宋体");
+    strcpy(PlayerFont,"新宋体");
+    strcpy(WrdFont,"新宋体");
+    strcpy(DocFont,"新宋体");
+    strcpy(ListFont,"新宋体");
+    strcpy(TracerFont,"新宋体");
 
     if(GetModuleFileName(hInst, buffer, MAXPATH))
     {

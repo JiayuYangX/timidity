@@ -842,8 +842,8 @@ static int ListWndInfoReset(HWND hwnd)
 	ListWndInfo.hwnd = hwnd;
 	if ( hwnd != NULL )
 		ListWndInfo.hwndListBox = GetDlgItem(hwnd,IDC_LISTBOX_PLAYLIST);
-	strcpy(ListWndInfo.fontNameEN,"Times New Roman");
-	strcpy(ListWndInfo.fontNameJA,"ＭＳ 明朝");
+	strcpy(ListWndInfo.fontNameEN,"新宋体");
+	strcpy(ListWndInfo.fontNameJA,"新宋体");
 	ListWndInfo.fontHeight = 12;
 	ListWndInfo.fontWidth = 6;
 	ListWndInfo.fontFlags = FONT_FLAGS_FIXED;
@@ -1204,8 +1204,8 @@ static int DocWndInfoReset2(HWND hwnd)
 	DocWndInfo.hwnd = hwnd;
 	if ( hwnd != NULL )
 	DocWndInfo.hwndEdit = GetDlgItem(hwnd,IDC_EDIT);
-	strcpy(DocWndInfo.fontNameEN,"Times New Roman");
-	strcpy(DocWndInfo.fontNameJA,"ＭＳ 明朝");
+	strcpy(DocWndInfo.fontNameEN,"新宋体");
+	strcpy(DocWndInfo.fontNameJA,"新宋体");
 	DocWndInfo.fontHeight = 12;
 	DocWndInfo.fontWidth = 6;
 	DocWndInfo.fontFlags = FONT_FLAGS_FIXED;
@@ -1367,7 +1367,7 @@ stage1_end:
 		break;
 	case LANGUAGE_JAPANESE:
 		strncpy(out,buffer,MAX2(buffer_size-1,out_size-1));
-		nkf_convert(buffer,out,out_size-1,NULL,"SJIS");
+		// nkf_convert(buffer,out,out_size-1,NULL,"SJIS");
 		out[out_size-1] = '\0';
 		free(buffer);
 		break;

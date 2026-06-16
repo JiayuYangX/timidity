@@ -347,9 +347,9 @@ void InitTracerWnd(HWND hParentWnd)
 	{
 		char fontname[128];
 		if ( PlayerLanguage == LANGUAGE_JAPANESE )
-			strcpy(fontname,"ＭＳ Ｐ明朝");
+			strcpy(fontname,"新宋体");
 		else {
-			strcpy(fontname,"Arial");
+			strcpy(fontname,"新宋体");
 			w32g_tracer_wnd.font_common_height = 16; 
 		}
 		w32g_tracer_wnd.hFontCommon = CreateFont(w32g_tracer_wnd.font_common_height,w32g_tracer_wnd.font_common_width,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,

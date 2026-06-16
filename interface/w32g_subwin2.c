@@ -307,9 +307,9 @@ void InitWrdWnd(HWND hParentWnd)
 	{
 		char fontname[1024];
 		if ( PlayerLanguage == LANGUAGE_JAPANESE )
-			strcpy(fontname,"ＭＳ 明朝");
+			strcpy(fontname,"新宋体");
 		else
-			strcpy(fontname,"Times New Roman");
+			strcpy(fontname,"新宋体");
 		w32g_wrd_wnd.hFont = CreateFont(w32g_wrd_wnd.font_height,w32g_wrd_wnd.font_width,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,
 			DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,
 	      	FIXED_PITCH | FF_MODERN	,fontname);
