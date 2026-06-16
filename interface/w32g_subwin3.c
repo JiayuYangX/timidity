@@ -110,10 +110,10 @@ extern void ClearEditCtlWnd(HWND hwnd);
 #define C_TEXT_BACK_VERY_DARK RGB(0x40,0x40,0x40)
 
 #define CVV_TYPE_NONE 0
-#define CVV_TYPE_LEFT 1		// 嵍偐傜塃
-#define CVV_TYPE_RIGHT 2	// 塃偐傜嵍
-#define CVV_TYPE_TOP 3		// 忋偐傜壓
-#define CVV_TYPE_BOTTOM 4	// 壓偐傜忋
+#define CVV_TYPE_LEFT 1		// 左から右
+#define CVV_TYPE_RIGHT 2	// 右から左
+#define CVV_TYPE_TOP 3		// 上から下
+#define CVV_TYPE_BOTTOM 4	// 下から上
 
 #define VEL_MAX 128*4
 
@@ -347,7 +347,7 @@ void InitTracerWnd(HWND hParentWnd)
 	{
 		char fontname[128];
 		if ( PlayerLanguage == LANGUAGE_JAPANESE )
-			strcpy(fontname,"俵俽 俹柧挬");
+			strcpy(fontname,"ＭＳ Ｐ明朝");
 		else {
 			strcpy(fontname,"Arial");
 			w32g_tracer_wnd.font_common_height = 16; 
@@ -447,8 +447,8 @@ static int init_tracer_bmp ( HDC hdc )
 		DeleteObject ( (HGDIOBJ) tracer_bmp.hbmp );
 	tracer_bmp.hbmp = CreateCompatibleBitmap ( hdc, TRACER_CANVAS_SIZE_X, TRACER_CANVAS_SIZE_Y );
 	tracer_bmp.hmdc = CreateCompatibleDC ( hdc );
-	SelectObject ( tracer_bmp.hmdc, w32g_tracer_wnd.hNullBrush ); /* 昁梫側偄偐傕偟傟側偄偑 */
-	SelectObject ( tracer_bmp.hmdc, w32g_tracer_wnd.hNullPen ); /* 昁梫側偄偐傕偟傟側偄偑 */
+	SelectObject ( tracer_bmp.hmdc, w32g_tracer_wnd.hNullBrush ); /* 必要ないかもしれないが */
+	SelectObject ( tracer_bmp.hmdc, w32g_tracer_wnd.hNullPen ); /* 必要ないかもしれないが */
 	SelectObject ( tracer_bmp.hmdc, tracer_bmp.hbmp );
 
 	hbmp = LoadBitmap ( hInst, MAKEINTRESOURCE(IDB_BITMAP_TRACER) );
@@ -563,7 +563,7 @@ void TracerWndReset2(void)
 }
 
 
-// 夋柺徚嫀
+// 画面消去
 void TracerWndClear(int lockflag)
 {
 	HPEN hPen;
@@ -1091,12 +1091,12 @@ static int effect_view_border_draw ( RECT *lprc, int lockflag)
 	if ( lockflag ) TRACER_LOCK ();
 	hOldPen= (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
 
-	// 塃慄
+	// 右線
 	SelectObject(hdc, hPen3);
 	MoveToEx(hdc, lprc->right, lprc->top - 1, NULL);
 	LineTo(hdc, lprc->right, lprc->bottom + 1);
 
-	// 壓慄
+	// 下線
 	SelectObject(hdc, hPen1);
 	MoveToEx(hdc, lprc->left - 1, lprc->bottom, NULL);
 	LineTo(hdc, lprc->right + 1, lprc->bottom);
@@ -1132,12 +1132,12 @@ static int tracer_velocity_draw_ex ( RECT *lprc, int vol, int vol_old, int max, 
 	if(vol_old >= view_max) {vol_old = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗儀儘僔僥傿僶乕偺攚宨傪昤夋
+	// 必要なだけベロシティバーの背景を描画
 //	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, vol_old - vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_velocity[0].left + vol, tracer_bmp.rc_velocity[0].top, SRCCOPY );
 
-	// 昁梫側偩偗儀儘僔僥傿僶乕傪昤夋
+	// 必要なだけベロシティバーを描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_velocity[0].left, tracer_bmp.rc_velocity[0].top + 19 + 1, SRCCOPY );
 
@@ -1161,10 +1161,10 @@ static int tracer_volume_draw ( RECT *lprc, int vol, int max, int lockflag )
 	if(vol >= view_max) {vol = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗攚宨傪昤夋
+	// 必要なだけ背景を描画
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_volume.left, tracer_bmp.rc_volume.top, SRCCOPY );
-	// 昁梫側偩偗昤夋
+	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_volume.left, tracer_bmp.rc_volume.top + 9 + 1, SRCCOPY );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1186,10 +1186,10 @@ static int tracer_expression_draw ( RECT *lprc, int vol, int max, int lockflag )
 	if(vol >= view_max) {vol = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗攚宨傪昤夋
+	// 必要なだけ背景を描画
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_expression.left, tracer_bmp.rc_expression.top, SRCCOPY );
-	// 昁梫側偩偗昤夋
+	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_expression.left, tracer_bmp.rc_expression.top + 9 + 1, SRCCOPY );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1212,14 +1212,14 @@ static int tracer_pan_draw ( RECT *lprc, int vol, int max, int lockflag )
 	else if(vol < -view_max) {vol = -view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 攚宨傪昤夋
+	// 背景を描画
 	BitBlt ( hdc, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_pan.left, tracer_bmp.rc_pan.top, SRCCOPY );
-	// 仸埲壓偺2偮偺揮憲張棟偱偼柍懯側晹暘傕揮憲偟偰偄傞偺偱丄偆傑偔傗傟偽徣偗傞丅
-	// 儅僗僋傪昤夋
+	// ※以下の2つの転送処理では無駄な部分も転送しているので、うまくやれば省ける。
+	// マスクを描画
 	BitBlt ( hdc, lprc->left + vol, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_pan.left, tracer_bmp.rc_pan.top + (9 + 1) * 2, SRCPAINT );
-	// 偮傑傒傪昤夋
+	// つまみを描画
 	BitBlt ( hdc, lprc->left + vol, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_pan.left, tracer_bmp.rc_pan.top + 9 + 1, SRCAND );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1241,10 +1241,10 @@ static int tracer_sustain_draw ( RECT *lprc, int vol, int lockflag )
 	if(vol >= view_max) {vol = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗攚宨傪昤夋
+	// 必要なだけ背景を描画
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_sustain.left, tracer_bmp.rc_sustain.top, SRCCOPY );
-	// 昁梫側偩偗昤夋
+	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_sustain.left, tracer_bmp.rc_sustain.top + 9 + 1, SRCCOPY );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1282,10 +1282,10 @@ static int tracer_pitch_bend_draw ( RECT *lprc, int vol, int max, int lockflag )
 	else if(vol < -view_max) {vol = -view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 攚宨傪昤夋
+	// 背景を描画
 	BitBlt ( hdc, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_pitch_bend.left, tracer_bmp.rc_pitch_bend.top, SRCCOPY );
-	if(vol > 0) {	// 昁梫側偩偗昤夋
+	if(vol > 0) {	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left + view_max, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_pitch_bend.left + view_max, tracer_bmp.rc_pitch_bend.top + 9 + 1, SRCCOPY );
 	} else if(vol < 0) {
@@ -1311,10 +1311,10 @@ static int tracer_mod_wheel_draw ( RECT *lprc, int vol, int max, int lockflag )
  	if(vol >= view_max) {vol = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗攚宨傪昤夋
+	// 必要なだけ背景を描画
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_mod_wheel.left, tracer_bmp.rc_mod_wheel.top, SRCCOPY );
-	// 昁梫側偩偗昤夋
+	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_mod_wheel.left, tracer_bmp.rc_mod_wheel.top + 9 + 1, SRCCOPY );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1336,10 +1336,10 @@ static int tracer_chorus_effect_draw ( RECT *lprc, int vol, int max, int lockfla
 	if(vol >= view_max) {vol = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗攚宨傪昤夋
+	// 必要なだけ背景を描画
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_chorus_effect.left, tracer_bmp.rc_chorus_effect.top, SRCCOPY );
-	// 昁梫側偩偗昤夋
+	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_chorus_effect.left, tracer_bmp.rc_chorus_effect.top + 9 + 1, SRCCOPY );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1361,10 +1361,10 @@ static int tracer_reverb_effect_draw ( RECT *lprc, int vol, int max, int lockfla
 	if(vol >= view_max) {vol = view_max;}
 	
 	if ( lockflag ) TRACER_LOCK ();
-	// 昁梫側偩偗攚宨傪昤夋
+	// 必要なだけ背景を描画
 	BitBlt ( hdc, lprc->left +  vol, lprc->top, lprc->right - lprc->left -  vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_reverb_effect.left, tracer_bmp.rc_reverb_effect.top, SRCCOPY );
-	// 昁梫側偩偗昤夋
+	// 必要なだけ描画
 	BitBlt ( hdc, lprc->left, lprc->top, vol, lprc->bottom - lprc->top,
 		tracer_bmp.hmdc, tracer_bmp.rc_reverb_effect.left, tracer_bmp.rc_reverb_effect.top + 9 + 1, SRCCOPY );
 	if ( lockflag ) TRACER_UNLOCK ();
@@ -1608,22 +1608,22 @@ static int string_view_border_draw ( RECT *lprc, COLORREF back, int lockflag)
 	if ( lockflag ) TRACER_LOCK ();
 	hOldPen= (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
 
-	// 忋慄
+	// 上線
 	SelectObject(hdc, hPen1);
 	MoveToEx(hdc, lprc->left, lprc->top, NULL);
 	LineTo(hdc, lprc->right, lprc->top);
 
-	// 嵍慄
+	// 左線
 	SelectObject(hdc, hPen3);
 	MoveToEx(hdc, lprc->left, lprc->top, NULL);
 	LineTo(hdc, lprc->left, lprc->bottom);
 
-	// 壓慄
+	// 下線
 	SelectObject(hdc, hPen2);
 	MoveToEx(hdc, lprc->left, lprc->bottom - 1, NULL);
 	LineTo(hdc, lprc->right, lprc->bottom - 1);
 
-	// 塃慄
+	// 右線
 	SelectObject(hdc, hPen4);
 	MoveToEx(hdc, lprc->right - 1, lprc->top, NULL);
 	LineTo(hdc, lprc->right - 1, lprc->bottom);
@@ -1742,7 +1742,7 @@ void TracerWndPaintAll(int lockflag)
 	if ( !w32g_tracer_wnd.active )
 		return;
 	if ( lockflag ) TRACER_LOCK();
-	// 僞僀僩儖
+	// タイトル
 	strcpy ( buff, "ch" );
 	get_head_rc ( &rc, &w32g_tracer_wnd.rc_channel_top );
 	cheap_string_view_draw ( &rc, buff, C_TEXT_FORE, C_TEXT_BACK, CSV_CENTER, FALSE );
@@ -1797,7 +1797,7 @@ void TracerWndPaintAll(int lockflag)
 	get_head_rc ( &rc, &w32g_tracer_wnd.rc_head_rest );
 	cheap_string_view_draw ( &rc, buff, C_TEXT_FORE, C_TEXT_BACK, CSV_LEFT, FALSE );
 
-	// 奺僠儍儞僱儖
+	// 各チャンネル
 	for ( i = 0; i < TRACER_CHANNELS ; i ++ ) {
 		if ( get_ch_rc ( i, &rc, &w32g_tracer_wnd.rc_channel_top ) == 0 ) {
 			sprintf ( buff, "%02d", i + 1);
@@ -1855,7 +1855,7 @@ void TracerWndPaintAll(int lockflag)
 	InvalidateRect( w32g_tracer_wnd.hwnd,NULL, FALSE );
 }
 
-// GUI 僗儗僢僪偐傜偺傒屇傋傞
+// GUI スレッドからのみ呼べる
 void TracerWndPaintDo(int flag)
 {
 	RECT rc;
@@ -1992,17 +1992,17 @@ TracerCanvasWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 			case 0x68:	// h
 				if ( PlayerLanguage == LANGUAGE_JAPANESE ){
 				MessageBox(hTracerWnd,
-					"僉乕僐儅儞僪\n"
-					"僩儗乕僒僂僀儞僪僂僐儅儞僪\n"
-					"  ESC: 僿儖僾傪暵偠傞      H: 僿儖僾傪弌偡\n"
-					"  +: 僉乕傾僢僾    -: 僉乕僟僂儞\n"
-					"  >: 僗僺乕僪傾僢僾    <: 僗僺乕僪僟僂儞\n"
-					"僾儗僀儎乕僐儅儞僪\n"
-					"  SPACE/ENTER: 墘憈奐巒    E: 掆巭    S: 堦帪掆巭\n"
-					"  P: 慜偺嬋    N: 師偺嬋\n"
-					"TiMidity 僐儅儞僪\n"
-					"  Q: 廔椆\n"
-					,"僿儖僾", MB_OK);
+					"キーコマンド\n"
+					"トレーサウインドウコマンド\n"
+					"  ESC: ヘルプを閉じる      H: ヘルプを出す\n"
+					"  +: キーアップ    -: キーダウン\n"
+					"  >: スピードアップ    <: スピードダウン\n"
+					"プレイヤーコマンド\n"
+					"  SPACE/ENTER: 演奏開始    E: 停止    S: 一時停止\n"
+					"  P: 前の曲    N: 次の曲\n"
+					"TiMidity コマンド\n"
+					"  Q: 終了\n"
+					,"ヘルプ", MB_OK);
 				} else {
 				MessageBox(hTracerWnd,
 					"Usage of key.\n"

@@ -58,7 +58,7 @@ int DlgChooseFontAndApply(HWND hwnd, HWND hwndFontChange, HFONT hFontPre, char *
 
 //	lf.lfHeight = 16;
 //	lf.lfWidth = 8;
-	strcpy(lf.lfFaceName,"俵俽 柧挬");
+	strcpy(lf.lfFaceName,"ＭＳ 明朝");
     cf.lStructSize = sizeof(CHOOSEFONT);
     cf.hwndOwner = hwnd;
 //    cf.hDC = NULL;
@@ -369,48 +369,48 @@ int INILoadConsoleWnd(void)
 
 
 /**********************************************************************/
-// 僾儘僙僗娫捠怣梡偵儊乕儖僗儘僢僩偺僒乕僶乕僗儗僢僪傪梡堄偡傞
+// プロセス間通信用にメールスロットのサーバースレッドを用意する
 
 #define TIMIDITY_MAILSLOT "\\\\.\\mailslot\\timiditypp_mailslot_ver_1_0"
 
-// 儊乕儖僗儘僢僩偵搉偝傟傞宍幃
-// 僿僢僟
-// 僐儅儞僪柤
-// 僆僾僔儑儞悢
-// 僆僾僔儑儞侾
-// 僆僾僔儑儞俀
+// メールスロットに渡される形式
+// ヘッダ
+// コマンド名
+// オプション数
+// オプション１
+// オプション２
 //   ...
 
-// 僿僢僟
+// ヘッダ
 #define MC_HEADER	"TiMidity++Win32GUI Mailslot-1.0"	
-// 僐儅儞僪柤
-// TiMidity 偺廔椆
+// コマンド名
+// TiMidity の終了
 #define MC_TERMINATE	"Terminate"
-// 僼傽僀儖傪巜掕
+// ファイルを指定
 #define MC_FILES "Files Argc Argv"
-// 僆僾僔儑儞侾 : 僼傽僀儖柤侾
+// オプション１ : ファイル名１
 //   ...
-// 僾儗僀儕僗僩偺僋儕傾
+// プレイリストのクリア
 #define MC_PLAYLIST_CLEAR	"Playlist Clear"
-// 墘憈奐巒
+// 演奏開始
 #define MC_PLAY			"Play"
-// 師偺僼傽僀儖偺墘憈
+// 次のファイルの演奏
 #define MC_PLAY_NEXT	"Play Next"
-// 慜偺僼傽僀儖偺墘憈
+// 前のファイルの演奏
 #define MC_PLAY_PREV	"Play Prev"
-// 墘憈掆巭
+// 演奏停止
 #define MC_STOP	"Stop"
-// 墘憈堦帪掆巭
+// 演奏一時停止
 #define MC_PAUSE	"Pause"
-// TiMidity 偺忬懺傪巜掕儊乕儖僗儘僢僩偵憲怣
+// TiMidity の状態を指定メールスロットに送信
 #define MC_SEND_TIMIDITY_INFO	"Send TiMidity Info"
-// 僆僾僔儑儞侾 : 儊乕儖僗儘僢僩柤
-// 僆僾僔儑儞俀 : 忬懺侾
+// オプション１ : メールスロット名
+// オプション２ : 状態１
 //   ...
-// 忬懺
-// "PlayFileName:乣" : 墘憈僼傽僀儖柤
-// "PlayTile:乣"		: 墘憈僞僀僩儖柤
-// "PlayStatus:乣"		: 墘憈忬懺(乣:PLAY,STOP,PAUSE)
+// 状態
+// "PlayFileName:～" : 演奏ファイル名
+// "PlayTile:～"		: 演奏タイトル名
+// "PlayStatus:～"		: 演奏状態(～:PLAY,STOP,PAUSE)
 
 static HANDLE hMailslot = NULL;
 
@@ -451,7 +451,7 @@ PrintfDebugWnd("[%s]\n",buffer);
 	} else
 		return FALSE;
 }
-// 柍帇偡傞斉
+// 無視する版
 void ReadFromMailslotIgnore(HANDLE hmailslot, int num)
 {
 	int i;
@@ -463,7 +463,7 @@ void ReadFromMailslotIgnore(HANDLE hmailslot, int num)
 	}
 	return;
 }
-// 儊乕儖僗儘僢僩偵彂偒崬傓
+// メールスロットに書き込む
 HANDLE *OpenMailslot(void)
 {
 	HANDLE hFile;
@@ -547,7 +547,7 @@ void w32gMailslotThread(void)
 					continue;
 				}
 				nfiles = atoi(buffer);
-				// MailslotArgcArgv丂偑弶婜壔偝傟偰偄側偐偭偨傜張棟搑拞偲偟偰柍帇
+				// MailslotArgcArgv　が初期化されていなかったら処理途中として無視
 				if(MailslotArgcArgv.argc!=0 || MailslotArgcArgv.argv!=NULL){
 					ReadFromMailslotIgnore(hMailslot,nfiles);
 					continue;
@@ -581,7 +581,7 @@ void w32gMailslotThread(void)
 				}
 				MailslotArgcArgv.argc = nfiles;
 				MailslotArgcArgv.argv = files;
-				// files 偼暿偺偲偙傠偱夝曻偟偰偔傟傞
+				// files は別のところで解放してくれる
 				w32g_send_rc(RC_EXT_LOAD_FILES_AND_PLAY,(ptr_size_t)&MailslotArgcArgv);
 //				w32g_send_rc(RC_EXT_LOAD_FILE,(ptr_size_t))files[0]);
 				continue;
@@ -653,7 +653,7 @@ void w32gMailslotThread(void)
 				}
 				param_num = atoi(buffer);
 				ReadFromMailslotIgnore(hMailslot,param_num);
-				// 壗傕偟側偄
+				// 何もしない
 				continue;
 			}
 		}
@@ -662,8 +662,8 @@ void w32gMailslotThread(void)
 
 #define TIMIDTY_MUTEX_NAME "TiMidity_pp_Win32GUI_ver_1_0_0"
 static HANDLE hMutexTiMidity = NULL;
-// TiMidity 偑桞堦側傞偙偲傪庡挘偟傑偡
-// 偦偺徹嫆偺 Mutex 傪 hMutexTiMidity 偵曐帩偟傑偡
+// TiMidity が唯一なることを主張します
+// その証拠の Mutex を hMutexTiMidity に保持します
 int UniqTiMidity(void)
 {
 	hMutexTiMidity = CreateMutex(NULL,TRUE,TIMIDTY_MUTEX_NAME);
@@ -680,7 +680,7 @@ int UniqTiMidity(void)
 	return FALSE;
 }
 
-// 偡偱偵 TiMidity 偑懚嵼偡傞偐
+// すでに TiMidity が存在するか
 int ExistOldTiMidity(void)
 {
 	HANDLE hMutex = CreateMutex(NULL,TRUE,TIMIDTY_MUTEX_NAME);
@@ -694,7 +694,7 @@ int ExistOldTiMidity(void)
 	return FALSE;
 }
 
-// 壗夞偐桞堦偺 TiMidity 偵側傠偆偲偟傑偡
+// 何回か唯一の TiMidity になろうとします
 int TryUniqTiMidity(int num)
 {
 	int i;
@@ -784,17 +784,17 @@ int PauseOldTiMidity(void)
 	return  SendCommandNoParamOldTiMidity(MC_PAUSE);
 }
 
-// 俀廳婲摦帪偺張棟
-// opt==0 : 僼傽僀儖傪屆偄 TiMidity 偵搉偟偰帺暘偼廔椆丅屆偄 TiMidity 偑側偄偲偒偼帺暘偑婲摦丅
-//                屆偄僾儗僀儕僗僩偼僋儕傾偡傞丅
-// opt==1 : 僼傽僀儖傪屆偄 TiMidity 偵搉偟偰帺暘偼廔椆丅屆偄 TiMidity 偑側偄偲偒偼帺暘偑婲摦丅
-//               屆偄僾儗僀儕僗僩偼僋儕傾偟側偄丅
-// opt==2 : 屆偄 TiMidity 傪廔椆偟偰丄帺暘偑墘憈偡傞
-// opt==3 : 帺暘偼壗傕偣偢廔椆
-// opt==4 : 屆偄 TiMidity 傪廔椆偟偰丄帺暘偼壗傕偣偢廔椆
-// opt==5 : 俀廳偵婲摦偡傞
-// 帺暘偑廔椆偡傞傋偒偲偒偼 FALSE 傪曉偡
-// 帺暘偑廔椆偡傞傋偒偱側偄偲偒偼 TRUE 傪曉偡
+// ２重起動時の処理
+// opt==0 : ファイルを古い TiMidity に渡して自分は終了。古い TiMidity がないときは自分が起動。
+//                古いプレイリストはクリアする。
+// opt==1 : ファイルを古い TiMidity に渡して自分は終了。古い TiMidity がないときは自分が起動。
+//               古いプレイリストはクリアしない。
+// opt==2 : 古い TiMidity を終了して、自分が演奏する
+// opt==3 : 自分は何もせず終了
+// opt==4 : 古い TiMidity を終了して、自分は何もせず終了
+// opt==5 : ２重に起動する
+// 自分が終了するべきときは FALSE を返す
+// 自分が終了するべきでないときは TRUE を返す
 int w32gSecondTiMidity(int opt, int argc, char **argv)
 {
 	int i;
@@ -850,7 +850,7 @@ int w32gSecondTiMidity(int opt, int argc, char **argv)
 	}
 }
 
-// w32gSecondTiMidity() 偺屻張棟
+// w32gSecondTiMidity() の後処理
 int w32gSecondTiMidityExit(void)
 {
 	MailslotThreadTeminateFlag = TRUE;

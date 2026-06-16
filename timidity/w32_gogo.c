@@ -21,7 +21,7 @@
 
     Functions to use gogo.dll for mp3 gogo (Windows 95/98/NT).
 
-    Orignal source : stub.c by 俹俤俶仐俵倎倰倝値倕俠倎倲 and 傊傞傒.
+    Orignal source : stub.c by ＰＥＮ＠ＭａｒｉｎｅＣａｔ and へるみ.
 
     Modified by Daisuke Aoki <dai@y7.net>
 */
@@ -97,14 +97,14 @@ static	me_haveunit mpge_haveunit = NULL;
 
 int MPGE_available = 0;
 
-// DLL偺撉傒崬傒(嵟弶偺1夞栚偺傒)偲儚乕僋僄儕傾偺弶婜壔傪峴偄傑偡丅
+// DLLの読み込み(最初の1回目のみ)とワークエリアの初期化を行います。
 MERET	MPGE_initializeWork(void)
 {
 	if( hModule == NULL ){
-		// (DLL偑撉傒崬傑傟偰偄側偄応崌)
-		// 僇儗儞僩僨傿儗僋僩儕丄媦傃system僨傿儗僋僩儕偺GOGO.DLL偺撉傒崬傒
+		// (DLLが読み込まれていない場合)
+		// カレントディレクトリ、及びsystemディレクトリのGOGO.DLLの読み込み
 		hModule = LoadLibrary("gogo.dll");
-		if( hModule == NULL ){			// DLL偑尒偮偐傜側偄応崌
+		if( hModule == NULL ){			// DLLが見つからない場合
 			#define Key		HKEY_CURRENT_USER
 			#define SubKey "Software\\MarineCat\\GOGO_DLL"
 			HKEY	hKey;
@@ -114,8 +114,8 @@ MERET	MPGE_initializeWork(void)
 			char	szPathName[ _MAX_PATH + 8];
 			dwKeySize = sizeof( szPathName );
 
-			// 儗僕僗僩儕崁栚偺 HEY_CURENT_USER\Software\MarineCat\GOGO_DLL僉乕埲壓偺 
-			// INSTPATH (REG_SZ)傪庢摼偟傑偡丅
+			// レジストリ項目の HEY_CURENT_USER\Software\MarineCat\GOGO_DLLキー以下の 
+			// INSTPATH (REG_SZ)を取得します。
 			if( RegOpenKeyEx(
 					Key,
 					SubKey,
@@ -132,23 +132,23 @@ MERET	MPGE_initializeWork(void)
 					&dwKeySize);
 				RegCloseKey(hKey);
 				if( lResult == ERROR_SUCCESS && REG_SZ == dwType ){
-					// 儗僕僗僩儕偐傜庢摼偟偨僷僗偱嵞搙DLL偺撉傒崬傒傪帋傒傞
+					// レジストリから取得したパスで再度DLLの読み込みを試みる
 					hModule = LoadLibrary( szPathName );
 				}
 			}
 			#undef Key
 			#undef SubKey
 		}
-		// DLL偑尒偮偐傜側偄
+		// DLLが見つからない
 		if( hModule == NULL ){
 			ctl->cmsg(CMSG_ERROR, VERB_NORMAL, "can not find gogo.dll.");
 			return ME_INTERNALERROR;
-//			MessageBox( "DLL偺撉傒崬傒傪幐攕偟傑偟偨丅\nDLL傪EXE僼傽僀儖偲摨偠僨傿儗僋僩儕傊暋幨偟偰偔偩偝偄\n");
-//			fprintf( stderr,"DLL偺撉傒崬傒傪幐攕偟傑偟偨丅\nDLL傪EXE僼傽僀儖偲摨偠僨傿儗僋僩儕傊暋幨偟偰偔偩偝偄\n");
+//			MessageBox( "DLLの読み込みを失敗しました。\nDLLをEXEファイルと同じディレクトリへ複写してください\n");
+//			fprintf( stderr,"DLLの読み込みを失敗しました。\nDLLをEXEファイルと同じディレクトリへ複写してください\n");
 //			exit( -1 );
 		}
 		
-		// 僄僋僗億乕僩娭悢偺庢摼
+		// エクスポート関数の取得
 		mpge_init = (me_init )GetProcAddress( hModule, "MPGE_initializeWork" );
 		mpge_setconf = (me_setconf )GetProcAddress( hModule, "MPGE_setConfigure" );
 		mpge_getconf = (me_getconf )GetProcAddress( hModule, "MPGE_getConfigure" );
@@ -160,15 +160,15 @@ MERET	MPGE_initializeWork(void)
 		mpge_haveunit= (me_haveunit )GetProcAddress( hModule, "MPGE_getUnitStates" );
 	}
 
-	// 偡傋偰偺娭悢偑惓忢偐妋擣偡傞
+	// すべての関数が正常か確認する
 	if( mpge_init && mpge_setconf && mpge_getconf &&
 		mpge_detector && mpge_processframe && mpge_end && mpge_getver && mpge_haveunit ){
 		MPGE_available = 1;
 		return (mpge_init)();
 	}
 
-	// 僄儔乕
-	//fprintf( stderr, "DLL偺撪梕傪惓偟偔幆暿偡傞偙偲偑弌棃傑偣傫偱偟偨\n");
+	// エラー
+	//fprintf( stderr, "DLLの内容を正しく識別することが出来ませんでした\n");
 	FreeLibrary( hModule );
 	hModule = NULL;
 	MPGE_available = 0;
@@ -177,7 +177,7 @@ MERET	MPGE_initializeWork(void)
 	return ME_NOERR;
 }
 
-MERET	MPGE_terminateWork(void)	// 嫮惂廔椆
+MERET	MPGE_terminateWork(void)	// 強制終了
 {
 	mpge_init = NULL;
 	mpge_setconf = NULL;
@@ -247,7 +247,7 @@ MERET	MPGE_endCoder(void)
 		mpge_end	 = NULL;
 		mpge_getver	 = NULL;
 		mpge_haveunit= NULL;
-		FreeLibrary( hModule );		// DLL奐曻
+		FreeLibrary( hModule );		// DLL開放
 		hModule = NULL;
 		MPGE_available = 0;
 	}

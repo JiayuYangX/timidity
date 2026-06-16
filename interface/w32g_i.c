@@ -220,10 +220,10 @@ int TracerThreadPriority;
 int WrdThreadPriority;
 
 // dir
-int SeachDirRecursive = 0;	// 嵞婣揑僨傿儗僋僩儕専嶕 
+int SeachDirRecursive = 0;	// 再帰的ディレクトリ検索 
 
 // Ini File
-int IniFileAutoSave = 1;	// INI 僼傽僀儖偺帺摦僙乕僽
+int IniFileAutoSave = 1;	// INI ファイルの自動セーブ
 
 // misc
 int DocMaxSize;
@@ -348,7 +348,7 @@ void OnQuit(void)
 
 // ***************************************************************************
 // Start Window
-// 戝尦偺僂傿儞僪僂偺抧埵偼Main Window偵忳傝丄崱偱偼偨偩偺弶婜壔娭悢
+// 大元のウィンドウの地位はMain Windowに譲り、今ではただの初期化関数
 
 void InitStartWnd(int nCmdShow)
 {
@@ -433,7 +433,7 @@ static void InitOutputMenu(HWND hWnd)
 	mii.fType = MFT_STRING;
 	mii.hSubMenu = outputMenu;
 	if (PlayerLanguage == LANGUAGE_JAPANESE) {
-		mii.dwTypeData = TEXT("弌椡(&O)");
+		mii.dwTypeData = TEXT("出力(&O)");
 	} else {
 		mii.dwTypeData = TEXT("Output(&O)");
 	}
@@ -1142,7 +1142,7 @@ void ShowSubWindow(HWND hwnd,int showflag)
 				}
 			}
 #ifdef SUBWINDOW_POS_IS_OLD_CLOSED_WINDOW
-		// 僒僽僂僀儞僪僂傪嵟戝悢傪墇偊偰暵偠傜傟傞屆偄僂僀儞僪僂偵崌傢偣傞巇條偼巭傔傞偙偲偵偟偨丅
+		// サブウインドウを最大数を越えて閉じられる古いウインドウに合わせる仕様は止めることにした。
 		if(max>0){
 			GetWindowRect(hwnd, &rc2);
 			MoveWindow(hwnd,rc.left,rc.top,rc2.right-rc2.left,rc2.bottom-rc2.top,TRUE);
@@ -1505,7 +1505,7 @@ CanvasWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 #define CCR_LOW		RGB(0x80,0xd0,0x00)
 #define CCR_MIDDLE	RGB(0xb0,0xb0,0x00)
 #define CCR_HIGH		RGB(0xe0,0x00,0x00)
-// 怓傪 m : n 偱崿偤傞
+// 色を m : n で混ぜる
 static COLORREF HalfColorMN(COLORREF fc, COLORREF bc, int m, int n)
 {
 	return fc*m/(m+n) + bc*n/(m+n);
@@ -1716,7 +1716,7 @@ static void CanvasMapReadPanelInfo(int flag)
 		}
 		if(v<0) v = 0; else if(v>Canvas.MapBarMax-1) v = Canvas.MapBarMax-1;
 		if(v != Canvas.MapBar[ch]){
-			// 抶墑
+			// 遅延
 	    	if(Canvas.MapDelay){
    	  		int old = Canvas.MapBar[ch];
 				if(Canvas.MapBar[ch]<0)
@@ -1810,7 +1810,7 @@ static void CanvasMapDrawMapBar(int flag)
 			if(i<=Canvas.MapBar[ch]){
 				Canvas.MapMap[ch][y] = color1;
 				Canvas.MapResidual = 1;
-#if 1		// 巆憸
+#if 1		// 残像
 			} else if(i<=Canvas.MapBarOld[ch]){
 				Canvas.MapMap[ch][y] = color2;
 				Canvas.MapResidual = 1;
@@ -2590,7 +2590,7 @@ int CanvasGetMode(void)
 
 //-----------------------------------------------------------------------------
 // Main Panel
-//  儊僀儞僷僱儖僂僀儞僪僂娭楢
+//  メインパネルウインドウ関連
 //
 //
 //
@@ -2686,19 +2686,19 @@ struct MPanel_ {
 extern volatile int MPanelOK;
 
 static struct MPanelMessageData_ {
-	int len;	// 儊僢僙乕僕儃僢僋僗偺挿偝丅
-	char buff[1024];	// 幚僶僢僼傽丅
+	int len;	// メッセージボックスの長さ。
+	char buff[1024];	// 実バッファ。
 	DWORD prevtime;
-	int msec;	// 幚巆傝昩丅
-	int pointer;		// 尰嵼偺億僀儞僞丅
+	int msec;	// 実残り秒。
+	int pointer;		// 現在のポインタ。
 
 	char curbuff[1024];
 	int curbuffsize;
-	int curmode;	// 尰嵼儊僢僙乕僕偺儌乕僪丅
-	int curmsec;		// 尰嵼儊僢僙乕僕偺巆傝昩丅
+	int curmode;	// 現在メッセージのモード。
+	int curmsec;		// 現在メッセージの残り秒。
 	char nextbuff[1024];
-	int nextmode;	// 尰嵼儊僢僙乕僕偺儌乕僪丅
-	int nextmsec;		// 尰嵼儊僢僙乕僕偺巆傝昩丅
+	int nextmode;	// 現在メッセージのモード。
+	int nextmsec;		// 現在メッセージの残り秒。
 } MPanelMessageData;
 void MPanelMessageInit(void);
 void MPanelMessageAdd(char *message, int msec, int mode);
@@ -2893,8 +2893,8 @@ static void MPanelInit(HWND hwnd)
      	break;
 	default:
 	case LANGUAGE_JAPANESE:
-		strcpy(MPanel.FontLang,"俵俽 俹柧挬");
-		strcpy(MPanel.FontLangFixed,"俵俽 柧挬");
+		strcpy(MPanel.FontLang,"ＭＳ Ｐ明朝");
+		strcpy(MPanel.FontLangFixed,"ＭＳ 明朝");
 		break;
 	}
 	rc = MPanel.rcTitle;
@@ -2969,7 +2969,7 @@ static void MPanelInit(HWND hwnd)
 	MPanelMessageInit();
 }
 
-// 僷僱儖峔憿懱傪儕僙僢僩偡傞丅
+// パネル構造体をリセットする。
 void MPanelReset(void)
 {
 	if(!MPanelOK)
@@ -3033,7 +3033,7 @@ void MPanelReset(void)
 	MPanelMessageClearAll();
 }
 
-// 僷僱儖峔憿懱傪尦偵峏怴偡傞丅
+// パネル構造体を元に更新する。
 void MPanelUpdate(void)
 {
 	if(!MPanelOK)
@@ -3042,7 +3042,7 @@ void MPanelUpdate(void)
 	if(MPanel.UpdateFlag==MP_UPDATE_NONE)
 	   	return;
 	if(MPanel.UpdateFlag & MP_UPDATE_BACKGROUND){
-		// 價僢僩儅僢僾傪揬傝晅偗傞偑崱偼揾傝偮傇偟丅
+		// ビットマップを貼り付けるが今は塗りつぶし。
 		HPEN hPen;
       HBRUSH hBrush;
 //		COLORREF color = MPanel.FGColor;
@@ -3416,20 +3416,20 @@ static void MPanelPaintDo(void)
 	}
 }
 
-// 昤夋
+// 描画
 void MPanelPaint(void)
 {
 	UpdateWindow(hPanelWnd);
 }
 
-// 姰慡昤夋
+// 完全描画
 void MPanelPaintAll(void)
 {
 	InvalidateRect(hPanelWnd, NULL, FALSE);
 	MPanelPaint();
 }
 
-// 僷僱儖峔憿懱傪尦偵姰慡峏怴傪偡傞丅
+// パネル構造体を元に完全更新をする。
 void MPanelUpdateAll(void)
 {
 	if(!MPanelOK)
@@ -3438,8 +3438,8 @@ void MPanelUpdateAll(void)
 	MPanelUpdate();
 }
 
-// PanelInfo 峔憿懱傪撉傒崬傫偱僷僱儖峔憿懱傊揔梡偡傞丅
-// flag 偼嫮惂峏怴偡傞丅
+// PanelInfo 構造体を読み込んでパネル構造体へ適用する。
+// flag は強制更新する。
 void MPanelReadPanelInfo(int flag)
 {
 	int cur_pl_num, playlist_num;
@@ -3556,10 +3556,10 @@ void MPanelMessageInit(void)
 	MPanelMessageClearAll();
 }
 
-// sec 昩偱 message 傪棳偡丅
-// mode 0: sec 昩偩偗 message 傪昞帵丅僨僼僅儖僩丅
-// mode 1: sec 昩偺娫偵 message 傪塃偐傜嵍偵棳偡丅
-// mode 2: sec 昩偺娫偵 messege 傪昞帵丅億僀儞僞傪嵍偐傜塃偵堏偡丅億僀儞僞傪嫬奅偵怓傪曄偊傞丅
+// sec 秒で message を流す。
+// mode 0: sec 秒だけ message を表示。デフォルト。
+// mode 1: sec 秒の間に message を右から左に流す。
+// mode 2: sec 秒の間に messege を表示。ポインタを左から右に移す。ポインタを境界に色を変える。
 void MPanelMessageAdd(char *message, int msec, int mode)
 {
 	if ( MPanelMessageData.nextmode >= 0 ) {
@@ -4137,7 +4137,7 @@ void WINAPI MainThread(void *arglist)
 //PrintfDebugWnd("H%lu M%lu WP%lu LP%lu T%lu x%d y%d\n",
 //	msg.hwnd, msg.message, msg.wParam, msg.lParam, msg.time, msg.pt.x, msg.pt.y);
 #if 1
-		// ESC 偱憢傪暵偠傞丅 
+		// ESC で窓を閉じる。 
 		if ( msg.message == WM_KEYDOWN && (int)msg.wParam == VK_ESCAPE ) {
 			if ( msg.hwnd == hConsoleWnd || IsChild ( hConsoleWnd, msg.hwnd ) ) {
 				 ToggleSubWindow(hConsoleWnd);
@@ -4276,7 +4276,7 @@ static void DlgDirOpen(HWND hwnd)
 	bi.pidlRoot = NULL;
     bi.pszDisplayName = biBuffer;
 	if ( PlayerLanguage == LANGUAGE_JAPANESE ) 
-		bi.lpszTitle = "MIDI 僼傽僀儖偺偁傞僨傿儗僋僩儕傪屼慖戰側偝傟傑偡傛偆丅";
+		bi.lpszTitle = "MIDI ファイルのあるディレクトリを御選択なされますよう。";
 	else
 		bi.lpszTitle = "Select a directory with MIDI files.";
 	bi.ulFlags = 0;
@@ -4707,7 +4707,7 @@ void w32g_show_console(void)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// GDI 傾僋僙僗傪扨堦僗儗僢僪偵尷掕偡傞偨傔偺儘僢僋婡峔
+// GDI アクセスを単一スレッドに限定するためのロック機構
 
 static HANDLE volatile hMutexGDI = NULL;
 // static int volatile lock_num = 0;

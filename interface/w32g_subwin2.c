@@ -272,17 +272,17 @@ void InitWrdWnd(HWND hParentWnd)
 		hWrdWnd,0,hInst,0);
 	w32g_wrd_wnd.hdc = GetDC(w32g_wrd_wnd.hwnd);
 
-	// 戝尦
+	// 大元
 	w32g_wrd_wnd.hbitmap = CreateCompatibleBitmap(w32g_wrd_wnd.hdc,w32g_wrd_wnd.width,w32g_wrd_wnd.height);
 	w32g_wrd_wnd.hmdc = CreateCompatibleDC(w32g_wrd_wnd.hdc);
 	w32g_wrd_wnd.hgdiobj_hmdcprev = SelectObject(w32g_wrd_wnd.hmdc,w32g_wrd_wnd.hbitmap);
 	SelectObject ( w32g_wrd_wnd.hmdc, w32g_wrd_wnd.hNullBrush );
 	SelectObject ( w32g_wrd_wnd.hmdc, w32g_wrd_wnd.hNullPen );
 
-	// 儚乕僋
+	// ワーク
 	w32g_wrd_wnd.hbmp_work = CreateCompatibleBitmap(w32g_wrd_wnd.hdc,w32g_wrd_wnd.width,w32g_wrd_wnd.height);
 
-	// 僥僉僗僩儅僗僋
+	// テキストマスク
 //	w32g_wrd_wnd.hbmp_tmask = CreateBitmap ( w32g_wrd_wnd.width, w32g_wrd_wnd.height, 1, 1, NULL);
 	w32g_wrd_wnd.hbmp_tmask = CreateCompatibleBitmap(w32g_wrd_wnd.hdc,w32g_wrd_wnd.width,w32g_wrd_wnd.height);
 	{
@@ -299,7 +299,7 @@ void InitWrdWnd(HWND hParentWnd)
 		DeleteObject ( hbrush );
 	}
 
-	// 僌儔僼傿僢僋
+	// グラフィック
 	wrd_graphic_init ( w32g_wrd_wnd.hdc );
 
 	ReleaseDC(w32g_wrd_wnd.hwnd,w32g_wrd_wnd.hdc);
@@ -307,7 +307,7 @@ void InitWrdWnd(HWND hParentWnd)
 	{
 		char fontname[1024];
 		if ( PlayerLanguage == LANGUAGE_JAPANESE )
-			strcpy(fontname,"俵俽 柧挬");
+			strcpy(fontname,"ＭＳ 明朝");
 		else
 			strcpy(fontname,"Times New Roman");
 		w32g_wrd_wnd.hFont = CreateFont(w32g_wrd_wnd.font_height,w32g_wrd_wnd.font_width,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,
@@ -344,7 +344,7 @@ static void wrd_graphic_terminate ( void )
 	wrd_wnd_unlock();
 }
 
-// 僾儗乕儞 index 偺僌儔僼傿僢僋偺弶婜壔
+// プレーン index のグラフィックの初期化
 static void wrd_graphic_init ( HDC hdc )
 {
 	int index;
@@ -420,7 +420,7 @@ static void wrd_graphic_reset_all ( void )
 	wrd_wnd_unlock();
 }
 
-// 僾儗乕儞 index 偺僌儔僼傿僢僋偺 lprc 椞堟傪 hmdc_graphic 傊峏怴
+// プレーン index のグラフィックの lprc 領域を hmdc_graphic へ更新
 static void wrd_graphic_apply ( RECT *lprc, int index, int lockflag )
 {
 #if 0
@@ -433,14 +433,14 @@ static void wrd_graphic_apply ( RECT *lprc, int index, int lockflag )
 #endif
 }
 
-// lprc 椞堟偺僌儔僼傿僢僋傪峏怴
+// lprc 領域のグラフィックを更新
 static void wrd_graphic_update ( RECT *lprc, int lockflag )
 {
 	if ( WrdWndInfo.GraphicStop ) return;
 	if ( w32g_wrd_wnd.draw_skip ) return;
 	wrd_wnd_lock();
 	if ( lockflag ) GDI_LOCK();
-	// 夋憸張棟偟偨娭悢偱峴偆丅
+	// 画像処理した関数で行う。
 	if ( w32g_wrd_wnd.flag & WRD_FLAG_GRAPHIC ) {
 		if ( w32g_wrd_wnd.flag & WRD_FLAG_TEXT ) {
 			HDC hmdc_work, hmdc_tmask, hmdc_graphic;
@@ -475,7 +475,7 @@ static void wrd_graphic_update ( RECT *lprc, int lockflag )
 	wrd_wnd_unlock();
 }
 
-// 椞堟偺僥僉僗僩傪峏怴
+// 領域のテキストを更新
 static void wrd_text_update ( int x_from, int y_from, int x_to, int y_to, int lockflag )
 {
 	RECT rc;
@@ -657,7 +657,7 @@ void wrd_graphic_gon ( int sw )
 	if ( WrdWndInfo.GraphicStop ) return;
 	if ( !w32g_wrd_wnd.active ) return;
 	if ( sw && !sw_old ) {
-		w32g_wrd_wnd.flag |= WRD_FLAG_GRAPHIC;		// 愭偵愝掕
+		w32g_wrd_wnd.flag |= WRD_FLAG_GRAPHIC;		// 先に設定
 		if ( w32g_wrd_wnd.index_active == w32g_wrd_wnd.index_display ) {
 			RECT rc;
 			SetRect ( &rc, 0, 0, w32g_wrd_wnd.width, w32g_wrd_wnd.height );
@@ -957,7 +957,7 @@ void wrd_graphic_fadestep ( int v )
 #if 1
 	InvalidateRect ( w32g_wrd_wnd.hwnd, &rc, FALSE );
 #else
-	{ // 僷儗僢僩偺曄壔偱慡夋柺傪峏怴偟側偄偱嵪傓傛偆偵僠僃僢僋偟偰傒傞丅偗偳丄廳偄偺偱晄嵦梡丅
+	{ // パレットの変化で全画面を更新しないで済むようにチェックしてみる。けど、重いので不採用。
 #define BITS_DIV 10
 		int j;
 		char *bits;
@@ -1158,7 +1158,7 @@ void wrd_graphic_mag ( char *path, int x, int y, int s, int p )
 	if ( p == 0 || p == 2 ) {
 		wrd_graphic_pal_g4r4b4 ( 0, mh->pal, 16 );
 	} else {
-		// wrd_graphic_pal_g4r4b4() 傪幚峴偟側偄偲椞堟偑峏怴偝傟側偄丅
+		// wrd_graphic_pal_g4r4b4() を実行しないと領域が更新されない。
 		if ( w32g_wrd_wnd.index_active == w32g_wrd_wnd.index_display ) {
 			RECT rc;
 			SetRect ( &rc, x_orig, y_orig, width, height );
@@ -1175,7 +1175,7 @@ void wrd_text_ton ( int sw )
 
 	if ( !w32g_wrd_wnd.active ) return;
 	if ( sw && !sw_old ) {
-		w32g_wrd_wnd.flag |= WRD_FLAG_TEXT;		// 愭偵愝掕
+		w32g_wrd_wnd.flag |= WRD_FLAG_TEXT;		// 先に設定
 		if ( w32g_wrd_wnd.index_active == w32g_wrd_wnd.index_display ) {
 			wrd_text_update ( 0, 0, w32g_wrd_wnd.width, w32g_wrd_wnd.height, TRUE );
 		}
@@ -1437,7 +1437,7 @@ void wrd_graphic_xcopy ( int sx1, int sy1, int sx2, int sy2, int tx, int ty, int
 			}
 		}
 		break;
-	case 9:	// 偪傚偭偲傢偐傜側偐偭偨丅
+	case 9:	// ちょっとわからなかった。
 		break;
 	case 10:	// COPY opt1, opt2
 		if ( opt1 < 0 || opt2 < 0 )
@@ -1453,7 +1453,7 @@ void wrd_graphic_xcopy ( int sx1, int sy1, int sx2, int sy2, int tx, int ty, int
 				&w32g_wrd_wnd.graphic_dib[ss]->bits[i_src + sx1], d );
 		}
 		break;
-	case 11:	// Clipping Copy	傆偮偆偺僐僺乕偱戙梡丅
+	case 11:	// Clipping Copy	ふつうのコピーで代用。
 		d = sx2 - sx1 + 1;
 		for ( y = sy1; y <= sy2; y ++ ) {
 			int i_src = y * w32g_wrd_wnd.width;
@@ -1533,7 +1533,7 @@ void WrdWndCurStateSaveAndRestore(int saveflag)
 	}
 }
 
-// from_from 峴偐傜 from_to 峴傑偱傪 to_from 峴傪愭摢偵僐僺乕丅
+// from_from 行から from_to 行までを to_from 行を先頭にコピー。
 void WrdWndCopyLineS ( int from_from, int from_to, int to_from, int lockflag )
 {
 	int y, to_to;
@@ -1585,14 +1585,14 @@ void WrdWndCopyLineS ( int from_from, int from_to, int to_from, int lockflag )
 	wrd_text_update ( 0, to_from, w32g_wrd_wnd.row - 1, to_to, lockflag );
 }
 
-// from 峴傪 to 峴偵僐僺乕丅
+// from 行を to 行にコピー。
 void WrdWndCopyLine ( int from, int to, int lockflag )
 {
 	if ( !w32g_wrd_wnd.active ) return;
 	WrdWndCopyLineS ( from, from, to, lockflag );
 }
 
-// from峴偐傜 to 峴傑偱僋儕傾
+// from行から to 行までクリア
 void WrdWndClearLineFromTo(int from, int to, int lockflag)
 {
 	int i;
@@ -1613,7 +1613,7 @@ void WrdWndClearLineFromTo(int from, int to, int lockflag)
 	wrd_text_update ( 0, from, w32g_wrd_wnd.row - 1, to, lockflag );
 }
 
-// from 峴傪 to 峴偵堏摦丅
+// from 行を to 行に移動。
 void WrdWndMoveLine(int from, int to, int lockflag)
 {
 	if ( !w32g_wrd_wnd.active ) return;
@@ -1624,7 +1624,7 @@ void WrdWndMoveLine(int from, int to, int lockflag)
 	WrdWndClearLineFromTo ( from,from, lockflag );
 }
 
-// 僗僋儘乕儖僟僂儞偡傞丅
+// スクロールダウンする。
 void WrdWndScrollDown(int lockflag)
 {
 	if ( !w32g_wrd_wnd.active ) return;
@@ -1632,7 +1632,7 @@ void WrdWndScrollDown(int lockflag)
 	WrdWndClearLineFromTo ( 0, 0, lockflag );
 }
 
-// 僗僋儘乕儖傾僢僾偡傞丅
+// スクロールアップする。
 void WrdWndScrollUp(int lockflag)
 {
 	if ( !w32g_wrd_wnd.active ) return;
@@ -1640,21 +1640,21 @@ void WrdWndScrollUp(int lockflag)
 	WrdWndClearLineFromTo ( w32g_wrd_wnd.col - 1, w32g_wrd_wnd.col - 1, lockflag );
 }
 
-// 夋柺徚嫀
+// 画面消去
 void WrdWndClear(int lockflag)
 {
 	if ( !w32g_wrd_wnd.active ) return;
 	WrdWndClearLineFromTo ( 0, w32g_wrd_wnd.col - 1, lockflag );
 }
 
-// 暥帤弌椡
+// 文字出力
 void WrdWndPutString(char *str, int lockflag)
 {
 	if ( !w32g_wrd_wnd.active ) return;
 	WrdWndPutStringN(str, strlen(str),lockflag);
 }
 
-// 暥帤弌椡(n暥帤)
+// 文字出力(n文字)
 void WrdWndPutStringN(char *str, int n, int lockflag)
 {
 	int i;
@@ -1728,8 +1728,8 @@ void WrdWndPutStringN(char *str, int n, int lockflag)
 	if ( lockflag ) wrd_wnd_unlock();
 }
 
-// left == TRUE : 峴偺嵍徚嫀
-// left != TRUE : 峴偺塃徚嫀
+// left == TRUE : 行の左消去
+// left != TRUE : 行の右消去
 void WrdWndLineClearFrom(int left, int lockflag)
 {
 	if ( !w32g_wrd_wnd.active ) return;
@@ -1757,29 +1757,29 @@ void WrdWndLineClearFrom(int left, int lockflag)
 	}
 }
 
-// PC98 偺傾僩儕價儏乕僩偱愝掕
+// PC98 のアトリビュートで設定
 void WrdWndSetAttr98(int attr)
 {
 	if ( !w32g_wrd_wnd.active ) return;
 	switch ( attr ) {
-	case 0:	// 婯掕抣
+	case 0:	// 規定値
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_WHITE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 1: // 僴僀儔僀僩
+	case 1: // ハイライト
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 2: // 僶乕僥傿僇儖儔僀儞
+	case 2: // バーティカルライン
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 4: // 傾儞僟乕儔僀儞
+	case 4: // アンダーライン
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 5: // 僽儕儞僋
+	case 5: // ブリンク
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 7: // 儕僶乕僗
+	case 7: // リバース
 		{
 			char tmp = w32g_wrd_wnd.curbackcolor;
 			w32g_wrd_wnd.curbackcolor = w32g_wrd_wnd.curforecolor;
@@ -1788,134 +1788,134 @@ void WrdWndSetAttr98(int attr)
 			w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		}
 		break;
-	case 8: // 僔乕僋儗僢僩
+	case 8: // シークレット
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 16:	// 崟
+	case 16:	// 黒
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 17:	// 愒
+	case 17:	// 赤
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_RED;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 18:	// 惵
+	case 18:	// 青
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLUE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 19:	// 巼
+	case 19:	// 紫
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_PURPLE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;	
-	case 20:		// 椢
+	case 20:		// 緑
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_GREEN;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 21:	// 墿怓
+	case 21:	// 黄色
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_YELLOW;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 22:	// 悈怓
+	case 22:	// 水色
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_LIGHTBLUE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 23: // 敀
+	case 23: // 白
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_WHITE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 30:	// 崟
+	case 30:	// 黒
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 31:	// 愒
+	case 31:	// 赤
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_RED;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 32:	// 椢
+	case 32:	// 緑
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_GREEN;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 33:	// 墿怓
+	case 33:	// 黄色
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_YELLOW;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 34:	// 惵
+	case 34:	// 青
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLUE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 35:	// 巼
+	case 35:	// 紫
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_PURPLE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 36:	// 悈怓
+	case 36:	// 水色
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_LIGHTBLUE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 37:	// 敀
+	case 37:	// 白
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_WHITE;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		break;
-	case 40:	// 崟斀揮
+	case 40:	// 黒反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 41:	// 愒斀揮
+	case 41:	// 赤反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_RED;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 42:	// 椢斀揮
+	case 42:	// 緑反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_GREEN;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 43:	// 墿怓斀揮
+	case 43:	// 黄色反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_YELLOW;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 44:	// 惵斀揮
+	case 44:	// 青反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_BLUE;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 45:	// 巼斀揮
+	case 45:	// 紫反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_PURPLE;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 46:	// 悈怓斀揮
+	case 46:	// 水色反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_LIGHTBLUE;
 		w32g_wrd_wnd.curattr = 0;
 		w32g_wrd_wnd.curattr |= W32G_WRDWND_ATTR_REVERSE;
 		break;
-	case 47:	// 敀斀揮
+	case 47:	// 白反転
 		w32g_wrd_wnd.curforecolor = W32G_WRDWND_BLACK;
 		w32g_wrd_wnd.curbackcolor = W32G_WRDWND_WHITE;
 		w32g_wrd_wnd.curattr = 0;
@@ -1929,7 +1929,7 @@ void WrdWndSetAttr98(int attr)
 	}
 }
 
-// 傾僩儕價儏乕僩偺儕僙僢僩
+// アトリビュートのリセット
 void WrdWndSetAttrReset(void)
 {
 	if ( !w32g_wrd_wnd.active ) return;
@@ -1938,7 +1938,7 @@ void WrdWndSetAttrReset(void)
 	w32g_wrd_wnd.curattr = 0;
 }
 
-// 僇乕僜儖億僕僔儑儞偺堏摦
+// カーソルポジションの移動
 void WrdWndGoto(int x, int y)
 {
 	if ( !w32g_wrd_wnd.active ) return;
@@ -1956,7 +1956,7 @@ void WrdWndPaintAll(int lockflag)
 	wrd_text_update ( 0, 0, w32g_wrd_wnd.row - 1, w32g_wrd_wnd.col - 1, TRUE );
 }
 
-// SetInvalidateRect() 偼 WM_PAINT 傪屇傇壜擻惈偑偁傞丅
+// SetInvalidateRect() は WM_PAINT を呼ぶ可能性がある。
 void WrdWndPaintDo(int flag)
 {
 	RECT rc;

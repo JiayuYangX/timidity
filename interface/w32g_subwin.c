@@ -396,15 +396,15 @@ void InitListWnd(HWND hParentWnd)
 	ListWndInfo.hPopupMenu = CreatePopupMenu();
 	switch(PlayerLanguage){
 	case LANGUAGE_JAPANESE:
-		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_PLAY,"墘憈");
-		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDC_BUTTON_DOC,"僪僉儏儊儞僩");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_PLAY,"演奏");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDC_BUTTON_DOC,"ドキュメント");
 		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
-		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CURRENT,"尰嵼埵抲");
-		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_SEARCH,"専嶕");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CURRENT,"現在位置");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_SEARCH,"検索");
 		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
-		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_REMOVE,"嶍彍");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_REMOVE,"削除");
 		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
-		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CHOOSEFONT,"僼僅儞僩偺慖戰");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CHOOSEFONT,"フォントの選択");
 		break;
  	default:
   	case LANGUAGE_ENGLISH:
@@ -460,11 +460,11 @@ ListWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		ListWndInfo.hPopupMenu = NULL;
 		INISaveListWnd();
 		break;
-		/* 儅僂僗擖椡偑僉儍僾僠儍偝傟偰偄側偄偨傔偺張棟 */
+		/* マウス入力がキャプチャされていないための処理 */
 	case WM_SETCURSOR:
 		switch(HIWORD(lParam)){
 		case WM_RBUTTONDOWN:
-			if(LOWORD(lParam)!=HTCAPTION){	// 僞僀僩儖僶乕偵側偄偲偒
+			if(LOWORD(lParam)!=HTCAPTION){	// タイトルバーにないとき
 				POINT point;
 				int res;
 				GetCursorPos(&point);
@@ -639,22 +639,22 @@ ListWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 					case 0x48:	// VK_H
 						if ( PlayerLanguage == LANGUAGE_JAPANESE ){
 						MessageBox(hListWnd,
-							"僉乕僐儅儞僪\n"
-							"儕僗僩僂僀儞僪僂僐儅儞僪\n"
-							"  ESC: 僿儖僾傪暵偠傞      H: 僿儖僾傪弌偡\n"
-							"  V: 僪僉儏儊儞僩傪尒傞      W: WRD 僂僀儞僪僂傪奐偔\n"
-							"僾儗僀儎乕僐儅儞僪\n"
-							"  SPACE/ENTER: 墘憈奐巒    E: 掆巭    S: 堦帪掆巭\n"
-							"  P: 慜偺嬋    N: 師偺嬋\n"
-							"僾儗僀儕僗僩憖嶌僐儅儞僪\n"
-							"  M: MIDI僼傽僀儖埲奜傪嶍彍    U: 廳暋僼傽僀儖傪嶍彍\n"
-							"  C: 僾儗僀儕僗僩偺僋儕傾\n"
-							"  D: 僇乕僜儖偺嬋傪嶍彍    BS: 僇乕僜儖偺慜偺嬋傪嶍彍\n"
-							"  INS: 僇乕僜儖偺嬋傪儕僗僩偺嵟屻偵堏偡 (Push)\n"
-							"  DEL: 儕僗僩偺嵟屻偺嬋傪僇乕僜儖偺慜偵憓擖 (Pop)\n"
-							"TiMidity 僐儅儞僪\n"
-							"  Q: 廔椆\n"
-							,"僿儖僾", MB_OK);
+							"キーコマンド\n"
+							"リストウインドウコマンド\n"
+							"  ESC: ヘルプを閉じる      H: ヘルプを出す\n"
+							"  V: ドキュメントを見る      W: WRD ウインドウを開く\n"
+							"プレイヤーコマンド\n"
+							"  SPACE/ENTER: 演奏開始    E: 停止    S: 一時停止\n"
+							"  P: 前の曲    N: 次の曲\n"
+							"プレイリスト操作コマンド\n"
+							"  M: MIDIファイル以外を削除    U: 重複ファイルを削除\n"
+							"  C: プレイリストのクリア\n"
+							"  D: カーソルの曲を削除    BS: カーソルの前の曲を削除\n"
+							"  INS: カーソルの曲をリストの最後に移す (Push)\n"
+							"  DEL: リストの最後の曲をカーソルの前に挿入 (Pop)\n"
+							"TiMidity コマンド\n"
+							"  Q: 終了\n"
+							,"ヘルプ", MB_OK);
 						} else {
 						MessageBox(hListWnd,
 							"Usage of key.\n"
@@ -683,7 +683,7 @@ ListWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		switch(wParam){
 		case SIZE_MAXIMIZED:
 		case SIZE_RESTORED:
-			{		// 側傫偐堄枴側偔柺搢(^^;;
+			{		// なんか意味なく面倒(^^;;
 				int x,y,cx,cy;
 				int maxHeight = 0;
 				int center, idControl;
@@ -843,7 +843,7 @@ static int ListWndInfoReset(HWND hwnd)
 	if ( hwnd != NULL )
 		ListWndInfo.hwndListBox = GetDlgItem(hwnd,IDC_LISTBOX_PLAYLIST);
 	strcpy(ListWndInfo.fontNameEN,"Times New Roman");
-	strcpy(ListWndInfo.fontNameJA,"俵俽 柧挬");
+	strcpy(ListWndInfo.fontNameJA,"ＭＳ 明朝");
 	ListWndInfo.fontHeight = 12;
 	ListWndInfo.fontWidth = 6;
 	ListWndInfo.fontFlags = FONT_FLAGS_FIXED;
@@ -950,7 +950,7 @@ TracerWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 // Doc Window
 
 #define IDM_DOCWND_CHOOSEFONT 4232
-int DocWndIndependent = 0; /* Independent document viewer mode.(撈棫僪僉儏儊儞僩價儏儚乕儌乕僪) */
+int DocWndIndependent = 0; /* Independent document viewer mode.(独立ドキュメントビュワーモード) */
 int DocWndAutoPopup = 0;
 DOCWNDINFO DocWndInfo;
 
@@ -1003,7 +1003,7 @@ void InitDocWnd(HWND hParentWnd)
 	switch(PlayerLanguage){
 	case LANGUAGE_JAPANESE:
 		AppendMenu(hMenu,MF_SEPARATOR,0,0);
-		AppendMenu(hMenu,MF_STRING,IDM_DOCWND_CHOOSEFONT,"僼僅儞僩偺慖戰");
+		AppendMenu(hMenu,MF_STRING,IDM_DOCWND_CHOOSEFONT,"フォントの選択");
 		break;
  	default:
   	case LANGUAGE_ENGLISH:
@@ -1101,7 +1101,7 @@ DocWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		switch(wParam){
 		case SIZE_MAXIMIZED:
 		case SIZE_RESTORED:
-			{		// 側傫偐堄枴側偔柺搢(^^;;
+			{		// なんか意味なく面倒(^^;;
 				int x,y,cx,cy;
 				int max = 0;
 				int width;
@@ -1205,7 +1205,7 @@ static int DocWndInfoReset2(HWND hwnd)
 	if ( hwnd != NULL )
 	DocWndInfo.hwndEdit = GetDlgItem(hwnd,IDC_EDIT);
 	strcpy(DocWndInfo.fontNameEN,"Times New Roman");
-	strcpy(DocWndInfo.fontNameJA,"俵俽 柧挬");
+	strcpy(DocWndInfo.fontNameJA,"ＭＳ 明朝");
 	DocWndInfo.fontHeight = 12;
 	DocWndInfo.fontWidth = 6;
 	DocWndInfo.fontFlags = FONT_FLAGS_FIXED;
@@ -1517,7 +1517,7 @@ void DocWndSetMidifile(char *filename)
 	strcat(buffer,"readme.1st");
 	DocWndAddDocFile(buffer);
 	*p = '\0';
-	strcat(buffer,"壧帉.txt");
+	strcat(buffer,"歌詞.txt");
 	DocWndAddDocFile(buffer);
 end:
 	DocWndInfoUnLock();
@@ -1671,12 +1671,12 @@ ListSearchWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 	case WM_INITDIALOG:
 		switch(PlayerLanguage){
 		case LANGUAGE_JAPANESE:
-			SendMessage(hwnd,WM_SETTEXT,0,(LPARAM)"僾儗僀儕僗僩偺専嶕");
-			SendMessage(GetDlgItem(hwnd,IDC_STATIC_HEAD),WM_SETTEXT,0,(LPARAM)"専嶕僉乕儚乕僪傪擖傟偰偔偩偝偄丅");
+			SendMessage(hwnd,WM_SETTEXT,0,(LPARAM)"プレイリストの検索");
+			SendMessage(GetDlgItem(hwnd,IDC_STATIC_HEAD),WM_SETTEXT,0,(LPARAM)"検索キーワードを入れてください。");
 			SendMessage(GetDlgItem(hwnd,IDC_STATIC_TAIL),WM_SETTEXT,0,(LPARAM)"");
-			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_1),WM_SETTEXT,0,(LPARAM)"専嶕");
-			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_2),WM_SETTEXT,0,(LPARAM)"師傪専嶕");
-			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_3),WM_SETTEXT,0,(LPARAM)"暵偠傞");
+			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_1),WM_SETTEXT,0,(LPARAM)"検索");
+			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_2),WM_SETTEXT,0,(LPARAM)"次を検索");
+			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_3),WM_SETTEXT,0,(LPARAM)"閉じる");
 			break;
 		default:
 		case LANGUAGE_ENGLISH:

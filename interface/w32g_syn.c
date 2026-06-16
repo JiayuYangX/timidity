@@ -111,7 +111,7 @@ typedef struct w32g_syn_t_ {
 } w32g_syn_t;
 static w32g_syn_t w32g_syn;
 
-// 奺庬曄悢 (^^;;;
+// 各種変数 (^^;;;
 HINSTANCE hInst = NULL;
 int PlayerLanguage = LANGUAGE_ENGLISH;
 int IniFileAutoSave = 1;
@@ -181,7 +181,7 @@ static int w32g_syn_create_win ( void );
 #define W32G_SYNWIN_CLASSNAME "TWSYNTH GUI"
 #define W32G_SYN_TIP "TWSYNTH GUI"
 
-// 億僢僾傾僢僾儊僯儏乕
+// ポップアップメニュー
 #define IDM_NOTHING	100
 #define IDM_QUIT	101
 #define IDM_START	102
@@ -240,8 +240,8 @@ static BOOL UninstallService();
 #define W32G_SYN_MESSAGE_MAX 100
 #define W32G_SYN_NONE	0
 #define W32G_SYN_QUIT	10
-#define W32G_SYN_START	11		// 墘憈忬懺傊堏峴
-#define W32G_SYN_STOP	12		// 墘憈掆巭忬懺傊堏峴
+#define W32G_SYN_START	11		// 演奏状態へ移行
+#define W32G_SYN_STOP	12		// 演奏停止状態へ移行
 #define W32G_SYN_GS_SYSTEM_RESET 21
 #define W32G_SYN_XG_SYSTEM_RESET 22
 #define W32G_SYN_SYSTEM_RESET 23
@@ -270,12 +270,12 @@ w32g_syn_message_t msg_loopbuf[W32G_SYN_MESSAGE_MAX];
 int msg_loopbuf_start = -1;
 int msg_loopbuf_end = -1;
 extern int rtsyn_system_mode;
-HANDLE msg_loopbuf_hMutex = NULL; // 攔懠張棟梡
-int syn_AutoStart;	// 僔儞僙帺摦婲摦
-DWORD processPriority;	// 僾儘僙僗偺僾儔僀僆儕僥傿
-DWORD syn_ThreadPriority;	// 僔儞僙僗儗僢僪偺僾儔僀僆儕僥傿
+HANDLE msg_loopbuf_hMutex = NULL; // 排他処理用
+int syn_AutoStart;	// シンセ自動起動
+DWORD processPriority;	// プロセスのプライオリティ
+DWORD syn_ThreadPriority;	// シンセスレッドのプライオリティ
 
-extern int volatile stream_max_compute;	// play_event() 偺 compute_data() 偱寁嶼傪嫋偡嵟戝帪娫丅
+extern int volatile stream_max_compute;	// play_event() の compute_data() で計算を許す最大時間。
 
 static int w32g_syn_main ( void );
 static int start_syn_thread ( void );
@@ -290,9 +290,9 @@ int w32g_syn_do_after_pref_apply ( void );
 
 
 /*
-  峔憿
-	丂儊僀儞僗儗僢僪丗GUI偺儊僢僙乕僕儖乕僾
-	丂僔儞僙僒僀僓乕僗儗僢僪丗敪壒晹暘
+  構造
+	　メインスレッド：GUIのメッセージループ
+	　シンセサイザースレッド：発音部分
 */
 int WINAPI
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -301,7 +301,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HANDLE hMutex;
 	int i;
 
-	// 崱偺偲偙傠俀廳婲摦偼偱偒側偄傛偆偵偟偲偔丅
+	// 今のところ２重起動はできないようにしとく。
 	hMutex = OpenMutex ( 0, FALSE, W32G_MUTEX_NAME );
 	if ( hMutex != NULL ) {
 		CloseHandle ( hMutex );
@@ -381,7 +381,7 @@ static int w32g_syn_create_win ( void )
 		return -1;
 	}
 	ShowWindow ( w32g_syn.nid_hWnd, SW_HIDE );
-	UpdateWindow ( w32g_syn.nid_hWnd );		// 昁梫側偄偲巚偆傫偩偗偳丅
+	UpdateWindow ( w32g_syn.nid_hWnd );		// 必要ないと思うんだけど。
 	return 0;
 }
 
@@ -578,80 +578,80 @@ SynWinProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				hMenuSynPriority = CreateMenu ();
 				if (PlayerLanguage == LANGUAGE_JAPANESE) {
 					if ( w32g_syn_status == run ) {
-						AppendMenu ( hMenu, MF_STRING, IDM_STOP, "僔儞僙掆巭(&S)");
+						AppendMenu ( hMenu, MF_STRING, IDM_STOP, "シンセ停止(&S)");
 					} else if ( w32g_syn_status == stop ) {
-						AppendMenu ( hMenu, MF_STRING, IDM_START, "僔儞僙奐巒(&S)");
+						AppendMenu ( hMenu, MF_STRING, IDM_START, "シンセ開始(&S)");
 					} else if ( w32g_syn_status == quit ) { 
-						AppendMenu ( hMenu, MF_STRING | MF_GRAYED, IDM_START, "廔椆拞乧乧");
+						AppendMenu ( hMenu, MF_STRING | MF_GRAYED, IDM_START, "終了中……");
 					}
-					AppendMenu ( hMenu, MF_STRING, IDM_SYSTEM_RESET, "僔僗僥儉儕僙僢僩(&R)");
+					AppendMenu ( hMenu, MF_STRING, IDM_SYSTEM_RESET, "システムリセット(&R)");
 					switch ( rtsyn_system_mode ) {
 					case GM_SYSTEM_MODE:
-						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_GM_SYSTEM_RESET, "GM 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG 儕僙僢僩");
-						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_GM_SYSTEM, "GM 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "GS 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "XG 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "僨僼僅儖僩偺僔僗僥儉傊曄峏");
+						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_GM_SYSTEM_RESET, "GM リセット");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS リセット");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG リセット");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_GM_SYSTEM, "GM システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "GS システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "XG システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "デフォルトのシステムへ変更");
 						break;
 					case GS_SYSTEM_MODE:
-						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_GS_SYSTEM_RESET, "GS 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG 儕僙僢僩");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "GM 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_GS_SYSTEM, "GS 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "XG 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "僨僼僅儖僩偺僔僗僥儉傊曄峏");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM リセット");
+						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_GS_SYSTEM_RESET, "GS リセット");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG リセット");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "GM システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_GS_SYSTEM, "GS システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "XG システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "デフォルトのシステムへ変更");
 						break;
 					case XG_SYSTEM_MODE:
-						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_XG_SYSTEM_RESET, "XG 儕僙僢僩");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "GM 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "GS 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_XG_SYSTEM, "XG 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "僨僼僅儖僩偺僔僗僥儉傊曄峏");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM リセット");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS リセット");
+						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_XG_SYSTEM_RESET, "XG リセット");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "GM システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "GS システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_XG_SYSTEM, "XG システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "デフォルトのシステムへ変更");
 						break;
 					default:
 					case DEFAULT_SYSTEM_MODE:
-						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS 儕僙僢僩");
-						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG 儕僙僢僩");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "GM 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "GS 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "XG 僔僗僥儉傊曄峏");
-						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_DEFAULT_SYSTEM, "僨僼僅儖僩偺僔僗僥儉傊曄峏");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM リセット");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS リセット");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG リセット");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "GM システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "GS システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "XG システムへ変更");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_DEFAULT_SYSTEM, "デフォルトのシステムへ変更");
 						break;
 					}
-					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][0], IDM_PROCESS_PRIORITY_LOWEST, "掅偄");
-					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][1], IDM_PROCESS_PRIORITY_BELOW_NORMAL, "彮偟掅偄");
-					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][2], IDM_PROCESS_PRIORITY_NORMAL, "晛捠");
-					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][3], IDM_PROCESS_PRIORITY_ABOVE_NORMAL, "彮偟崅偄");
-					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][4], IDM_PROCESS_PRIORITY_HIGHEST, "崅偄");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][0], IDM_PROCESS_PRIORITY_LOWEST, "低い");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][1], IDM_PROCESS_PRIORITY_BELOW_NORMAL, "少し低い");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][2], IDM_PROCESS_PRIORITY_NORMAL, "普通");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][3], IDM_PROCESS_PRIORITY_ABOVE_NORMAL, "少し高い");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][4], IDM_PROCESS_PRIORITY_HIGHEST, "高い");
 					AppendMenu ( hMenuProcessPriority, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][5], IDM_PROCESS_PRIORITY_REALTIME, "儕傾儖僞僀儉");
-					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][0], IDM_SYN_THREAD_PRIORITY_LOWEST, "掅偄");
-					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][1], IDM_SYN_THREAD_PRIORITY_BELOW_NORMAL, "彮偟掅偄");
-					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][2], IDM_SYN_THREAD_PRIORITY_NORMAL, "晛捠");
-					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][3], IDM_SYN_THREAD_PRIORITY_ABOVE_NORMAL, "彮偟崅偄");
-					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][4], IDM_SYN_THREAD_PRIORITY_HIGHEST, "崅偄");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][5], IDM_PROCESS_PRIORITY_REALTIME, "リアルタイム");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][0], IDM_SYN_THREAD_PRIORITY_LOWEST, "低い");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][1], IDM_SYN_THREAD_PRIORITY_BELOW_NORMAL, "少し低い");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][2], IDM_SYN_THREAD_PRIORITY_NORMAL, "普通");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][3], IDM_SYN_THREAD_PRIORITY_ABOVE_NORMAL, "少し高い");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][4], IDM_SYN_THREAD_PRIORITY_HIGHEST, "高い");
 					AppendMenu ( hMenuSynPriority, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][5], IDM_SYN_THREAD_PRIORITY_TIMECRITICAL, "僞僀儉僋儕僥傿僇儖");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][5], IDM_SYN_THREAD_PRIORITY_TIMECRITICAL, "タイムクリティカル");
 					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuReset, "奺庬僔僗僥儉儕僙僢僩" );
-					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuChange, "摿掕偺僔僗僥儉傊曄峏" );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuReset, "各種システムリセット" );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuChange, "特定のシステムへ変更" );
 					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuProcessPriority, "僾儘僙僗僾儔僀僆儕僥傿愝掕" );
-					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuSynPriority, "僔儞僙僗儗僢僪僾儔僀僆儕僥傿愝掕" );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuProcessPriority, "プロセスプライオリティ設定" );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuSynPriority, "シンセスレッドプライオリティ設定" );
 					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenu, MF_STRING, IDM_PREFERENCE, "愝掕(&P)...");
-					AppendMenu ( hMenu, MF_STRING, IDM_CONSOLE_WND, "僐儞僜乕儖(&C)");
+					AppendMenu ( hMenu, MF_STRING, IDM_PREFERENCE, "設定(&P)...");
+					AppendMenu ( hMenu, MF_STRING, IDM_CONSOLE_WND, "コンソール(&C)");
 					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenu, MF_STRING, IDM_VERSION, "僶乕僕儑儞忣曬");
-					AppendMenu ( hMenu, MF_STRING, IDM_TIMIDITY, "TiMidity++ 偵偮偄偰(&A)");
+					AppendMenu ( hMenu, MF_STRING, IDM_VERSION, "バージョン情報");
+					AppendMenu ( hMenu, MF_STRING, IDM_TIMIDITY, "TiMidity++ について(&A)");
 					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
-					AppendMenu ( hMenu, MF_STRING, IDM_QUIT, "廔椆(&X)");
+					AppendMenu ( hMenu, MF_STRING, IDM_QUIT, "終了(&X)");
 				} else {
 					if ( w32g_syn_status == run ) {
 						AppendMenu ( hMenu, MF_STRING, IDM_STOP, "&Stop synthesizer");
@@ -730,9 +730,9 @@ SynWinProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 					AppendMenu ( hMenu, MF_STRING, IDM_QUIT, "E&xit");
 				}
 				GetCursorPos ( &point );
-				// 億僢僾傾僢僾儊僯儏乕偑偒偪傫偲徚偊傞偨傔偺憖嶌丅 
-				// http://support.microsoft.com/default.aspx?scid=KB;EN-US;Q135788& 嶲徠
-#if 0		// Win 98/2000 埲崀梡丠
+				// ポップアップメニューがきちんと消えるための操作。 
+				// http://support.microsoft.com/default.aspx?scid=KB;EN-US;Q135788& 参照
+#if 0		// Win 98/2000 以降用？
 				{
 					DWORD dwThreadID = GetWindowThreadProcessId ( hwnd, NULL );
 					if ( dwThreadID != w32g_syn.gui_dwThreadId ) {
@@ -743,12 +743,12 @@ SynWinProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 						SetForegroundWindow ( hwnd );
 					}
 				}
-#else	// 偙傟偱偄偄傜偟偄丠
+#else	// これでいいらしい？
 				SetForegroundWindow ( hwnd );
 #endif
 				TrackPopupMenu ( hMenu, TPM_TOPALIGN | TPM_LEFTALIGN,
 					point.x, point.y, 0, hwnd, NULL );
-				PostMessage ( hwnd, WM_NULL, 0, 0 );	// 偙傟傕億僢僾傾僢僾儊僯儏乕偺僥僋僯僢僋傜偟偄丅
+				PostMessage ( hwnd, WM_NULL, 0, 0 );	// これもポップアップメニューのテクニックらしい。
 				DestroyMenu ( hMenu );
 				have_popupmenu = 0;
 				return 0;
@@ -759,7 +759,7 @@ SynWinProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDM_QUIT:
-#if 1/* 嫮惂廔椆 */
+#if 1/* 強制終了 */
 			SetTimer ( NULL, 0, 20000, forced_exit );
 #endif
 			w32g_message_set (W32G_SYN_QUIT);
@@ -1244,8 +1244,8 @@ static BOOL UninstallService()
 #endif	// !TWSYNSRV
 
 
-// 壜曄挿堷悢偵偡傞梊掕乧乧
-// 0: 惉岟丄1: 捛壛偱偒側偐偭偨
+// 可変長引数にする予定……
+// 0: 成功、1: 追加できなかった
 int w32g_message_set ( int cmd )
 {
 	int res = 0;
@@ -1254,7 +1254,7 @@ int w32g_message_set ( int cmd )
 	} else {
 		WaitForSingleObject ( msg_loopbuf_hMutex, INFINITE );
 	}
-	if ( cmd == W32G_SYN_QUIT || cmd == W32G_SYN_START || cmd == W32G_SYN_STOP ) {	// 桪愭偡傞儊僢僙乕僕丅
+	if ( cmd == W32G_SYN_QUIT || cmd == W32G_SYN_START || cmd == W32G_SYN_STOP ) {	// 優先するメッセージ。
 			msg_loopbuf_start = 0;
 			msg_loopbuf_end = 0;
 			msg_loopbuf[msg_loopbuf_end].cmd = cmd;

@@ -143,13 +143,13 @@ typedef struct pref_page_t_ {
 } pref_page_t;
 
 static pref_page_t pref_pages_ja[] = {
-	{ 0, "僾儗僀儎", (HWND)NULL, IDD_PREF_PLAYER, (DLGPROC) PrefPlayerDialogProc, 0 },
-	{ 1, "僄僼僃僋僩", (HWND)NULL, IDD_PREF_TIMIDITY1, (DLGPROC) PrefTiMidity1DialogProc, 0 },
-	{ 2, "偦偺懠", (HWND)NULL, IDD_PREF_TIMIDITY2, (DLGPROC) PrefTiMidity2DialogProc, 0 },
-	{ 3, "弌椡", (HWND)NULL, IDD_PREF_TIMIDITY3, (DLGPROC) PrefTiMidity3DialogProc, 0 },
-	{ 4, "僠儍儞僱儖", (HWND)NULL, IDD_PREF_TIMIDITY4, (DLGPROC) PrefTiMidity4DialogProc, 0 },
+	{ 0, "プレイヤ", (HWND)NULL, IDD_PREF_PLAYER, (DLGPROC) PrefPlayerDialogProc, 0 },
+	{ 1, "エフェクト", (HWND)NULL, IDD_PREF_TIMIDITY1, (DLGPROC) PrefTiMidity1DialogProc, 0 },
+	{ 2, "その他", (HWND)NULL, IDD_PREF_TIMIDITY2, (DLGPROC) PrefTiMidity2DialogProc, 0 },
+	{ 3, "出力", (HWND)NULL, IDD_PREF_TIMIDITY3, (DLGPROC) PrefTiMidity3DialogProc, 0 },
+	{ 4, "チャンネル", (HWND)NULL, IDD_PREF_TIMIDITY4, (DLGPROC) PrefTiMidity4DialogProc, 0 },
 #ifdef IA_W32G_SYN
-	{ 5, "僔儞僙僒僀僓", (HWND)NULL, IDD_PREF_SYN1, (DLGPROC) PrefSyn1DialogProc, 0 },
+	{ 5, "シンセサイザ", (HWND)NULL, IDD_PREF_SYN1, (DLGPROC) PrefSyn1DialogProc, 0 },
 #endif
 };
 
@@ -329,8 +329,8 @@ static BOOL APIENTRY CALLBACK PrefWndDialogProc(HWND hwnd, UINT uMess, WPARAM wP
 extern void TracerWndApplyQuietChannel( ChannelBitMask quietchannels_ );
 
 #ifndef IA_W32G_SYN
-/* st_temp, sp_temp 傪揔梡偡傞
- * 拲堄: MainThread 偐傜偺屇傃弌偟嬛巭丄婋尟両
+/* st_temp, sp_temp を適用する
+ * 注意: MainThread からの呼び出し禁止、危険！
  */
 void PrefSettingApplyReally(void)
 {
@@ -589,11 +589,11 @@ static char *cb_info_IDC_COMBO_REVERB_en[] = {
 };
 
 static char *cb_info_IDC_COMBO_REVERB_jp[] = {
-	"儕僶乕僽側偟",
-	"昗弨儕僶乕僽",
-	"昗弨儕僶乕僽乮僌儘乕僶儖乯",
-	"怴儕僶乕僽",
-	"怴儕僶乕僽乮僌儘乕僶儖乯",
+	"リバーブなし",
+	"標準リバーブ",
+	"標準リバーブ（グローバル）",
+	"新リバーブ",
+	"新リバーブ（グローバル）",
 };
 
 // IDC_COMBO_CHORUS
@@ -606,9 +606,9 @@ static char *cb_info_IDC_COMBO_CHORUS_en[] = {
 };
 
 static char *cb_info_IDC_COMBO_CHORUS_jp[] = {
-	"僐乕儔僗側偟",
-	"昗弨僐乕儔僗",
-	"僒儔僂儞僪僐乕儔僗",
+	"コーラスなし",
+	"標準コーラス",
+	"サラウンドコーラス",
 };
 
 // IDC_COMBO_DELAY
@@ -620,8 +620,8 @@ static char *cb_info_IDC_COMBO_DELAY_en[] = {
 };
 
 static char *cb_info_IDC_COMBO_DELAY_jp[] = {
-	"僨傿儗僀側偟",
-	"昗弨僨傿儗僀",
+	"ディレイなし",
+	"標準ディレイ",
 };
 
 // IDC_COMBO_LPF
@@ -634,7 +634,7 @@ static char *cb_info_IDC_COMBO_LPF_en[] = {
 };
 
 static char *cb_info_IDC_COMBO_LPF_jp[] = {
-	"僼傿儖僞側偟",
+	"フィルタなし",
 	"LPF (12dB/oct)",
 	"LPF (24dB/oct)",
 };
@@ -1226,23 +1226,23 @@ static char *cb_info_IDC_COMBO_BANDWIDTH_en[] = {
 	"24-bit",
 };
 static char *cb_info_IDC_COMBO_BANDWIDTH_jp[] = {
-	"8價僢僩",
-	"16價僢僩",
-	"24價僢僩",
+	"8ビット",
+	"16ビット",
+	"24ビット",
 };
 static char **cb_info_IDC_COMBO_BANDWIDTH;
 
 // IDC_COMBO_OUTPUT_MODE
 static char *cb_info_IDC_COMBO_OUTPUT_MODE_jp[]= {
-	"埲壓偺僼傽僀儖偵弌椡",(char *)0,
+	"以下のファイルに出力",(char *)0,
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
-//	"僼傽僀儖柤傪帺摦偱寛掕偟丄僜\乕僗偲摨偠僼僅儖僟偵弌椡",(char *)1,
+//	"ファイル名を自動で決定し、ソ\ースと同じフォルダに出力",(char *)1,
 #else
-	"僼傽僀儖柤傪帺摦偱寛掕偟丄僜乕僗偲摨偠僼僅儖僟偵弌椡",(char *)1,
+	"ファイル名を自動で決定し、ソースと同じフォルダに出力",(char *)1,
 #endif
 
-	"僼傽僀儖柤傪帺摦偱寛掕偟丄埲壓偺僼僅儖僟偵弌椡",(char *)2,
-	"僼傽僀儖柤傪帺摦偱寛掕偟丄埲壓偺僼僅儖僟偵弌椡(僼僅儖僟柤晅偒)",(char *)3,
+	"ファイル名を自動で決定し、以下のフォルダに出力",(char *)2,
+	"ファイル名を自動で決定し、以下のフォルダに出力(フォルダ名付き)",(char *)3,
 	NULL
 };
 static char *cb_info_IDC_COMBO_OUTPUT_MODE_en[]= {
@@ -1550,10 +1550,10 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				}
 				if (PlayerLanguage == LANGUAGE_JAPANESE) {
 				  if(st_temp->auto_output_mode>0){
-				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"弌椡愭");
+				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"出力先");
 				    SetDlgItemText(hwnd,IDC_EDIT_OUTPUT_FILE,st_temp->OutputDirName);
 				  } else {
-				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"弌椡僼傽僀儖");
+				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"出力ファイル");
 				    SetDlgItemText(hwnd,IDC_EDIT_OUTPUT_FILE,st_temp->OutputName);
 				  }
 				} else {
@@ -1927,30 +1927,30 @@ PrefSyn1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		DLG_FLAG_TO_CHECKBUTTON(hwnd, IDC_CHECK_SYN_AUTOSTART, st_temp->syn_AutoStart);
 		if (PlayerLanguage == LANGUAGE_JAPANESE) {
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "掅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "低い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "彮偟掅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "少し低い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "晛捠" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "普通" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "彮偟崅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "少し高い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "崅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "高い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "儕傾儖僞僀儉" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "リアルタイム" );
 
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "掅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "低い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "彮偟掅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "少し低い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "晛捠" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "普通" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "彮偟崅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "少し高い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "崅偄" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "高い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
-				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "僞僀儉僋儕僥傿僇儖" );
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "タイムクリティカル" );
 		} else {
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
 				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "Lowest" );
@@ -2259,13 +2259,13 @@ int w32g_gogo_id3_tag_dialog(void)
 //
 ///////////////////////////////////////////////////////////////////////
 
-// id 偺僐儞儃儃僢僋僗偺忣曬偺掕媊
+// id のコンボボックスの情報の定義
 #define CB_INFO_TYPE1_BEGIN(id) static int cb_info_ ## id [] = {
 #define CB_INFO_TYPE1_END };
 #define CB_INFO_TYPE2_BEGIN(id) static char * cb_info_ ## id [] = {
 #define CB_INFO_TYPE2_END };
 
-// cb_info_type1_俬俢  cb_info_type2_俬俢 偲偄偆傆偆偵側傞丅
+// cb_info_type1_ＩＤ  cb_info_type2_ＩＤ というふうになる。
 
 // IDC_COMBO_OUTPUT_FORMAT
 CB_INFO_TYPE2_BEGIN(IDC_COMBO_OUTPUT_FORMAT)
@@ -2328,7 +2328,7 @@ CB_INFO_TYPE2_BEGIN(IDC_COMBO_VBR)
 	NULL
 CB_INFO_TYPE2_END
 
-// id 偺僐儞儃儃僢僋僗傪慖戰偺愝掕偡傞丅
+// id のコンボボックスを選択の設定する。
 #define CB_SETCURSEL_TYPE1(id) \
 { \
 	int cb_num; \
@@ -2351,7 +2351,7 @@ CB_INFO_TYPE2_END
 		} \
 	} \
 }
-// id 偺僐儞儃儃僢僋僗偺慖戰傪曄悢偵戙擖偡傞丅
+// id のコンボボックスの選択を変数に代入する。
 #define CB_GETCURSEL_TYPE1(id) \
 { \
 	int cb_num1, cb_num2; \
@@ -2372,27 +2372,27 @@ CB_INFO_TYPE2_END
 			break; \
 		} \
 }
-// 僠僃僢僋偝傟偰偄傞偐丅
+// チェックされているか。
 #define IS_CHECK(id) SendDlgItemMessage(hwnd,id,BM_GETCHECK,0,0)
-// 僠僃僢僋偡傞丅
+// チェックする。
 #define CHECK(id) SendDlgItemMessage(hwnd,id,BM_SETCHECK,1,0)
-// 僠僃僢僋傪偼偢偡丅
+// チェックをはずす。
 #define UNCHECK(id) SendDlgItemMessage(hwnd,id,BM_SETCHECK,0,0)
-// id 偺僠僃僢僋儃僢僋僗傪愝掕偡傞丅
+// id のチェックボックスを設定する。
 #define CHECKBOX_SET(id) \
 	if(gogo_ConfigDialogInfo.opt ## id>0) \
 		SendDlgItemMessage(hwnd,id,BM_SETCHECK,1,0); \
 	else \
 		SendDlgItemMessage(hwnd,id,BM_SETCHECK,0,0); \
-// id 偺僠僃僢僋儃僢僋僗傪曄悢偵戙擖偡傞丅
+// id のチェックボックスを変数に代入する。
 #define CHECKBOX_GET(id) \
 	if(SendDlgItemMessage(hwnd,id,BM_GETCHECK,0,0)) \
 		gogo_ConfigDialogInfo.opt ## id = 1; \
 	else \
 		gogo_ConfigDialogInfo.opt ## id = 0; \
-// id 偺僄僨傿僢僩傪愝掕偡傞丅
+// id のエディットを設定する。
 #define EDIT_SET(id) SendDlgItemMessage(hwnd,id,WM_SETTEXT,0,(LPARAM)gogo_ConfigDialogInfo.opt ## id);
-// id 偺僄僨傿僢僩傪曄悢偵戙擖偡傞丅
+// id のエディットを変数に代入する。
 #define EDIT_GET(id,size) SendDlgItemMessage(hwnd,id,WM_GETTEXT,(WPARAM)size,(LPARAM)gogo_ConfigDialogInfo.opt ## id);
 #define EDIT_GET_RANGE(id,size,min,max) \
 { \
@@ -2406,9 +2406,9 @@ CB_INFO_TYPE2_END
 	strncpy((char *)gogo_ConfigDialogInfo.opt ## id,tmpbuf,size); \
 	(gogo_ConfigDialogInfo.opt ## id)[size] = '\0'; \
 }
-// 僐儞僩儘乕儖偺桳岠壔
+// コントロールの有効化
 #define ENABLE_CONTROL(id) EnableWindow(GetDlgItem(hwnd,id),TRUE);
-// 僐儞僩儘乕儖偺柍岠壔
+// コントロールの無効化
 #define DISABLE_CONTROL(id) EnableWindow(GetDlgItem(hwnd,id),FALSE);
 
 static void gogoConfigDialogProcControlEnableDisable(HWND hwnd);
@@ -2424,7 +2424,7 @@ static BOOL APIENTRY gogoConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, 
 	case WM_INITDIALOG:
 	{
 		int i;
-		// 僐儞儃儃僢僋僗偺弶婜壔
+		// コンボボックスの初期化
 		for(i=0;cb_info_IDC_COMBO_OUTPUT_FORMAT[i];i+=2){
 			SendDlgItemMessage(hwnd,IDC_COMBO_OUTPUT_FORMAT,CB_INSERTSTRING,(WPARAM)-1,(LPARAM)cb_info_IDC_COMBO_OUTPUT_FORMAT[i]);
 		}
@@ -2453,7 +2453,7 @@ static BOOL APIENTRY gogoConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, 
 		for(i=0;cb_info_IDC_COMBO_VBR[i];i+=2){
 			SendDlgItemMessage(hwnd,IDC_COMBO_VBR,CB_INSERTSTRING,(WPARAM)-1,(LPARAM)cb_info_IDC_COMBO_VBR[i]);
 		}
-		// 愝掕
+		// 設定
 		gogoConfigDialogProcControlReset(hwnd);
 	}
 		break;
@@ -2612,7 +2612,7 @@ static BOOL APIENTRY gogoConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, 
 	return FALSE;
 }
 
-// 僐儞僩儘乕儖偺桳岠 / 柍岠壔
+// コントロールの有効 / 無効化
 static void gogoConfigDialogProcControlEnableDisable(HWND hwnd)
 {
 	ENABLE_CONTROL(IDC_CHECK_DEFAULT);
@@ -2801,7 +2801,7 @@ static void gogoConfigDialogProcControlEnableDisable(HWND hwnd)
 
 static void gogoConfigDialogProcControlReset(HWND hwnd)
 {
-	// 僐儞儃儃僢僋僗偺慖戰愝掕
+	// コンボボックスの選択設定
 	CB_SETCURSEL_TYPE2(IDC_COMBO_OUTPUT_FORMAT)
 	CB_SETCURSEL_TYPE1(IDC_COMBO_MPEG1_AUDIO_BITRATE)
 	CB_SETCURSEL_TYPE1(IDC_COMBO_MPEG2_AUDIO_BITRATE)
@@ -2810,7 +2810,7 @@ static void gogoConfigDialogProcControlReset(HWND hwnd)
 	CB_SETCURSEL_TYPE1(IDC_COMBO_VBR_BITRATE_LOW)
 	CB_SETCURSEL_TYPE1(IDC_COMBO_VBR_BITRATE_HIGH)
 	CB_SETCURSEL_TYPE2(IDC_COMBO_VBR)
-	// 僠僃僢僋儃僢僋僗偺愝掕
+	// チェックボックスの設定
 	CHECKBOX_SET(IDC_CHECK_DEFAULT)
 	CHECKBOX_SET(IDC_CHECK_COMMANDLINE_OPTS)
 	CHECKBOX_SET(IDC_CHECK_OUTPUT_FORMAT)
@@ -2834,20 +2834,20 @@ static void gogoConfigDialogProcControlReset(HWND hwnd)
 	CHECKBOX_SET(IDC_CHECK_USEPSY)
 	CHECKBOX_SET(IDC_CHECK_VERIFY)
 	CHECKBOX_SET(IDC_CHECK_16KHZ_LOW_PASS_FILTER)
-	// 僄僨傿僢僩偺愝掕
+	// エディットの設定
 	EDIT_SET(IDC_EDIT_OUTFREQ)
 	EDIT_SET(IDC_EDIT_MSTHRESHOLD_THRESHOLD)
 	EDIT_SET(IDC_EDIT_MSTHRESHOLD_MSPOWER)
 	EDIT_SET(IDC_EDIT_COMMANDLINE_OPTION)
 	EDIT_SET(IDC_EDIT_LPF_PARA1)
 	EDIT_SET(IDC_EDIT_LPF_PARA2)
-	// 僐儞僩儘乕儖偺桳岠 / 柍岠壔
+	// コントロールの有効 / 無効化
 	gogoConfigDialogProcControlEnableDisable(hwnd);
 }
 
 static void gogoConfigDialogProcControlApply(HWND hwnd)
 {
-	// 僐儞儃儃僢僋僗偺慖戰愝掕
+	// コンボボックスの選択設定
 	CB_GETCURSEL_TYPE2(IDC_COMBO_OUTPUT_FORMAT)
 	CB_GETCURSEL_TYPE1(IDC_COMBO_MPEG1_AUDIO_BITRATE)
 	CB_GETCURSEL_TYPE1(IDC_COMBO_MPEG2_AUDIO_BITRATE)
@@ -2856,7 +2856,7 @@ static void gogoConfigDialogProcControlApply(HWND hwnd)
 	CB_GETCURSEL_TYPE1(IDC_COMBO_VBR_BITRATE_LOW)
 	CB_GETCURSEL_TYPE1(IDC_COMBO_VBR_BITRATE_HIGH)
 	CB_GETCURSEL_TYPE2(IDC_COMBO_VBR)
-	// 僠僃僢僋儃僢僋僗偺愝掕
+	// チェックボックスの設定
 	CHECKBOX_GET(IDC_CHECK_DEFAULT)
 	CHECKBOX_GET(IDC_CHECK_COMMANDLINE_OPTS)
 	CHECKBOX_GET(IDC_CHECK_OUTPUT_FORMAT)
@@ -2880,16 +2880,16 @@ static void gogoConfigDialogProcControlApply(HWND hwnd)
 	CHECKBOX_GET(IDC_CHECK_USEPSY)
 	CHECKBOX_GET(IDC_CHECK_VERIFY)
 	CHECKBOX_GET(IDC_CHECK_16KHZ_LOW_PASS_FILTER)
-	// 僄僨傿僢僩偺愝掕
+	// エディットの設定
 	EDIT_GET_RANGE(IDC_EDIT_OUTFREQ,6,MIN_OUTPUT_RATE,MAX_OUTPUT_RATE)
 	EDIT_GET_RANGE(IDC_EDIT_MSTHRESHOLD_THRESHOLD,4,0,100)
 	EDIT_GET_RANGE(IDC_EDIT_MSTHRESHOLD_MSPOWER,4,0,100)
 	EDIT_GET(IDC_EDIT_COMMANDLINE_OPTION,1024)
 	EDIT_GET_RANGE(IDC_EDIT_LPF_PARA1,4,0,100)
 	EDIT_GET_RANGE(IDC_EDIT_LPF_PARA2,4,0,100)
-	// 僐儞僩儘乕儖偺桳岠 / 柍岠壔
+	// コントロールの有効 / 無効化
 	gogoConfigDialogProcControlEnableDisable(hwnd);
-	// 儕僙僢僩
+	// リセット
 	gogoConfigDialogProcControlReset(hwnd);
 }
 
@@ -3047,12 +3047,12 @@ int gogo_ConfigDialogInfoApply(void)
 	if(gogo_ConfigDialogInfo.optIDC_CHECK_16KHZ_LOW_PASS_FILTER>0){
 		gogo_opts.optUSELPF16 = TRUE;
 	}
-//	gogo_opts.optINPFREQ;			// SYSTEM USE(僔僗僥儉偱巊梡偡傞偐傜巜掕偱偒側偄)
+//	gogo_opts.optINPFREQ;			// SYSTEM USE(システムで使用するから指定できない)
 //	gogo_opts.optSTARTOFFSET;	// SYSTEM USE
 //	gogo_opts.optADDTAGnum;		// SYSTEM USE
 //	gogo_opts.optADDTAG_len[64];	// SYSTEM USE
 //	gogo_opts.optADDTAG_buf[64];	// SYSTEM USE
-//	gogo_opts.optCPU;					// PREPAIRING(弨旛拞)
+//	gogo_opts.optCPU;					// PREPAIRING(準備中)
 //	gogo_opts.optBYTE_SWAP;			// SYSTEM USE
 //	gogo_opts.opt8BIT_PCM;			// SYSTEM USE
 //	gogo_opts.optMONO_PCM;		// SYSTEM USE
@@ -3417,35 +3417,35 @@ int lame_ConfigDialogInfoLoadINI(void)
 
 volatile vorbis_ConfigDialogInfo_t vorbis_ConfigDialogInfo;
 
-// id 偺僐儞儃儃僢僋僗偺忣曬偺掕媊
+// id のコンボボックスの情報の定義
 #define CB_INFO_TYPE1_BEGIN(id) static int cb_info_ ## id [] = {
 #define CB_INFO_TYPE1_END };
 #define CB_INFO_TYPE2_BEGIN(id) static char * cb_info_ ## id [] = {
 #define CB_INFO_TYPE2_END };
 
-// cb_info_type1_俬俢  cb_info_type2_俬俢 偲偄偆傆偆偵側傞丅
+// cb_info_type1_ＩＤ  cb_info_type2_ＩＤ というふうになる。
 
 // IDC_COMBO_MODE_jp
 CB_INFO_TYPE2_BEGIN(IDC_COMBO_MODE_jp)
-	"VBR 昳幙 1 (掅)",(char *)1,
-	"VBR 昳幙 2",(char *)2,
-	"VBR 昳幙 3",(char *)3,
-	"VBR 昳幙 4",(char *)4,
-	"VBR 昳幙 4.99",(char *)499,
-	"VBR 昳幙 5",(char *)5,
-	"VBR 昳幙 6",(char *)6,
-	"VBR 昳幙 7",(char *)7,
-	"VBR 昳幙 8 (僨僼僅儖僩)",(char *)8,
-	"VBR 昳幙 9",(char *)9,
-	"VBR 昳幙 10 (崅)",(char *)10,
+	"VBR 品質 1 (低)",(char *)1,
+	"VBR 品質 2",(char *)2,
+	"VBR 品質 3",(char *)3,
+	"VBR 品質 4",(char *)4,
+	"VBR 品質 4.99",(char *)499,
+	"VBR 品質 5",(char *)5,
+	"VBR 品質 6",(char *)6,
+	"VBR 品質 7",(char *)7,
+	"VBR 品質 8 (デフォルト)",(char *)8,
+	"VBR 品質 9",(char *)9,
+	"VBR 品質 10 (高)",(char *)10,
 #if 0
-	"僨僼僅儖僩(栺128kbps VBR)",(char *)0,
-	"栺112kbps VBR",(char *)1,
-	"栺128kbps VBR",(char *)2,
-	"栺160kbps VBR",(char *)3,
-	"栺192kbps VBR",(char *)4,
-	"栺256kbps VBR",(char *)5,
-	"栺350kbps VBR",(char *)6,
+	"デフォルト(約128kbps VBR)",(char *)0,
+	"約112kbps VBR",(char *)1,
+	"約128kbps VBR",(char *)2,
+	"約160kbps VBR",(char *)3,
+	"約192kbps VBR",(char *)4,
+	"約256kbps VBR",(char *)5,
+	"約350kbps VBR",(char *)6,
 #endif
 	NULL
 CB_INFO_TYPE2_END
@@ -3477,7 +3477,7 @@ CB_INFO_TYPE2_END
 
 static char **cb_info_IDC_COMBO_MODE;
 
-// id 偺僐儞儃儃僢僋僗傪慖戰偺愝掕偡傞丅
+// id のコンボボックスを選択の設定する。
 #define CB_SETCURSEL_TYPE1(id) \
 { \
 	int cb_num; \
@@ -3500,7 +3500,7 @@ static char **cb_info_IDC_COMBO_MODE;
 		} \
 	} \
 }
-// id 偺僐儞儃儃僢僋僗偺慖戰傪曄悢偵戙擖偡傞丅
+// id のコンボボックスの選択を変数に代入する。
 #define CB_GETCURSEL_TYPE1(id) \
 { \
 	int cb_num1, cb_num2; \
@@ -3521,27 +3521,27 @@ static char **cb_info_IDC_COMBO_MODE;
 			break; \
 		} \
 }
-// 僠僃僢僋偝傟偰偄傞偐丅
+// チェックされているか。
 #define IS_CHECK(id) SendDlgItemMessage(hwnd,id,BM_GETCHECK,0,0)
-// 僠僃僢僋偡傞丅
+// チェックする。
 #define CHECK(id) SendDlgItemMessage(hwnd,id,BM_SETCHECK,1,0)
-// 僠僃僢僋傪偼偢偡丅
+// チェックをはずす。
 #define UNCHECK(id) SendDlgItemMessage(hwnd,id,BM_SETCHECK,0,0)
-// id 偺僠僃僢僋儃僢僋僗傪愝掕偡傞丅
+// id のチェックボックスを設定する。
 #define CHECKBOX_SET(id) \
 	if(vorbis_ConfigDialogInfo.opt ## id>0) \
 		SendDlgItemMessage(hwnd,id,BM_SETCHECK,1,0); \
 	else \
 		SendDlgItemMessage(hwnd,id,BM_SETCHECK,0,0); \
-// id 偺僠僃僢僋儃僢僋僗傪曄悢偵戙擖偡傞丅
+// id のチェックボックスを変数に代入する。
 #define CHECKBOX_GET(id) \
 	if(SendDlgItemMessage(hwnd,id,BM_GETCHECK,0,0)) \
 		vorbis_ConfigDialogInfo.opt ## id = 1; \
 	else \
 		vorbis_ConfigDialogInfo.opt ## id = 0; \
-// id 偺僄僨傿僢僩傪愝掕偡傞丅
+// id のエディットを設定する。
 #define EDIT_SET(id) SendDlgItemMessage(hwnd,id,WM_SETTEXT,0,(LPARAM)vorbis_ConfigDialogInfo.opt ## id);
-// id 偺僄僨傿僢僩傪曄悢偵戙擖偡傞丅
+// id のエディットを変数に代入する。
 #define EDIT_GET(id,size) SendDlgItemMessage(hwnd,id,WM_GETTEXT,(WPARAM)size,(LPARAM)vorbis_ConfigDialogInfo.opt ## id);
 #define EDIT_GET_RANGE(id,size,min,max) \
 { \
@@ -3555,9 +3555,9 @@ static char **cb_info_IDC_COMBO_MODE;
 	strncpy((char *)vorbis_ConfigDialogInfo.opt ## id,tmpbuf,size); \
 	(vorbis_ConfigDialogInfo.opt ## id)[size] = '\0'; \
 }
-// 僐儞僩儘乕儖偺桳岠壔
+// コントロールの有効化
 #define ENABLE_CONTROL(id) EnableWindow(GetDlgItem(hwnd,id),TRUE);
-// 僐儞僩儘乕儖偺柍岠壔
+// コントロールの無効化
 #define DISABLE_CONTROL(id) EnableWindow(GetDlgItem(hwnd,id),FALSE);
 
 
@@ -3573,7 +3573,7 @@ static BOOL APIENTRY vorbisConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam
 	case WM_INITDIALOG:
 	{
 		int i;
-		// 僐儞儃儃僢僋僗偺弶婜壔
+		// コンボボックスの初期化
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 		  cb_info_IDC_COMBO_MODE = cb_info_IDC_COMBO_MODE_jp;
 		else
@@ -3582,7 +3582,7 @@ static BOOL APIENTRY vorbisConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam
 		for(i=0;cb_info_IDC_COMBO_MODE[i];i+=2){
 			SendDlgItemMessage(hwnd,IDC_COMBO_MODE,CB_INSERTSTRING,(WPARAM)-1,(LPARAM)cb_info_IDC_COMBO_MODE[i]);
 		}
-		// 愝掕
+		// 設定
 		vorbisConfigDialogProcControlReset(hwnd);
 	}
 		break;
@@ -3627,7 +3627,7 @@ static BOOL APIENTRY vorbisConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam
 	return FALSE;
 }
 
-// 僐儞僩儘乕儖偺桳岠 / 柍岠壔
+// コントロールの有効 / 無効化
 static void vorbisConfigDialogProcControlEnableDisable(HWND hwnd)
 {
 	ENABLE_CONTROL(IDC_CHECK_DEFAULT);
@@ -3640,25 +3640,25 @@ static void vorbisConfigDialogProcControlEnableDisable(HWND hwnd)
 
 static void vorbisConfigDialogProcControlReset(HWND hwnd)
 {
-	// 僐儞儃儃僢僋僗偺慖戰愝掕
+	// コンボボックスの選択設定
 	CB_SETCURSEL_TYPE2(IDC_COMBO_MODE)
-	// 僠僃僢僋儃僢僋僗偺愝掕
+	// チェックボックスの設定
 	CHECKBOX_SET(IDC_CHECK_DEFAULT)
-	// 僄僨傿僢僩偺愝掕
-	// 僐儞僩儘乕儖偺桳岠 / 柍岠壔
+	// エディットの設定
+	// コントロールの有効 / 無効化
 	vorbisConfigDialogProcControlEnableDisable(hwnd);
 }
 
 static void vorbisConfigDialogProcControlApply(HWND hwnd)
 {
-	// 僐儞儃儃僢僋僗偺慖戰愝掕
+	// コンボボックスの選択設定
 	CB_GETCURSEL_TYPE2(IDC_COMBO_MODE)
-	// 僠僃僢僋儃僢僋僗偺愝掕
+	// チェックボックスの設定
 	CHECKBOX_GET(IDC_CHECK_DEFAULT)
-	// 僄僨傿僢僩偺愝掕
-	// 僐儞僩儘乕儖偺桳岠 / 柍岠壔
+	// エディットの設定
+	// コントロールの有効 / 無効化
 	vorbisConfigDialogProcControlEnableDisable(hwnd);
-	// 儕僙僢僩
+	// リセット
 	vorbisConfigDialogProcControlReset(hwnd);
 }
 
