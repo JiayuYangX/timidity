@@ -72,6 +72,10 @@ int lame_ConfigDialogInfoLoadINI(void);
 #include "lame_a.h"
 #endif
 
+#if defined(AU_PORTAUDIO) && defined(__W32__)
+#include "asio_a.h"
+#endif
+
 /* TiMidity Win32GUI preference / PropertySheet */
 
 #ifndef IA_W32G_SYN
@@ -1523,7 +1527,7 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 					lameConfigDialog();
 				}
 #endif
-#ifdef AU_PORTAUDIO_DLL
+#if defined(AU_PORTAUDIO) && defined(__W32__)
 				if(st_temp->opt_playmode[0]=='o'){
 					asioConfigDialog();
 				}
@@ -3784,7 +3788,7 @@ int vorbis_ConfigDialogInfoLoadINI(void)
 #endif	// AU_VORBIS
 
 
-#ifdef AU_PORTAUDIO_DLL
+#if defined(AU_PORTAUDIO) && defined(__W32__)
 ///////////////////////////////////////////////////////////////////////
 //
 // asioConfigDialog
@@ -3794,60 +3798,180 @@ int vorbis_ConfigDialogInfoLoadINI(void)
 #include <pa_asio.h>
 #include "w32_portaudio.h"
 
+static int asio_dialog_saved_device = -1;
+
+static void asio_reopen_output(void)
+{
+    play_mode->close_output();
+    play_mode->open_output();
+}
+
+static BOOL APIENTRY asioConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
+{
+    switch(uMess)
+    {
+    case WM_INITDIALOG:
+    {
+        PaHostApiIndex asioApi, i;
+        const PaHostApiInfo *ApiInfo;
+        int devCount = 0, selIdx = asio_ConfigDialogInfo.device_index;
+        int selCombo = -1;
+        HWND hCombo = GetDlgItem(hwnd, IDC_COMBO_ASIO_DEVICE);
+
+        asioApi = Pa_HostApiTypeIdToHostApiIndex(paASIO);
+        if(asioApi >= 0) ApiInfo = Pa_GetHostApiInfo(asioApi);
+
+        SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)"(Default Device)");
+        SendMessage(hCombo, CB_SETITEMDATA, 0, -1);
+        if(selIdx < 0) selCombo = 0;
+        devCount = 1;
+
+        if(asioApi >= 0) {
+            for(i = 0; i < Pa_GetDeviceCount(); i++)
+            {
+                const PaDeviceInfo *info = Pa_GetDeviceInfo(i);
+                if(info && info->hostApi == asioApi && info->maxOutputChannels > 0)
+                {
+                    SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)info->name);
+                    SendMessage(hCombo, CB_SETITEMDATA, devCount, i);
+                    if(i == selIdx) selCombo = devCount;
+                    devCount++;
+                }
+            }
+        }
+
+        if(selCombo >= 0)
+            SendMessage(hCombo, CB_SETCURSEL, selCombo, 0);
+        break;
+    }
+
+    case WM_COMMAND:
+        switch(LOWORD(wParam))
+        {
+        case IDC_BUTTON_ASIO_CONTROL_PANEL:
+        {
+            HWND hCombo = GetDlgItem(hwnd, IDC_COMBO_ASIO_DEVICE);
+            int sel = (int)SendMessage(hCombo, CB_GETCURSEL, 0, 0);
+            if(sel != CB_ERR)
+            {
+                PaDeviceIndex devIdx = (PaDeviceIndex)SendMessage(hCombo, CB_GETITEMDATA, sel, 0);
+                if(devIdx < 0)
+                {
+                    PaHostApiIndex ai = Pa_HostApiTypeIdToHostApiIndex(paASIO);
+                    const PaHostApiInfo *api = ai >= 0 ? Pa_GetHostApiInfo(ai) : NULL;
+                    if(api) devIdx = api->defaultOutputDevice;
+                }
+                if(devIdx >= 0)
+                {
+                    /* Must close stream before opening ASIO CP */
+                    play_mode->close_output();
+                    {
+                        PaError e = Pa_Initialize();
+                        if(e == paNoError) {
+                            e = PaAsio_ShowControlPanel(devIdx, (void*)hPrefWnd);
+                            if(e != paNoError)
+                                MessageBox(hwnd, Pa_GetErrorText(e), "ASIO Control Panel", MB_OK | MB_ICONERROR);
+                            Pa_Terminate();
+                        }
+                    }
+                    play_mode->open_output();
+                }
+            }
+            break;
+        }
+
+        case IDOK:
+        {
+            HWND hCombo = GetDlgItem(hwnd, IDC_COMBO_ASIO_DEVICE);
+            int sel = (int)SendMessage(hCombo, CB_GETCURSEL, 0, 0);
+            if(sel != CB_ERR)
+            {
+                int devIdx = (int)SendMessage(hCombo, CB_GETITEMDATA, sel, 0);
+                asio_ConfigDialogInfo.device_index = devIdx;
+            }
+            asio_ConfigDialogInfoSaveINI();
+            /* apply: close + reopen with new device */
+            asio_reopen_output();
+            EndDialog(hwnd, 1);
+            break;
+        }
+
+        case IDCANCEL:
+            asio_ConfigDialogInfo.device_index = asio_dialog_saved_device;
+            EndDialog(hwnd, 0);
+            break;
+        }
+        break;
+
+    default:
+        return FALSE;
+    }
+    return TRUE;
+}
 
 int asioConfigDialog(void)
 {
-	extern HWND hMainWnd;
+    PaHostApiIndex asioApi;
+    int result = -1;
+    int need_pa_cleanup = 0;
 
-	PaHostApiTypeId HostApiTypeId;
-	const PaHostApiInfo  *HostApiInfo;
-	PaDeviceIndex DeviceIndex;
-	PaError err;
-	HWND hWnd;
-	int buffered_data;
+    asioApi = Pa_HostApiTypeIdToHostApiIndex(paASIO);
+    if(asioApi < 0) {
+        if(Pa_Initialize() != paNoError)
+            return -1;
+        need_pa_cleanup = 1;
+        asioApi = Pa_HostApiTypeIdToHostApiIndex(paASIO);
+        if(asioApi < 0) {
+            Pa_Terminate();
+            return -1;
+        }
+    }
+    if(!Pa_GetHostApiInfo(asioApi)) {
+        if(need_pa_cleanup) Pa_Terminate();
+        return -1;
+    }
 
-	PaHostApiIndex i, ApiCount;
-	
-	
-	if(load_portaudio_dll(0))
-		return -1;
-	
-	play_mode->acntl(PM_REQ_GETFILLED, &buffered_data);
-	if (buffered_data != 0) return -1;
-	
-	play_mode->close_output();
-	err = Pa_Initialize();
-	if( err != paNoError ) goto error1;
+    asio_dialog_saved_device = asio_ConfigDialogInfo.device_index;
 
+    result = DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_ASIO),
+                (HWND)hPrefWnd, asioConfigDialogProc);
+    if(result < 0) result = 0;
 
-	HostApiTypeId = paASIO;
-	i = 0;
-	hWnd = hPrefWnd;
-	ApiCount = Pa_GetHostApiCount();
-	do{
-		HostApiInfo=Pa_GetHostApiInfo(i);
-		if( HostApiInfo->type == HostApiTypeId ) break;
-	    i++;
-	}while ( i < ApiCount );
-	if ( i == ApiCount ) goto error2;
-    DeviceIndex = HostApiInfo->defaultOutputDevice;
-	if(DeviceIndex==paNoDevice) goto error2;
+    if(need_pa_cleanup)
+        Pa_Terminate();
 
-	if (HostApiTypeId ==  paASIO){
-    	err = PaAsio_ShowControlPanel( DeviceIndex, (void*) hWnd);
-		if( err != paNoError ) goto error1;
-	}
-	Pa_Terminate();
-	play_mode->open_output();
-//  	free_portaudio_dll();
-	return 0;
-	
-error1:
-//  	free_portaudio_dll();
-	MessageBox(NULL, Pa_GetErrorText( err ), "Port Audio (asio) error", IDOK);
-error2:
-	Pa_Terminate();
-	return -1;
+    return result;
 }
 
-#endif //AU_PORTAUDIO_DLL
+int asio_ConfigDialogInfoInit(void)
+{
+    if(!asio_ConfigDialogInfo_initialized)
+    {
+        asio_ConfigDialogInfo.device_index = -1;
+        asio_ConfigDialogInfoLoadINI();
+        asio_ConfigDialogInfo_initialized = 1;
+    }
+    return 0;
+}
+
+int asio_ConfigDialogInfoSaveINI(void)
+{
+    char sec[] = "ASIO";
+    char b[32];
+    char *ini = timidity_output_inifile;
+    if(!ini) return -1;
+    sprintf(b, "%d", asio_ConfigDialogInfo.device_index);
+    WritePrivateProfileString(sec, "DeviceIndex", b, ini);
+    return 0;
+}
+
+int asio_ConfigDialogInfoLoadINI(void)
+{
+    char sec[] = "ASIO";
+    char *ini = timidity_output_inifile;
+    if(!ini) return -1;
+    asio_ConfigDialogInfo.device_index = GetPrivateProfileInt(sec, "DeviceIndex", -1, ini);
+    return 0;
+}
+
+#endif //AU_PORTAUDIO

@@ -58,11 +58,16 @@
 #include "timidity.h"
 #include "common.h"
 #include "output.h"
+#include "asio_a.h"
 #include "controls.h"
 #include "timer.h"
 #include "instrum.h"
 #include "playmidi.h"
 #include "miditrace.h"
+
+/* ASIO device config (set by GUI) */
+volatile AsioConfigDialogInfo_t asio_ConfigDialogInfo;
+int asio_ConfigDialogInfo_initialized = 0;
 
 static int opt_pa_device_id = -2;
 
@@ -301,6 +306,14 @@ static int open_output(void)
 	if (dpm.name == NULL || ret == 0 || ret == EOF)
 		opt_pa_device_id = -2;
 	
+	/* override with ASIO config dialog selection */
+	if(asio_ConfigDialogInfo_initialized
+	    && asio_ConfigDialogInfo.device_index >= 0
+	    && &dpm == &portaudio_asio_play_mode)
+	{
+		opt_pa_device_id = asio_ConfigDialogInfo.device_index;
+	}
+	
 #if PORTAUDIO_V19
   {
 		if(&dpm == &portaudio_asio_play_mode){
@@ -508,6 +521,13 @@ error:
 	ctl->cmsg(  CMSG_ERROR, VERB_NORMAL, "PortAudio error: %s\n", Pa_GetErrorText( err ) );
 error2:
 	Pa_Terminate(); pa_active = 0;
+
+	/* if ASIO device selection failed, reset to default so dialog can reopen */
+	if(&dpm == &portaudio_asio_play_mode && asio_ConfigDialogInfo_initialized
+	    && asio_ConfigDialogInfo.device_index >= 0)
+	{
+		asio_ConfigDialogInfo.device_index = -1;
+	}
 
 	return -1;
 }

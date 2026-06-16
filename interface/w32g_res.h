@@ -15,6 +15,7 @@
 #define IDM_MENU_MAIN_EN                112
 #define IDD_DIALOG_VORBIS_EN            113
 #define IDD_DIALOG_GOGO_EN              114
+#define IDD_DIALOG_ASIO                 115
 #define IDD_DIALOG_LAME_EN              116
 #define IDD_DIALOG_ONE_LINE_EN          118
 #define IDD_DIALOG_ONE_LINE             119
@@ -352,6 +353,10 @@
 #define IDC_CHECK_LAME_COMMANDLINE_OPTS  2120
 #define IDC_EDIT_LAME_COMMANDLINE_OPTION 2121
 
+/* ASIO dialog controls */
+#define IDC_COMBO_ASIO_DEVICE            2122
+#define IDC_BUTTON_ASIO_CONTROL_PANEL    2123
+
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -360,7 +365,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         40007
-#define _APS_NEXT_CONTROL_VALUE         2109
+#define _APS_NEXT_CONTROL_VALUE         2124
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
