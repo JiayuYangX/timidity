@@ -539,7 +539,7 @@ static void wrd_text_update ( int x_from, int y_from, int x_to, int y_to, int lo
 					}
 					attr = w32g_wrd_wnd.attrbuf[y][x];
 				}
-				if ( PlayerLanguage == LANGUAGE_JAPANESE && _mbbtype( w32g_wrd_wnd.textbuf[y][x], _MBC_SINGLE ) == _MBC_LEAD ) {
+				if ( IsDBCSLeadByte( w32g_wrd_wnd.textbuf[y][x] ) ) {
 					SetRect ( &rc_part, x * w32g_wrd_wnd.font_width, y * w32g_wrd_wnd.font_height,
 						(x + 2) * w32g_wrd_wnd.font_width, (y + 1) * w32g_wrd_wnd.font_height );
 					if ( w32g_wrd_wnd.flag & WRD_FLAG_TEXT )
@@ -1689,13 +1689,11 @@ void WrdWndPutStringN(char *str, int n, int lockflag)
 		} else {
 			int len = w32g_wrd_wnd.row - w32g_wrd_wnd.curposx;
 			char mbt = _MBC_SINGLE;
-			if ( PlayerLanguage == LANGUAGE_JAPANESE ) {
-				for ( i=0; i < len; i++ ) {
-					mbt = _mbbtype ( str[i], mbt );
-				}
-				if ( mbt == _MBC_LEAD )
-					len -= 1;
+			for ( i=0; i < len; i++ ) {
+				mbt = IsDBCSLeadByteEx(936, str[i]) ? _MBC_LEAD : _MBC_SINGLE;
 			}
+			if ( mbt == _MBC_LEAD )
+				len -= 1;
 			memcpy( &w32g_wrd_wnd.textbuf[w32g_wrd_wnd.curposy][w32g_wrd_wnd.curposx], str, len );
 			memset( &w32g_wrd_wnd.forecolorbuf[w32g_wrd_wnd.curposy][w32g_wrd_wnd.curposx],
 				w32g_wrd_wnd.curforecolor, len );
