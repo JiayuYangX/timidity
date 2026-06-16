@@ -300,7 +300,7 @@ typedef double FLOAT_T;
 #define OUTPUT_TEXT_CODE "AUTO"
 #else
 /* Windows (Select "ASCII" or "NOCNV" or "SJIS") */
-#define OUTPUT_TEXT_CODE "SJIS"
+#define OUTPUT_TEXT_CODE "NOCNV"
 #endif
 #endif
 

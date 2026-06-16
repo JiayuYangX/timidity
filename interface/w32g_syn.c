@@ -155,7 +155,7 @@ int WrdWndFlag = 0;
 int SoundSpecWndFlag = 0;
 int WrdGraphicFlag;
 int TraceGraphicFlag;
-int w32g_auto_output_mode = 0;
+int w32g_auto_output_mode = 1;
 char *w32g_output_dir = NULL;
 
 extern void CmdLineToArgv(LPSTR lpCmdLine, int *argc, CHAR ***argv);

@@ -343,10 +343,10 @@ void PrefSettingApplyReally(void)
 
 	restart = (PlayerLanguage != sp_temp->PlayerLanguage);
 //	restart |= (strcmp(sp_temp->ConfigFile,ConfigFile) != 0);
-	if(sp_temp->PlayerLanguage == LANGUAGE_JAPANESE)
+	/*if(sp_temp->PlayerLanguage == LANGUAGE_JAPANESE)
 		strcpy(st_temp->output_text_code, "SJIS");
 	else
-		strcpy(st_temp->output_text_code, "ASCII");
+		strcpy(st_temp->output_text_code, "ASCII");*/
 	ApplySettingPlayer(sp_temp);
 	ApplySettingTiMidity(st_temp);
 	SaveSettingPlayer(sp_current);

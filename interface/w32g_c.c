@@ -76,7 +76,7 @@ static void AddStartupMessage(const char *message);
 static void ShowStartupMessage(void);
 
 char *w32g_output_dir = NULL;
-int w32g_auto_output_mode = 0;
+int w32g_auto_output_mode = 1;
 
 extern void MPanelMessageAdd(char *message, int msec, int mode);
 extern void MPanelMessageClearAll(void);
