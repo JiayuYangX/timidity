@@ -584,8 +584,22 @@ ApplySettingTiMidity(SETTING_TIMIDITY *st)
 	opt_pure_intonation = st->opt_pure_intonation;
 	opt_init_keysig = st->opt_init_keysig;
     if(output_text_code)
-	free(output_text_code);
-    output_text_code = safe_strdup(st->output_text_code);
+    {
+	if(strcmp(output_text_code, "ASCII") != 0 &&
+	   strcmp(output_text_code, "SJIS") != 0)
+	{
+	    /* keep */
+	}
+	else
+	{
+	    free(output_text_code);
+	    output_text_code = safe_strdup(st->output_text_code);
+	}
+    }
+    else
+    {
+	output_text_code = safe_strdup(st->output_text_code);
+    }
     free_instruments_afterwards = st->free_instruments_afterwards;
     set_wrd(st->opt_wrd);
 #if defined(__W32__) && defined(SMFCONV)
@@ -936,6 +950,9 @@ void w32g_initialize(void)
 #ifdef AU_GOGO
 		gogo_ConfigDialogInfoInit();
 #endif
+#ifdef AU_LAME
+		lame_ConfigDialogInfoInit();
+#endif
 #ifdef AU_VORBIS
 		vorbis_ConfigDialogInfoInit();
 #endif
@@ -944,12 +961,18 @@ void w32g_initialize(void)
 #ifdef AU_GOGO
 			gogo_ConfigDialogInfoSaveINI();
 #endif
+#ifdef AU_LAME
+			lame_ConfigDialogInfoSaveINI();
+#endif
 #ifdef AU_VORBIS
 			vorbis_ConfigDialogInfoSaveINI();
 #endif
 		} else {
 #ifdef AU_GOGO
 			gogo_ConfigDialogInfoLoadINI();
+#endif
+#ifdef AU_LAME
+			lame_ConfigDialogInfoLoadINI();
 #endif
 #ifdef AU_VORBIS
 			vorbis_ConfigDialogInfoLoadINI();

@@ -191,7 +191,11 @@ static int lame_output_open(const char *fname)
         if(lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE) {
             switch(lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE) {
             case 0: lame_set_mode(gf, STEREO); break;
-            case 2: lame_set_mode(gf, MONO); break;
+            case 2: lame_set_mode(gf, JOINT_STEREO); break; /* forced */
+            case 3: lame_set_mode(gf, DUAL_CHANNEL); break;
+            case 4: lame_set_mode(gf, MONO); break;
+            case 5: lame_set_mode(gf, MONO); break; /* Left Only -> mono */
+            case 6: /* Auto */ break;
             default: lame_set_mode(gf, JOINT_STEREO); break;
             }
         }
@@ -205,6 +209,45 @@ static int lame_output_open(const char *fname)
             if(lp > 0 && lp <= 20000)
                 lame_set_lowpassfreq(gf, lp);
         }
+    }
+
+    /* command-line options override everything */
+    if(lame_ConfigDialogInfo.optIDC_CHECK_COMMANDLINE_OPTS
+        && lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION[0] != '\0')
+    {
+        /* tokenize and apply (supports LAME-style args) */
+        char *p, *buf;
+        buf = (char *)safe_malloc(strlen((char *)lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION) + 1);
+        strcpy(buf, (char *)lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION);
+        p = strtok(buf, " \t");
+        while(p) {
+            if(strcmp(p, "-b") == 0) {
+                p = strtok(NULL, " \t"); if(!p) break;
+                lame_set_VBR(gf, vbr_off);
+                lame_set_brate(gf, atoi(p));
+            } else if(strcmp(p, "-V") == 0) {
+                p = strtok(NULL, " \t"); if(!p) break;
+                lame_set_VBR(gf, vbr_default);
+                lame_set_VBR_q(gf, atoi(p));
+            } else if(strcmp(p, "-q") == 0) {
+                p = strtok(NULL, " \t"); if(!p) break;
+                lame_set_quality(gf, atoi(p));
+            } else if(strcmp(p, "-m") == 0) {
+                p = strtok(NULL, " \t"); if(!p) break;
+                switch(p[0]) {
+                case 's': lame_set_mode(gf, STEREO); break;
+                case 'j': case 'a': lame_set_mode(gf, JOINT_STEREO); break;
+                case 'f': lame_set_mode(gf, JOINT_STEREO); break; /* forced MS */
+                case 'd': lame_set_mode(gf, DUAL_CHANNEL); break;
+                case 'm': case 'l': case 'r': lame_set_mode(gf, MONO); break;
+                }
+            } else if(strcmp(p, "--lowpass") == 0) {
+                p = strtok(NULL, " \t"); if(!p) break;
+                lame_set_lowpassfreq(gf, atoi(p));
+            }
+            p = strtok(NULL, " \t");
+        }
+        free(buf);
     }
 
     if(lame_init_params(gf) < 0)

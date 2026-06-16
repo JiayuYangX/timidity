@@ -63,7 +63,13 @@
 #ifdef AU_GOGO
 /* #include <musenc.h>		/* for gogo */
 #include <gogo/gogo.h>		/* for gogo */
+#ifdef AU_LAME
+int lameConfigDialog(void);
+int lame_ConfigDialogInfoSaveINI(void);
+int lame_ConfigDialogInfoLoadINI(void);
+#endif
 #include "gogo_a.h"
+#include "lame_a.h"
 #endif
 
 /* TiMidity Win32GUI preference / PropertySheet */
@@ -1510,6 +1516,11 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 #ifdef AU_GOGO
 				if(st_temp->opt_playmode[0]=='g'){
 					gogoConfigDialog();
+				}
+#endif
+#ifdef AU_LAME
+				if(st_temp->opt_playmode[0]=='L'){
+					lameConfigDialog();
 				}
 #endif
 #ifdef AU_PORTAUDIO_DLL
@@ -3181,6 +3192,216 @@ int gogo_ConfigDialogInfoLoadINI(void)
 }
 
 #endif	// AU_GOGO
+#ifdef AU_LAME
+
+static HWND hlameConfigDailog = NULL;
+static BOOL APIENTRY lameConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam);
+
+int lameConfigDialog(void)
+{
+    if(!IsWindow(hlameConfigDailog)) {
+        if (PlayerLanguage == LANGUAGE_JAPANESE)
+            hlameConfigDailog = CreateDialog(hInst,
+                MAKEINTRESOURCE(IDD_DIALOG_LAME),
+                (HWND)hPrefWnd, lameConfigDialogProc);
+        else
+            hlameConfigDailog = CreateDialog(hInst,
+                MAKEINTRESOURCE(IDD_DIALOG_LAME_EN),
+                (HWND)hPrefWnd, lameConfigDialogProc);
+    }
+    ShowWindow(hlameConfigDailog, SW_SHOW);
+    return 0;
+}
+
+static void lameConfigDialogEnableDisable(HWND hwnd)
+{
+    if(IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_COMMANDLINE_OPTS)) {
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_VBR_QUALITY), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_VBR), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_CBR_BITRATE), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_ALGO_QUALITY), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_ALGO_QUALITY), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_ENCODE_MODE), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_ENCODE_MODE), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_LAME_LOWPASS), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_LOWPASS), FALSE);
+        return;
+    }
+    if(IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_DEFAULT)) {
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_COMMANDLINE_OPTS), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_VBR_QUALITY), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_VBR), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_CBR_BITRATE), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_ALGO_QUALITY), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_ALGO_QUALITY), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_ENCODE_MODE), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_ENCODE_MODE), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_LAME_LOWPASS), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_LOWPASS), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_LAME_COMMANDLINE_OPTION), FALSE);
+        return;
+    }
+    EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_COMMANDLINE_OPTS), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_VBR_QUALITY), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_VBR), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_CBR_BITRATE), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_ALGO_QUALITY), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_ALGO_QUALITY), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_COMBO_LAME_ENCODE_MODE), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_ENCODE_MODE), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_LAME_LOWPASS), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_CHECK_LAME_LOWPASS), TRUE);
+    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_LAME_COMMANDLINE_OPTION), TRUE);
+}
+
+static void lameConfigDialogReset(HWND hwnd)
+{
+    int i;
+    char buf[4];
+    int cbr_table[] = {32,40,48,56,64,80,96,112,128,160,192,256,320};
+
+    SendDlgItemMessage(hwnd, IDC_CHECK_LAME_DEFAULT, BM_SETCHECK,
+        lame_ConfigDialogInfo.optIDC_CHECK_DEFAULT ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendDlgItemMessage(hwnd, IDC_CHECK_LAME_VBR, BM_SETCHECK,
+        lame_ConfigDialogInfo.optIDC_CHECK_VBR ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendDlgItemMessage(hwnd, IDC_CHECK_LAME_ALGO_QUALITY, BM_SETCHECK,
+        lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendDlgItemMessage(hwnd, IDC_CHECK_LAME_ENCODE_MODE, BM_SETCHECK,
+        lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendDlgItemMessage(hwnd, IDC_CHECK_LAME_LOWPASS, BM_SETCHECK,
+        lame_ConfigDialogInfo.optIDC_CHECK_LOWPASS ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendDlgItemMessage(hwnd, IDC_CHECK_LAME_COMMANDLINE_OPTS, BM_SETCHECK,
+        lame_ConfigDialogInfo.optIDC_CHECK_COMMANDLINE_OPTS ? BST_CHECKED : BST_UNCHECKED, 0);
+
+    for(i = 0; i <= 9; i++) {
+        sprintf(buf, "%d", i);
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_VBR_QUALITY, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)buf);
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ALGO_QUALITY, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)buf);
+    }
+    for(i = 0; i < 13; i++) {
+        sprintf(buf, "%d", cbr_table[i]);
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_CBR_BITRATE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)buf);
+    }
+    SendDlgItemMessage(hwnd, IDC_COMBO_LAME_VBR_QUALITY, CB_SETCURSEL, (WPARAM)lame_ConfigDialogInfo.optIDC_COMBO_VBR_QUALITY, 0);
+    SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ALGO_QUALITY, CB_SETCURSEL, (WPARAM)lame_ConfigDialogInfo.optIDC_COMBO_ALGO_QUALITY, 0);
+    SendDlgItemMessage(hwnd, IDC_COMBO_LAME_CBR_BITRATE, CB_SETCURSEL, (WPARAM)lame_ConfigDialogInfo.optIDC_COMBO_CBR_BITRATE, 0);
+
+    if(PlayerLanguage == LANGUAGE_JAPANESE) {
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"X");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Y");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Z");
+    } else {
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Stereo");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Joint Stereo");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Forced Joint");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Dual Channel");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Mono");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Left Only");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Auto");
+    }
+    SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_SETCURSEL, (WPARAM)lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE, 0);
+
+    SetDlgItemText(hwnd, IDC_EDIT_LAME_LOWPASS, (char *)lame_ConfigDialogInfo.optIDC_EDIT_LOWPASS);
+    SetDlgItemText(hwnd, IDC_EDIT_LAME_COMMANDLINE_OPTION, (char *)lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION);
+
+    lameConfigDialogEnableDisable(hwnd);
+}
+
+static void lameConfigDialogApply(HWND hwnd)
+{
+    lame_ConfigDialogInfo.optIDC_CHECK_DEFAULT = IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_DEFAULT) ? 1 : 0;
+    lame_ConfigDialogInfo.optIDC_CHECK_VBR = IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_VBR) ? 1 : 0;
+    lame_ConfigDialogInfo.optIDC_COMBO_VBR_QUALITY = (int)SendDlgItemMessage(hwnd, IDC_COMBO_LAME_VBR_QUALITY, CB_GETCURSEL, 0, 0);
+    lame_ConfigDialogInfo.optIDC_COMBO_CBR_BITRATE = (int)SendDlgItemMessage(hwnd, IDC_COMBO_LAME_CBR_BITRATE, CB_GETCURSEL, 0, 0);
+    lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY = IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_ALGO_QUALITY) ? 1 : 0;
+    lame_ConfigDialogInfo.optIDC_COMBO_ALGO_QUALITY = (int)SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ALGO_QUALITY, CB_GETCURSEL, 0, 0);
+    lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE = IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_ENCODE_MODE) ? 1 : 0;
+    lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = (int)SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_GETCURSEL, 0, 0);
+    lame_ConfigDialogInfo.optIDC_CHECK_LOWPASS = IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_LOWPASS) ? 1 : 0;
+    GetDlgItemText(hwnd, IDC_EDIT_LAME_LOWPASS, (char *)lame_ConfigDialogInfo.optIDC_EDIT_LOWPASS, 7);
+    lame_ConfigDialogInfo.optIDC_CHECK_COMMANDLINE_OPTS = IsDlgButtonChecked(hwnd, IDC_CHECK_LAME_COMMANDLINE_OPTS) ? 1 : 0;
+    GetDlgItemText(hwnd, IDC_EDIT_LAME_COMMANDLINE_OPTION, lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION, 1023);
+    lameConfigDialogReset(hwnd);
+}
+
+static BOOL APIENTRY lameConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
+{
+    switch(uMess)
+    {
+    case WM_CLOSE:
+        DestroyWindow(hwnd);
+        return TRUE;
+    case WM_INITDIALOG:
+        lameConfigDialogReset(hwnd);
+        break;
+    case WM_COMMAND:
+        switch(LOWORD(wParam))
+        {
+        case IDOK:
+            lameConfigDialogApply(hwnd);
+            lame_ConfigDialogInfoSaveINI();
+            DestroyWindow(hwnd);
+            return TRUE;
+        case IDCANCEL:
+            DestroyWindow(hwnd);
+            return TRUE;
+        case IDC_CHECK_LAME_DEFAULT:
+        case IDC_CHECK_LAME_COMMANDLINE_OPTS:
+            lameConfigDialogEnableDisable(hwnd);
+            return TRUE;
+        }
+        break;
+    }
+    return FALSE;
+}
+
+/* save/load */
+#define SEC_LAME "LAME"
+
+int lame_ConfigDialogInfoSaveINI(void)
+{
+    char *sec = SEC_LAME;
+    char *ini = timidity_output_inifile;
+    char b[32];
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_CHECK_DEFAULT); WritePrivateProfileString(sec, "optIDC_CHECK_DEFAULT", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_CHECK_VBR); WritePrivateProfileString(sec, "optIDC_CHECK_VBR", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_COMBO_VBR_QUALITY); WritePrivateProfileString(sec, "optIDC_COMBO_VBR_QUALITY", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_COMBO_CBR_BITRATE); WritePrivateProfileString(sec, "optIDC_COMBO_CBR_BITRATE", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE); WritePrivateProfileString(sec, "optIDC_CHECK_ENCODE_MODE", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE); WritePrivateProfileString(sec, "optIDC_COMBO_ENCODE_MODE", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY); WritePrivateProfileString(sec, "optIDC_CHECK_ALGO_QUALITY", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_COMBO_ALGO_QUALITY); WritePrivateProfileString(sec, "optIDC_COMBO_ALGO_QUALITY", b, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_CHECK_LOWPASS); WritePrivateProfileString(sec, "optIDC_CHECK_LOWPASS", b, ini);
+    WritePrivateProfileString(sec, "optIDC_EDIT_LOWPASS", (char *)lame_ConfigDialogInfo.optIDC_EDIT_LOWPASS, ini);
+    sprintf(b,"%d",lame_ConfigDialogInfo.optIDC_CHECK_COMMANDLINE_OPTS); WritePrivateProfileString(sec, "optIDC_CHECK_COMMANDLINE_OPTS", b, ini);
+    WritePrivateProfileString(sec, "optIDC_EDIT_COMMANDLINE_OPTION", lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION, ini);
+    WritePrivateProfileString(NULL,NULL,NULL,ini);
+    return 0;
+}
+
+int lame_ConfigDialogInfoLoadINI(void)
+{
+    char *sec = SEC_LAME;
+    char *ini = timidity_output_inifile;
+    int v;
+    char b[1024];
+    v = GetPrivateProfileInt(sec, "optIDC_CHECK_DEFAULT", 1, ini); lame_ConfigDialogInfo.optIDC_CHECK_DEFAULT = v;
+    v = GetPrivateProfileInt(sec, "optIDC_CHECK_VBR", 0, ini); lame_ConfigDialogInfo.optIDC_CHECK_VBR = v;
+    v = GetPrivateProfileInt(sec, "optIDC_COMBO_VBR_QUALITY", 4, ini); lame_ConfigDialogInfo.optIDC_COMBO_VBR_QUALITY = v;
+    v = GetPrivateProfileInt(sec, "optIDC_COMBO_CBR_BITRATE", 8, ini); lame_ConfigDialogInfo.optIDC_COMBO_CBR_BITRATE = v;
+    v = GetPrivateProfileInt(sec, "optIDC_CHECK_ENCODE_MODE", 1, ini); lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE = v;
+    v = GetPrivateProfileInt(sec, "optIDC_COMBO_ENCODE_MODE", 1, ini); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = v;
+    v = GetPrivateProfileInt(sec, "optIDC_CHECK_ALGO_QUALITY", 1, ini); lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY = v;
+    v = GetPrivateProfileInt(sec, "optIDC_COMBO_ALGO_QUALITY", 2, ini); lame_ConfigDialogInfo.optIDC_COMBO_ALGO_QUALITY = v;
+    v = GetPrivateProfileInt(sec, "optIDC_CHECK_LOWPASS", 0, ini); lame_ConfigDialogInfo.optIDC_CHECK_LOWPASS = v;
+    GetPrivateProfileString(sec, "optIDC_EDIT_LOWPASS", "0", b, 8, ini); b[7] = '\0'; strcpy((char *)lame_ConfigDialogInfo.optIDC_EDIT_LOWPASS, b);
+    v = GetPrivateProfileInt(sec, "optIDC_CHECK_COMMANDLINE_OPTS", 0, ini); lame_ConfigDialogInfo.optIDC_CHECK_COMMANDLINE_OPTS = v;
+    GetPrivateProfileString(sec, "optIDC_EDIT_COMMANDLINE_OPTION", "", b, 1024, ini); b[1023] = '\0'; strcpy(lame_ConfigDialogInfo.optIDC_EDIT_COMMANDLINE_OPTION, b);
+    lame_ConfigDialogInfo_initialized = 1;
+    return 0;
+}
+
+#endif /* AU_LAME */
 
 
 #ifdef AU_VORBIS
