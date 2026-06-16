@@ -3291,13 +3291,13 @@ static void lameConfigDialogReset(HWND hwnd)
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Y");
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Z");
     } else {
-        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Stereo");
-        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Joint Stereo");
-        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Forced Joint");
-        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Dual Channel");
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Mono");
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Left Only");
-        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Auto");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Right Only");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Stereo");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Joint Stereo");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Mid/Side Stereo");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Dual Channel");
     }
     SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_SETCURSEL, (WPARAM)lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE, 0);
 
@@ -3390,7 +3390,7 @@ int lame_ConfigDialogInfoLoadINI(void)
     v = GetPrivateProfileInt(sec, "optIDC_COMBO_VBR_QUALITY", 4, ini); lame_ConfigDialogInfo.optIDC_COMBO_VBR_QUALITY = v;
     v = GetPrivateProfileInt(sec, "optIDC_COMBO_CBR_BITRATE", 8, ini); lame_ConfigDialogInfo.optIDC_COMBO_CBR_BITRATE = v;
     v = GetPrivateProfileInt(sec, "optIDC_CHECK_ENCODE_MODE", 1, ini); lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE = v;
-    v = GetPrivateProfileInt(sec, "optIDC_COMBO_ENCODE_MODE", 1, ini); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = v;
+    v = GetPrivateProfileInt(sec, "optIDC_COMBO_ENCODE_MODE", 4, ini); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = v;
     v = GetPrivateProfileInt(sec, "optIDC_CHECK_ALGO_QUALITY", 1, ini); lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY = v;
     v = GetPrivateProfileInt(sec, "optIDC_COMBO_ALGO_QUALITY", 2, ini); lame_ConfigDialogInfo.optIDC_COMBO_ALGO_QUALITY = v;
     v = GetPrivateProfileInt(sec, "optIDC_CHECK_LOWPASS", 0, ini); lame_ConfigDialogInfo.optIDC_CHECK_LOWPASS = v;

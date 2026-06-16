@@ -81,7 +81,7 @@ int lame_ConfigDialogInfoInit(void)
     lame_ConfigDialogInfo.optIDC_COMBO_VBR_QUALITY = 4;
     lame_ConfigDialogInfo.optIDC_COMBO_CBR_BITRATE = 8; /* 128kbps index 8 */
     lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE = 1;
-    lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 1;
+    lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 4; /* Joint Stereo */
     lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY = 1;
     lame_ConfigDialogInfo.optIDC_COMBO_ALGO_QUALITY = 2;
     lame_ConfigDialogInfo.optIDC_CHECK_LOWPASS = 0;
@@ -190,13 +190,10 @@ static int lame_output_open(const char *fname)
         }
         if(lame_ConfigDialogInfo.optIDC_CHECK_ENCODE_MODE) {
             switch(lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE) {
-            case 0: lame_set_mode(gf, STEREO); break;
-            case 2: lame_set_mode(gf, JOINT_STEREO); break; /* forced */
-            case 3: lame_set_mode(gf, DUAL_CHANNEL); break;
-            case 4: lame_set_mode(gf, MONO); break;
-            case 5: lame_set_mode(gf, MONO); break; /* Left Only -> mono */
-            case 6: /* Auto */ break;
-            default: lame_set_mode(gf, JOINT_STEREO); break;
+            case 0: case 1: case 2: lame_set_mode(gf, MONO); break; /* Mono/Left/Right */
+            case 3: lame_set_mode(gf, STEREO); break;
+            case 4: case 5: lame_set_mode(gf, JOINT_STEREO); break; /* Joint/MidSide */
+            case 6: lame_set_mode(gf, DUAL_CHANNEL); break;
             }
         }
         if(lame_ConfigDialogInfo.optIDC_CHECK_ALGO_QUALITY) {
@@ -235,11 +232,13 @@ static int lame_output_open(const char *fname)
             } else if(strcmp(p, "-m") == 0) {
                 p = strtok(NULL, " \t"); if(!p) break;
                 switch(p[0]) {
-                case 's': lame_set_mode(gf, STEREO); break;
-                case 'j': case 'a': lame_set_mode(gf, JOINT_STEREO); break;
-                case 'f': lame_set_mode(gf, JOINT_STEREO); break; /* forced MS */
-                case 'd': lame_set_mode(gf, DUAL_CHANNEL); break;
-                case 'm': case 'l': case 'r': lame_set_mode(gf, MONO); break;
+                case 'm': lame_set_mode(gf, MONO); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 0; break;
+                case 'l': lame_set_mode(gf, MONO); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 1; break;
+                case 'r': lame_set_mode(gf, MONO); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 2; break;
+                case 's': lame_set_mode(gf, STEREO); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 3; break;
+                case 'j': case 'a': lame_set_mode(gf, JOINT_STEREO); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 4; break;
+                case 'f': lame_set_mode(gf, JOINT_STEREO); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 5; break;
+                case 'd': lame_set_mode(gf, DUAL_CHANNEL); lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE = 6; break;
                 }
             } else if(strcmp(p, "--lowpass") == 0) {
                 p = strtok(NULL, " \t"); if(!p) break;
@@ -341,6 +340,7 @@ static int open_output(void)
 static int output_data(char *buf, int32 nbytes)
 {
     int nch, nsamples, mp3bytes;
+    int enc_mode;
 
     if(dpm.fd < 0 || gf == NULL)
         return 0;
@@ -351,8 +351,21 @@ static int output_data(char *buf, int32 nbytes)
     if(nsamples <= 0)
         return 0;
 
-    mp3bytes = lame_encode_buffer_interleaved(
-        gf, (short int *)buf, nsamples, mp3buf, sizeof(mp3buf));
+    enc_mode = lame_ConfigDialogInfo.optIDC_COMBO_ENCODE_MODE;
+
+    /* Left Only / Right Only: zero out unwanted channel in-place */
+    if(enc_mode == 1) { /* Left Only */
+        short *in = (short *)buf;
+        int i;
+        for(i = 0; i < nsamples; i++)
+            in[i * 2 + 1] = 0;
+    } else if(enc_mode == 2) { /* Right Only */
+        short *in = (short *)buf;
+        int i;
+        for(i = 0; i < nsamples; i++)
+            in[i * 2] = 0;
+    }
+    mp3bytes = lame_encode_buffer_interleaved(gf, (short int *)buf, nsamples, mp3buf, sizeof(mp3buf));
 
     if(mp3bytes < 0) {
         ctl->cmsg(CMSG_ERROR, VERB_NORMAL,
