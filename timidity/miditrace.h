@@ -49,6 +49,7 @@ extern void push_midi_time_vp(int32 start, void (*f)(void *), void *vp);
 
 extern int32 trace_loop(void);
 extern void trace_flush(void);
+extern void trace_clear(void);
 extern void trace_offset(int offset);
 extern void trace_nodelay(int nodelay);
 extern void set_trace_loop_hook(void (* f)(void));

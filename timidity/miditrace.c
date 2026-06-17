@@ -303,6 +303,17 @@ void trace_flush(void)
     midi_trace.flush_flag = 0;
 }
 
+void trace_clear(void)
+{
+    while(midi_trace.head)
+    {
+	MidiTraceList *p = midi_trace.head;
+	midi_trace.head = midi_trace.head->next;
+	reuse_trace_node(p);
+    }
+    midi_trace.head = midi_trace.tail = midi_trace.free_list = NULL;
+}
+
 void set_trace_loop_hook(void (* f)(void))
 {
     midi_trace.trace_loop_hook = f;

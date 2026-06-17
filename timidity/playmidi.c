@@ -6450,6 +6450,7 @@ static int apply_controls(void)
 		midi_restart_time = current_trace_samples();
 		if(midi_restart_time == -1)
 		    midi_restart_time = current_sample;
+		trace_clear();
 		aq_flush(1);
 		play_pause_flag = 1;
 	    }
