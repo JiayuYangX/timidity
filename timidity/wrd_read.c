@@ -1605,6 +1605,8 @@ static uint8 cmdlookup(uint8 *cmd)
 	    return WRD_MAG;
 	return WRD_MIDI;
       case 'O':
+	if(cmd[1] == 'U' && cmd[2] == 'T')
+	    return 0;	/* @out: PC-98 I/O port, unsupported */
 	return WRD_OFFSET;
       case 'P':
 	if(cmd[3] == '\0')
