@@ -325,6 +325,11 @@ void InitWrdWnd(HWND hParentWnd)
 	ShowWindow(w32g_wrd_wnd.hwnd,SW_SHOW);
 	UpdateWindow(w32g_wrd_wnd.hwnd);
 	UpdateWindow(hWrdWnd);
+	{
+		RECT rc = {0, 0, w32g_wrd_wnd.width, w32g_wrd_wnd.height};
+		AdjustWindowRect(&rc, GetWindowLong(hWrdWnd, GWL_STYLE), FALSE);
+		SetWindowPos(hWrdWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+	}
 	WrdWndInfoApply();
 }
 
@@ -779,10 +784,131 @@ void wrd_graphic_gcircle ( int x, int y, int r, int p1, int sw, int p2 )
 {
 	if ( WrdWndInfo.GraphicStop ) return;
 	if ( !w32g_wrd_wnd.active ) return;
-	wrd_wnd_lock();
-	wrd_wnd_unlock();
-	// w32g_wrd_wnd.gmode
+	if ( r <= 0 ) return;
+	{
+		int xi, yi, d, i, py, px1, px2;
+		RECT rc;
+		char *bits;
+		int width = w32g_wrd_wnd.width;
+		int height = w32g_wrd_wnd.height;
+		int *min_x = NULL, *max_x = NULL, arr_size;
+		int y_start, y_end;
+
+		wrd_wnd_lock();
+		GdiFlush ();
+		bits = w32g_wrd_wnd.graphic_dib[w32g_wrd_wnd.index_active]->bits;
+
+		y_start = y - r;
+		if ( y_start < 0 ) y_start = 0;
+		y_end = y + r;
+		if ( y_end >= height ) y_end = height - 1;
+
+		if ( sw >= 2 && y_start <= y_end ) {
+			arr_size = y_end - y_start + 1;
+			min_x = (int *)malloc( arr_size * sizeof(int) * 2 );
+			if ( min_x ) {
+				max_x = min_x + arr_size;
+				for ( i = 0; i < arr_size; i++ ) {
+					min_x[i] = width;
+					max_x[i] = -1;
+				}
+			}
+		}
+
+		xi = 0; yi = r; d = 3 - 2 * r;
+
+		while ( xi <= yi ) {
+			if ( x + xi >= 0 && x + xi < width && y + yi >= 0 && y + yi < height ) {
+				bits[ (y + yi) * width + (x + xi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y + yi) >= y_start && (y + yi) <= y_end ) {
+					i = (y + yi) - y_start;
+					if ( x + xi < min_x[i] ) min_x[i] = x + xi;
+					if ( x + xi > max_x[i] ) max_x[i] = x + xi;
+				}
+			}
+			if ( x - xi >= 0 && x - xi < width && y + yi >= 0 && y + yi < height ) {
+				bits[ (y + yi) * width + (x - xi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y + yi) >= y_start && (y + yi) <= y_end ) {
+					i = (y + yi) - y_start;
+					if ( x - xi < min_x[i] ) min_x[i] = x - xi;
+					if ( x - xi > max_x[i] ) max_x[i] = x - xi;
+				}
+			}
+			if ( x + xi >= 0 && x + xi < width && y - yi >= 0 && y - yi < height ) {
+				bits[ (y - yi) * width + (x + xi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y - yi) >= y_start && (y - yi) <= y_end ) {
+					i = (y - yi) - y_start;
+					if ( x + xi < min_x[i] ) min_x[i] = x + xi;
+					if ( x + xi > max_x[i] ) max_x[i] = x + xi;
+				}
+			}
+			if ( x - xi >= 0 && x - xi < width && y - yi >= 0 && y - yi < height ) {
+				bits[ (y - yi) * width + (x - xi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y - yi) >= y_start && (y - yi) <= y_end ) {
+					i = (y - yi) - y_start;
+					if ( x - xi < min_x[i] ) min_x[i] = x - xi;
+					if ( x - xi > max_x[i] ) max_x[i] = x - xi;
+				}
+			}
+			if ( x + yi >= 0 && x + yi < width && y + xi >= 0 && y + xi < height ) {
+				bits[ (y + xi) * width + (x + yi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y + xi) >= y_start && (y + xi) <= y_end ) {
+					i = (y + xi) - y_start;
+					if ( x + yi < min_x[i] ) min_x[i] = x + yi;
+					if ( x + yi > max_x[i] ) max_x[i] = x + yi;
+				}
+			}
+			if ( x - yi >= 0 && x - yi < width && y + xi >= 0 && y + xi < height ) {
+				bits[ (y + xi) * width + (x - yi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y + xi) >= y_start && (y + xi) <= y_end ) {
+					i = (y + xi) - y_start;
+					if ( x - yi < min_x[i] ) min_x[i] = x - yi;
+					if ( x - yi > max_x[i] ) max_x[i] = x - yi;
+				}
+			}
+			if ( x + yi >= 0 && x + yi < width && y - xi >= 0 && y - xi < height ) {
+				bits[ (y - xi) * width + (x + yi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y - xi) >= y_start && (y - xi) <= y_end ) {
+					i = (y - xi) - y_start;
+					if ( x + yi < min_x[i] ) min_x[i] = x + yi;
+					if ( x + yi > max_x[i] ) max_x[i] = x + yi;
+				}
+			}
+			if ( x - yi >= 0 && x - yi < width && y - xi >= 0 && y - xi < height ) {
+				bits[ (y - xi) * width + (x - yi) ] = w32g_wrd_wnd.gmode & p1;
+				if ( min_x && (y - xi) >= y_start && (y - xi) <= y_end ) {
+					i = (y - xi) - y_start;
+					if ( x - yi < min_x[i] ) min_x[i] = x - yi;
+					if ( x - yi > max_x[i] ) max_x[i] = x - yi;
+				}
+			}
+
+			if ( d < 0 ) { d = d + 4 * xi + 6; }
+			else { d = d + 4 * ( xi - yi ) + 10; yi--; }
+			xi++;
+		}
+
+		if ( min_x ) {
+			for ( i = 0; i < arr_size; i++ ) {
+				if ( max_x[i] >= min_x[i] ) {
+					py = y_start + i;
+					for ( px1 = min_x[i] + 1; px1 < max_x[i]; px1++ )
+						bits[ py * width + px1 ] = w32g_wrd_wnd.gmode & p2;
+				}
+			}
+			free( min_x );
+		}
+
+		SetRect( &rc, x - r, y - r, x + r + 1, y + r + 1 );
+		wrd_wnd_unlock();
+		if ( w32g_wrd_wnd.index_active == w32g_wrd_wnd.index_display ) {
+			wrd_graphic_apply( &rc, w32g_wrd_wnd.index_display, TRUE );
+			wrd_graphic_update( &rc, TRUE );
+			InvalidateRect( w32g_wrd_wnd.hwnd, &rc, FALSE );
+		}
+	}
 }
+
 
 void wrd_graphic_pload ( char *path )
 {
