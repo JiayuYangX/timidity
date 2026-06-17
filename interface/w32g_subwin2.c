@@ -805,8 +805,8 @@ void wrd_graphic_pload ( char *path )
 
 static COLORREF g4r4b4_to_rgb ( int g4r4b4 )
 {
-	return RGB ( ((g4r4b4 & 0x00F0) >> 4 ) << 4, 
-		((g4r4b4 & 0x0F00) >> 8 ) << 4, 
+	return RGB ( ((g4r4b4 & 0x0F00) >> 8 ) << 4, 
+		((g4r4b4 & 0x00F0) >> 4 ) << 4, 
 		((g4r4b4 & 0x000F) >> 0 ) << 4 );
 }
 
