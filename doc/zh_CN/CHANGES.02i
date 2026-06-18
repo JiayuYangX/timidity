@@ -1,0 +1,264 @@
+---------------------------*-indented-text-*------------------------------
+
+    TiMidity -- 实验性 MIDI 到 WAVE 转换器
+    Copyright (C) 1995 Tuukka Toivonen <toivonen@clinet.fi>
+
+--------------------------------------------------------------------------
+
+	变更列表
+
+--------------------------------------------------------------------------
+0.2h 到 0.2i
+
+       将大多数源文件重命名为不超过 8.3 字符。抱歉。
+
+       Davide Moretti <dmoretti@iper.net> 的更改：纳入了使 TiMidity
+       能够在 Win32 平台（已在 Windows 95 和 Windows NT for Intel
+       上测试）上编译和运行的更改。请阅读 README.W32 获取更多信息。
+
+       Takashi Iwai <iwai@dragon.mm.t.u-tokyo.ac.jp> 的 Tcl/Tk 界面。
+       请阅读 README.tk。
+
+       Chi Ming HUNG <cmhung@insti.physics.sunysb.edu> 的 DEC 移植版。
+       请阅读 README.DEC。
+
+       若干错误修复：WAVE 头部、shell 替换、Linux 音频 O_RDWR、
+       dumb/ncurses 段错误（感谢所有为此发送修复的人 ;)
+
+       反转了 -F 选项的含义以消除一些烦人的爆音。
+
+       尝试将 Makefile.{SUN|SOLARIS|HPUX|DEC} 合并回 Makefile
+       以节约世界储备的酮洛芬。
+
+       将默认放大倍数降低到 70% 以获得更多的动态余量。
+
+0.2g 到 0.2h
+
+       警告！这是 Vincent Pagel 的发布版本... 更多正式版本
+       将在 Tuukka 从假期（实际上是考试）回来后发布。
+
+       我添加了一个 Motif 界面，具有文件选择、时间刻度游标
+       和其他蓝色组件。更多小工具即将到来。更改在 motif_* 文件中，
+       但 timidity.c 和 playmidi.c 中也有重大的结构变化，
+       因为现在由界面选择下一个要播放的文件名称。
+
+       添加了所谓的"漂亮"图标。
+
+       Motif 界面和程序之间的管道通信。
+
+       抗混叠滤波现在即使在循环音色中也能工作，在以
+       8Khz Ulaw 的 SUN 上播放时效果不错（选项 -a）。
+
+       添加了 Makefile.HPUX，因为 HP 上的 make 不理解 += 符号。
+
+       感谢 Gilles Dauphin，可以在 Solaris 上运行。
+
+0.2f 到 0.2g
+
+	编写了一个小的 WAVE 到音色转换器，并将 ".wav" 添加到
+	DECOMPRESSOR_LIST，允许使用 wave 文件作为简单的
+	乐器。这是 Davor Jadrijevic 之前的建议。新文件：wav2pat.c
+
+	移除了 ADJUST_PANNING_IMMEDIATELY 并添加了命令行
+	选项 "-F" 表示"关闭快速 Pan"。命令行选项的字母快用完了。
+
+	在 read_config_file 中添加了错误检查，当指定目录为
+	配置文件时发出警告。
+
+	修复了一个当重采样越过循环末尾时导致的段错误
+	（FINALINTERP，当 incr > 1<<FRACTION_BITS 时）。
+
+	修复了 seashore.pat 的 sweep 计算溢出。
+
+	如果乐器没有循环或包络，sample data 中 loop_end 到
+	data_length 的部分现在也会被播放。
+	某些音色（如 ProPats 3.0 集中的 Fretnoyz）在 loop_end
+	和 data_length 之间包含垃圾数据，因此新增了
+	配置文件选项 "strip=tail" 来丢弃它。
+
+	现在反向循环被"正确"处理了。
+
+	对 LOOKUP_HACK 进行了小幅清理。新增了 "final_volume_t" 类型
+	（根据混合计算所需的类型，可能是 uint8 或 int32），
+	以及一个 FINAL_VOLUME() 宏来将 int32 转换为所需的类型。
+
+	将 Makefile 中的 "THING := $(THING) junk" 赋值改为
+	"THING += junk"。希望后者能被更多 make 理解。
+	整个混乱将在几个版本内被 configure 脚本取代。
+
+	将 mix.c 中的 mix_data 拆分，使其更易读。
+
+0.2e 到 0.2f
+
+	将混合函数移出 resample.c。新文件：mix.c, mix.h。
+
+	为 Midia 音色集添加了 midia.cfg 配置文件。
+
+	添加了 Shawn McHorse 的循环优化和 LOOKUP_SINE config.h 选项。
+
+	添加了 Shawn 的 FAST_DECAY 命令行开关 -- config.h 选项
+	FAST_DECAY 现在设置此开关的默认值。
+
+	USE_LDEXP config.h 选项，适用于编译器将 ldexp() 转换为
+	直接的 fscale 且 fscale 在您的机器上比 fmul 更快的情况。
+
+	修复了 WAVE 头部错误 -- 长度少了 44 字节。感谢
+	Alexey Marinichev 注意到此问题。
+
+	添加了 PATCH_EXT_LIST 选项到 config.h，这样您在决定压缩
+	音色时无需更改配置文件中的每个文件名。
+
+	添加了外部实用程序 "bag"。新文件：bag.c，阅读文件获取信息。
+
+	在 output.h 中的 s32towhatever() 原型添加了 "extern"。
+
+0.2d 到 0.2e
+
+	Riccardo Facchetti 的基于 S-Lang 的用户界面：一种比
+	ncurses 更高效的替代方案。选项在 Makefile 中。
+
+	重新整理了 Makefile 中的选项，使各种组合更容易选择。
+
+	LOOKUP_HACK 配置文件选项：可怕的实验性补丁，用查表
+	替代乘法。第一次尝试使用 uLaw 作为采样格式惨败。
+	现在使用 8 位线性，对 Sound Blaster 用户来说没问题。
+	在 Pentium 上仅节省约 20% 的 CPU，但让我知道它对您的
+	设置有何影响。
+
+	更改了乐器加载，为所有设置了 Looped 标志的音色添加
+	Sustain 标志。
+
+	实现了 All Notes Off、All Sounds Off 和 Reset All Controllers
+	事件。《Day of the Tentacle》的片头音乐使用了第一个且现在
+	可以正常播放。另外两个可能有效，也可能使您的机器陷入
+	无限循环。
+
+	实现了 Bank Select 控制器。某种程度上模拟 SCC-1（我认为）：
+	使用 Control Change 00 xx，其中 xx 是您想要的音色库。
+	完全未经测试。某些 MIDI 文件将 Control Change 0 用于
+	其他目的，会产生大量警告。
+
+	在 config.h 中，将 shorten 的默认命令行改为适用于
+	版本 1.22。旧的是某个古老版本的，我终于换掉了。
+
+	Vincent Pagel 修复了重采样中的越界错误。
+
+	修复了双向循环和颤音的问题。
+
+0.2c 到 0.2d
+
+	音量计算重写，同时使用浮点和整数乘法。
+
+	震音和颤音处理。一些调音参数可在 config.h 中设置。
+
+	固定音高、无循环的乐器现在在加载时重采样。
+	注意：固定音高乐器不能弯音。
+
+	更廉价的消除咔嗒声方案。从 config.h 中移除了
+	I_WANT_THE_CLICKS_BACK 选项，添加了 MAX_DIE_TIME 定义。
+	将重采样和混合函数从 playmidi.{c,h} 移至新文件：
+	resample.c, resample.h。
+
+	打击乐器的音高现在可以独立于其分配的 Note 指定。
+	旋律乐器的音高也可以强制指定。配置文件中的额外选项
+	-- 参见手册。感谢 Davor Jadrijevic 的建议。
+
+	默认情况下，所有打击乐器的循环和包络现在都被移除。
+	这应该消除镲被截断的问题。
+
+	修改了 gravis.cfg 以覆盖某些会被错误猜测的乐器参数。
+
+	Vincent Pagel 的实验性抗混叠滤波器。这与循环的配合还
+	不太好，所以仅应用于无循环乐器。使用命令行选项 "-a"
+	启用此滤波器。新文件：filtering.c, filtering.h。
+
+	在 ncurses_ctl.c 中启用了非追踪模式下的快进和快退。
+
+	修复了包络问题 -- 包络处理仍不完美，但跳过
+	"Attack 2" 阶段是愚蠢的。
+
+	将 ADJUST_PANNING_IMMEDIATELY 添加到 config.h，默认开启
+	（与之前的行为不变）。
+
+	修复了调整无包络声音音量的小错误。
+
+	在 ncurses_ctl 中做了小改动，显示 100 为最大音量和表情。
+
+	在听过 GUS 后，将 FAST_DECAY 默认设为开启。
+
+	Riccardo Facchetti 对 config.h 的补丁：并非所有 Linux 系统
+	都是小端序的。
+
+	Riccardo 在 ncurses_ctl.c 中的替代键盘命令。
+	向移植到 MS Windows 迈出了第一步 -- 您可以按 F1 获取帮助！
+
+	DANGEROUS_RENICE config.h 选项。再次感谢 Riccardo。
+
+0.2b 到 0.2c
+
+	再次修复了弯音灵敏度。NRPN 控制现在被正确忽略。
+
+0.2a 到 0.2b
+
+	Francesco Zanichelli 的补丁，使 Sun 版本能够实际编译。
+
+	Victor Langeveld 的补丁，使 FreeBSD 版本能够实际编译。
+
+	修复了弯音灵敏度。再次感谢 Vincent Pagel 提供的信息。
+
+	Expression 现在默认设为 127，与 SCC-1 一致。某些内容
+	可能听起来有点响。
+
+0.1a 到 0.2a
+
+	内部更改，以便更容易移植到其他系统。
+	long long 类型不再使用，改用浮点数。
+	命令行选项已更改。
+
+	Vincent Pagel 的 HP-UX 音频服务器输出。
+
+	基于 Francesco Zanichelli 的 0.1a 版本移植的
+	Sun 音频设备输出。
+
+	基于 Rob Janssen 的 uLaw 补丁的 ZyXEL 调制解调器输出。
+
+	Makefile 和 linux_audio.c 中的 FreeBSD 选项。
+	检查 DSP 片段能力。（感谢 Victor Langeveld。）
+
+	ncurses 界面更改。追踪模式改为可选。
+
+	修复错误 -- 最后一个 MIDI 事件被吞噬，导致歌曲结尾
+	的声音卡住。（由 Anthony Cruz 报告。）
+
+	添加了弯音灵敏度，并使用了处理 "Data entry (MSB)" 事件
+	的补丁。感谢 Vincent Pagel 提供的信息...
+
+	运行时配置静音和打击乐通道。
+
+	音量计算修复。现在可以将音量调高到 800%。
+
+	更慢的包络。钢琴听起来更好，竖琴听起来更差。
+	贝多芬第五中的掌声应该听起来更好...
+	感谢 Tim Norman 对此的评论。CPU 使用率增加了
+	-- 参见 config.h 中的选项 FAST_DECAY。
+
+	Pan 和音量控制不再影响已关闭的 note。
+
+	默认开启消除咔嗒声。CPU 使用率增加了 -- 参见 config.h
+	中的选项 I_WANT_THE_CLICKS_BACK。
+
+	将采样音量调整设为编译时选项 -- 参见 config.h 中的
+	选项 ADJUST_SAMPLE_VOLUMES。
+
+	MThd 中 divisions 字段的 SMPTE 时间。未经测试。
+
+	在 popen() 之前对文件名中的某些特殊字符进行转义。
+
+	接受旧的音色文件和声称包含 0 个乐器和/或层的文件
+	的补丁。
+
+	读取 Gravis .cfg 文件时的行为改变 -- 报告语法错误
+	而不是段错误。
+
+0.1a
+	第一个版本。在 Linux 下播放 MIDI 文件。

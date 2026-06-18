@@ -1,0 +1,384 @@
+---------------------------------------------------------------------
+	如何使用 TiMidity++ 的 Xaw 接口
+
+TiMidity++ 的 Xaw 接口仅使用 X Window System 的标准工具包
+Athena Widget Sets 和 Xt 库来提供 GUI。
+
+
+* 2.14.0 的新增功能
+
+- 支持加载和保存播放列表。
+- 大幅改进的文件对话框（独立的文件/目录窗格、过滤等）。
+- 鼠标滚轮支持。
+- 通过 XDND 协议支持拖放。
+- 为按钮实现了工具提示。
+- 可在追踪模式下静音单个通道。
+- 修复时间滑块。现在也可用于更改 MIDI 文件的播放位置。
+- 支持显示超过 16 个通道。
+- 修复了大量错误和其他小改进。
+
+* 安装
+
+通过在 configure 脚本中传递 "--enable-interface=xaw" 或
+"--enable-dynamic=xaw" 参数来编译 xaw 接口。
+TiMidity++ 的常规安装将包含 xaw 接口。
+
+编译前有几种配置 xaw 接口的方式：
+
+A) 可以向 GNU configure 传递一些参数来修改 xaw 接口。即：
+
+--with-xawlib=<逗号分隔的工具包名称列表>
+--with-xaw-resource-prefix=<资源目录前缀>
+--enable-xdnd, --disable-xdnd
+--enable-offix, --disable-offix
+
+--with-xawlib:
+
+TiMidity++ 支持多种 Xaw 工具包。默认按以下顺序搜索：
+xaw3d, xaw。如果希望强制使用特定工具包编译，
+请向 configure 提供 --with-xawlib=<名称> 参数，例如：
+
+  ./configure --enable-interface=xaw --with-xawlib=xaw
+
+甚至：
+
+  ./configure --enable-interface=xaw --with-xawlib=neXtaw,xaw3d,XawPlus,xaw
+
+  来强制指定不同的搜索顺序。
+
+--enable-xdnd, --enable-offix, --disable-xdnd, --disable-offix
+
+启用/禁用 XDND/Offix 拖放协议的支持。默认两者均禁用。
+
+--with-xaw-resource-prefix=<前缀>
+
+可选参数。如果指定，timidity 将尝试将资源文件安装到
+<前缀>/app-defaults/ 和 <前缀>/ja_JP.EUCJP/app-defaults。
+
+B) 也可以编辑 xaw.h 和 x_trace.h 文件来更改一些选项：
+
+如果想如版本 1.1 那样使用 Label Widget 来显示歌词，
+请删除 /* */ 使以下行可见：
+
+  #define WIDGET_IS_LABEL_WIDGET
+
+虽然 $(HOME)/.xtimidity 被视为初始的个人配置文件，
+但可以通过更改以下行来重命名：
+
+  #define INITIAL_CONFIG ".xtimidity"
+
+如果在追踪模式下希望在一屏中看到多于/少于 16 个通道，请更改
+x_trace.h 中的：
+
+  #define D_VISIBLE_CHANNELS 16
+
+（还有一种在编译后更改的方法：更改 traceHeight 资源将改变
+一屏中可见通道的数量。）
+
+!!! 注意 !!!
+如果编辑了这些文件，请在构建前执行 make clean。
+
+* 使用方法
+
+Xaw 界面显示以下文件菜单：
+
+  LOAD
+    加载新的 MIDI 文件。
+
+  SAVE
+    保存当前显示的 MIDI 文件。
+
+  LOAD PLAYLIST
+    加载播放列表。
+
+  SAVE PLAYLIST
+    保存播放列表。
+
+  SAVE CONFIG
+    将当前设置和模式（如随机播放、
+    重复、自动开始和自动退出标志）保存到 ~/.xtimidity。
+
+  HIDE/UNHIDE MESSAGES
+    切换显示消息和歌词的文本组件。
+
+  HIDE/UNHIDE TRACE
+    切换追踪画布。
+
+  SHUFFLE
+    切换随机播放标志。
+
+  REPEAT
+    切换重复标志。
+
+  AUTO-START
+    切换自动开始标志。
+
+  AUTO-EXIT
+    切换所有乐曲播放完毕后是否自动退出的标志。
+
+  FILE LIST
+    弹出播放文件列表窗口。
+
+  EXTEND MODES
+    弹出扩展模式控制窗口。
+
+  ABOUT
+    关于 TiMidity++ Xaw 接口的信息。
+
+  QUIT
+    退出 timidity。
+
+从 ver.1.3 起，文件加载和文件列表菜单支持添加和/或删除播放列表。
+您可以通过文件浏览器追加或删除任意文件。
+要播放文件，可以通过标题栏的下拉菜单或文件列表窗口来选取。
+各窗口的快捷键操作如下：
+
+<主窗口>
+	[Enter] 或 [r]	: 开始播放
+	[Space]		: 暂停 / 重新开始
+	[a]		: 显示关于窗口
+	[l]		: 显示文件列表
+	[s]		: 停止播放
+	[q]		: 退出 TiMidity++
+	[p] 或 [Left]	: 上一首
+	[n] 或 [Right]	: 下一首
+	[v] 或 [Down]	: 音量降低 (10%)
+	[V] 或 [Up]	: 音量升高 (10%)
+	[<]		: 减慢速度
+	[>]		: 加快速度
+	[-]		: 降低音高
+	[+]		: 升高音高
+	[Alt + F], [z]	: 显示主菜单
+	[Alt + N]	: 加载文件
+	[Ctrl + V]	: 保存文件
+	[Alt + L]	: 加载播放列表
+	[Alt + P]	: 保存播放列表
+	[Alt + S]	: 保存设置到 ~/.xtimidity
+	[Ctrl + M]	: 显示/隐藏消息
+	[Ctrl + T]	: 显示/隐藏追踪画布
+	[Ctrl + S]	: 切换随机播放状态
+	[Ctrl + R]	: 切换重复状态
+	[Ctrl + D]	: 切换工具提示
+	[Ctrl + O]	: 显示选项窗口
+	[g]		: 开启/关闭频谱图（如果 timidity 使用
+			  --enable-spectrogram 编译）
+
+<文件列表窗口>
+	[p] 或 [Up]	: 将光标移到上一个文件
+	[n] 或 [Down]	: 将光标移到下一个文件
+	[Right]		: 将光标向后移动 5 行
+	[Left]		: 将光标向前移动 5 行
+	[v]		: 音量降低 (10%)
+	[V]		: 音量升高 (10%)
+	[Enter] 或 [R]	: 开始播放所选文件
+	[d]		: 删除所选文件条目
+	[A]		: 删除所有条目
+	[Space]		: 暂停 / 重新开始
+	[s]		: 停止播放
+	[q]		: 退出 TiMidity++
+	[c]		: 关闭窗口
+	[ESC]		: 关闭窗口
+
+<扩展模式窗口>
+	[c]		: 关闭窗口
+	[ESC]		: 关闭窗口
+	[q]		: 退出 TiMidity++
+
+<文件加载窗口中的对话框>
+	[Tab]			: 文件或目录补全
+	[Enter]			: 选择目录条目
+	[Alt-Enter]		: 选择所有可见文件
+	[Escape] 或 [CTRL]+[g]	: 取消并关闭窗口
+	[Ctrl-a]		: 将光标移到行首
+	[Ctrl-e]		: 将光标移到行尾
+	[Ctrl-k]		: 删除光标后的字符串
+	[Ctrl-`]		: 开启过滤
+在对话框中输入包含通配符的字符串将开启过滤，
+仅显示匹配的文件（不区分大小写）。例如：
+*.mid 显示所有以 '.mid'、'.MID' 等结尾的文件名。
+[AB]* 显示所有以 'a'、'A'、'b' 或 'B' 开头的文件名。
+[!c]* 显示所有不以 'c' 开头的文件名。
+
+* 追踪模式
+执行 TiMidity 时，在命令行中指定接口选项标志 't'，
+如 'timidity -iat'（请参阅 timidity 手册页）。
+您可以在追踪画布上看到各通道的音量、表情、Pan、弯音、
+混响、合唱和发音数等有趣的变化。
+在追踪画面上单击鼠标左键可在"弯音和乐器"与
+"音色库、混响和合唱"之间切换显示。
+单击鼠标右键可静音/取消静音通道。
+单击鼠标中键可独奏通道。
+滚轮或 'j' 键可滚动追踪以查看超过通常 16 个通道的更多通道。
+如果追踪窗口对您的分辨率来说太高，只需将 traceHeight 资源
+设置为较低的值。
+
+* 资源
+
+应用程序类名为 'TiMidity'，因此可以按如下例在
+主目录的 .Xdefaults 或 .Xresources 中指定资源：
+
+  TiMidity*textbackground: LemonChiffon    
+  TiMidity*background: PeachPuff1
+  TiMidity*menubutton: goldenrod
+  TiMidity*buttonbackground: gold
+  TiMidity*labelfont: -adobe-helvetica-bold-o-*-*-14-*-75-75-*-*-*-*
+
+TiMidity 支持的应用程序特定资源如下：
+
+名称                类                          默认值
+----------------------------------------------------------
+arrangeTitle        ArrangeTitle            False
+  在主窗口的标题栏上显示 MIDI 标题。
+background          Background              gray65
+  主窗口的背景色。
+menubutton          MenuButtonBackground    #CCFF33
+  菜单按钮颜色。
+textbackground      TextBackground          gray85
+  文本组件的背景色。
+toggleforeground    ToggleForeground        MediumBlue
+  切换按钮的前景色。
+buttonforeground    ButtonForeground        blue
+  命令按钮和其他弹出窗口的前景色。
+buttonbackground    ButtonBackground        gray76
+  命令按钮和其他弹出窗口的背景色。
+text2background     Text2Background         gray80
+  文件对话框中标签的背景色。
+
+labelfont           FontSet      -adobe-helvetica-bold-r-*-*-14-*-75-75-*-*-*-*
+  标签组件字体。
+volumefont          FontSet      -adobe-helvetica-bold-r-*-*-12-*-75-75-*-*-*-*
+  音量标签字体。
+textfontset         FontSet      -*-*-medium-r-normal--14-*-*-*-*-*-*-*
+  消息框等的文本字体。
+ttitlefont          FontSet      -*-fixed-medium-r-normal--14-*-*-*-*-*-*-*
+  追踪窗口底部的 MIDI 标题字体。
+textHeight          TextHeight   120
+  歌词组件的高度（若定义了 WIDGET_IS_LABEL_WIDGET 则为 30）。
+menuWidth           MenuWidth    200
+  弹出菜单的宽度。
+moreString          String       More...
+  弹出菜单上子菜单的标签。
+fileLabel           String       file...
+  主菜单标题。
+noPlaying           String       [ No Playing File ]
+  无文件播放时追加到标题的字符串。
+popup_confirm_title String       Dialog
+  确认框的标题。
+
+以下资源仅在追踪模式下使用：
+
+名称                类                          默认值
+----------------------------------------------------------
+tracefont           FontSet      -*-*-medium-r-normal--14-*-*-*-*-*-*-*
+  追踪窗口字体。
+traceWidth          TraceWidth     627
+  追踪组件的宽度。
+traceHeight         TraceHeight    332
+  追踪组件的高度。
+tracebackground     TraceBackground         gray90
+  追踪画布的背景色。
+velforeground       VelForeground           orange
+  "vel"（力度）列中"普通"通道的条形颜色。
+veldrumforeground   VelDrumForeground       red
+  通道为鼓通道时 "vel" 列的条形颜色。
+volforeground       VolForeground           LightPink
+  "vol" 列的条形颜色。
+expforeground       ExpForeground           aquamarine
+  "expr" 列的条形颜色。
+panforeground       PanForeground           blue
+  pan 列中三角形的颜色。
+rimcolor            RimColor                gray20
+  通道条边框的颜色。
+boxcolor            BoxColor                gray76
+  通道条的颜色。
+captioncolor        CaptionColor            DarkSlateGrey
+  追踪组件中文本的颜色。
+whitekeycolor       WhiteKeyColor           white
+  键盘中白键的颜色。
+blackkeycolor       BlackKeyColor           black
+  键盘中黑键的颜色。
+playingkeycolor     PlayingKeyColor         maroon1
+  键盘中正在演奏键的颜色。
+sustainedkeycolor   SustainedKeyColor       red4
+  键盘中延音键的颜色。
+reverbcolor         ReverbColor             PaleGoldenrod
+  混响列中条形的颜色。
+choruscolor         ChorusColor             yellow
+  合唱列中条形的颜色。
+untitled            String       <No title>
+  无文件播放时在底部使用的字符串。
+
+注意所有字体资源均为 FontSet 类型。
+另外 traceWidth 设置目前不起作用。
+
+!!! 注意 !!!
+TiMidity++ 1.3.6 及更高版本附带了部分资源文件。
+如果您创建了英语或日语以外的其他语言环境的资源文件，
+请将其发送到 timidity 邮件列表
+<timidity-talk@lists.sourceforge.net>。
+构建 TiMidity++ 后，将 TiMidity.ad 放入资源目录，例如：
+ $(X11R6)/lib/X11/app-defaults
+并将日语 EUC 资源文件 TiMidity-uj.ad 放入：
+ $(X11R6)/lib/X11/$(LANG)/app-defaults
+例如，如果系统的日语 EUC 语言环境是 FreeBSD 的 ja_JP.EUC：
+ # cp TiMidity.ad /usr/X11R6/lib/X11/app-defaults/TiMidity 
+ # cp TiMidity-uj.ad /usr/X11R6/lib/X11/app-defaults/ja_JP.EUC/TiMidity
+
+* 设置文件
+ ~/.xtimidity 包含 xaw 接口使用的设置。
+ 选择 "SAVE CONFIG" 时，timidity 会将当前配置保存到该文件。
+
+ 文件格式简单。每行以 "set" 开头，然后是选项名称，
+ 后接选项的值。
+ 选项如下：
+
+名称                  允许值              默认值
+----------------------------------------------------------
+RepeatPlay           0/1                    0
+  在播放完最后一个文件后重复播放播放列表。
+ShufflePlay          0/1                    0
+  以随机顺序播放播放列表。
+ExtOptions           0-63                   取决于编译选项。
+  启用各种音序器扩展模式（参见选项窗口的列表）。
+ChorusOption         0/1                    取决于编译选项。
+  启用合唱。
+CurVol               0-800                  70
+  初始音量。
+Showdotfiles         0/1                    0
+  在文件对话框中显示以 '.' 开头的文件和目录。
+DefaultDir           有效的目录名。        用户的主目录。
+  文件对话框初始显示的目录。
+Disp:trace           0/1                    0
+  始终以追踪模式启动。
+Disp:text            0/1                    1
+  启动时显示歌词/消息组件。
+Tooltips             0/1                    1 [1]
+  显示按钮的工具提示。
+Autostart            0/1                    1
+  界面启动后立即开始播放。
+AutoExit             0/1                    0
+  播放停止后退出。
+ConfirmExit          0/1                    0
+  用户尝试关闭时确认退出。
+SaveList             0/1                    1
+  保存配置时将播放列表保存到 ~/.xtimidity。如果 Autostart 为 1，
+  下次启动 timidity 时将立即开始播放。
+SaveConfig           0/1                    1
+  退出时保存配置。
+File                 有效的文件名。        无
+  此文件将在下次启动时加载。如果 SaveList 为 1，
+  先前的播放列表将使用此选项保存。
+  此选项在 ~/.xtimidity 中可出现多次。
+
+[1] 当 timidity 使用 xaw3d 编译时，工具提示默认关闭。
+    使用 neXtaw 工具包时无法启用工具提示。
+
+* 报告
+
+关于 Xaw 接口的问题、功能请求、错误报告或意见，
+请发送到 TiMidity 邮件列表
+<timidity-talk@lists.sourceforge.net>。
+
+  Regards,
+
+	Yoshishige Arai	<ryo2@on.rim.or.jp>

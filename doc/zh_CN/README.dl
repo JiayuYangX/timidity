@@ -1,0 +1,35 @@
+====================== 动态接口 ======================
+
+ 通过 `-i' 选项指定的接口模块，可以使用动态链接模块来加载。
+ 将共享库
+
+ if_<NAME>.so
+
+放置在 SHARED_LIB_PATH 目录中。其中 <NAME> 是接口的短名称标识。
+ TiMidity++ 要求该共享库提供以下函数：
+（其中 <ID> 是 `-i' 选项中指定的接口 ID。）
+
+ControlMode* interface_<ID>_loader(void)
+{
+	ControlMode* ctl;
+	/* ... */
+
+	return ctl;
+}
+
+ 如果使用 -i<ID> 指定了动态接口，TiMidity++
+会在 SHARED_LIB_PATH（Makefile 中定义的宏）加载 if_<NAME>.so，
+并调用共享库中的 interface_<ID>_loader() 函数。
+
+ 如果在 SHARED_LIB_PATH 中存在文件
+
+ if_<NAME>.txt
+
+其第一行为关于该接口的简要说明，TiMidity++ 会在指定 `-h'
+选项时显示该信息。
+
+警告:
+
+ 请不要在 Makefile 中将欲构建为动态链接的接口设为启用。
+TiMidity++ 查找接口时，会先在静态链接到 TiMidity++
+的接口中搜索，然后才搜索动态链接接口。

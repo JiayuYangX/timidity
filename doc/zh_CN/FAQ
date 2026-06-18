@@ -1,0 +1,194 @@
+---------------------------*-indented-text-*------------------------------
+
+    TiMidity -- 实验性 MIDI 到 WAVE 转换器
+    Copyright (C) 1995 Tuukka Toivonen <toivonen@clinet.fi>
+
+--------------------------------------------------------------------------
+
+   常见问题与解答:
+
+--------------------------------------------------------------------------
+问: 这是什么?
+
+答: 这个嘛... TiMidity 是一个纯软件合成器、MIDI 渲染器、
+   MIDI 到 WAVE 转换器、UNIX 机器上的实时 MIDI 播放器，
+   甚至（据说）可以作为 Netscape 辅助应用程序。
+   它读取 MIDI 文件并输出 WAVE 或原始 PCM 数据，或在您的
+   数字音频设备上播放。它听起来比 FM 合成更真实，
+   但您需要大约 100MHz 的处理器才能在后台一边工作一边听
+   32kHz 立体声音乐。11kHz 单声道可以在低端 486 上播放，
+   对某些人来说，这仍然比 FM 声音更好。
+
+--------------------------------------------------------------------------
+问: 我没有 GUS，可以用 TiMidity 吗?
+
+答: 可以。这正是它的意义所在。您不需要 Gravis Ultrasound 来使用
+   TiMidity，只需要兼容 GUS 的音色文件，这些文件可以在互联网上
+   免费获取。详见下面的链接。
+
+--------------------------------------------------------------------------
+问: 我有 GUS，可以用 TiMidity 吗?
+
+答: DOS 版本不支持 GUS，在其他操作系统下 TiMidity 也不会利用
+   该声卡的内部合成器。所以这有点违背初衷。但您仍然可以使用它。
+
+--------------------------------------------------------------------------
+问: 它不工作。什么都不播放，还打印出一些错误信息。
+
+答: 阅读 INSTALL 文件，或找人替您读。然后浏览其余文档，
+   其实没有多少。一旦在分发目录中让它工作了，以下是进一步的步骤：
+
+   获取一套完整的 General MIDI 音色。创建一个目录，比如
+   C:\TIMIDITY 或 /usr/local/lib/timidity，将所有 *.pat 文件放入其中。
+   同时将 TiMidity 分发版附带的所有 *.cfg 文件也放入其中。
+   然后编辑 timidity.cfg：
+
+   取消注释并编辑 dir 语句为 "dir c:\timidity" 或类似路径，
+   并取消 "source gravis.cfg" 语句的注释。
+
+   现在运行程序："timidity -L c:\timidity <midi 文件>"
+
+   这样就差不多了。注意 TiMidity 总是先检查当前目录，
+   所以如果您在不同位置有配置文件的多个副本，可能会混淆。
+   "timidity -idvv <midi文件>" 会列出所有打开音色文件的尝试，
+   可能对排查有帮助。
+
+   如果仍然不工作，请发邮件给我和/或特定端口的作者（如果使用非
+   Unix 版本）。
+
+--------------------------------------------------------------------------
+问: 我尝试播放从网上下载的 MIDI 文件，但只收到了十几个警告
+   说 "No instrument mapped to tone bank 0, program xx -
+   this instrument will not be heard"。出了什么问题?
+
+答: General MIDI 标准规定了 128 种旋律乐器和大约 60 种打击乐声音。
+   如果您想播放任意的 General MIDI 文件，需要获取更多的音色文件。
+
+   有一个为 SGI 编写的程序叫 Midia，也能播放 MIDI 文件，比 TiMidity
+   有更多花哨功能。它也使用兼容 GUS 的音色——您可以从
+   ftp://archive.cs.umbc.edu/pub/midia 获取 8 MB 音色集，
+   获得相当不错的 GM 兼容性。
+
+   在 Ultrasound FTP 站点上也有很多优秀的音色文件。我推荐
+   Dustin McCartney 在 "[.../]sound/patches/files" 目录中的
+   gsdrum*.zip 和 wow*.zip 合集。庞大的 ProPats 系列 (pp3-*.zip)
+   也包含很好的音色。这些站点上也能找到 General MIDI 文件。
+
+   以下站点列表来自 GUS FAQ：
+
+>                        FTP 站点                     存档目录
+>                        -------                     ---------
+> 北美主站点:            archive.orst.edu              pub/packages/gravis
+>                        wuarchive.wustl.edu           systems/ibmpc/ultrasound
+> 亚洲主站点:            nctuccca.edu.tw               PC/ultrasound
+> 欧洲主站点:            src.doc.ic.ac.uk              packages/ultrasound
+> 澳大利亚主站点:        ftp.mpx.com.au                /ultrasound/general
+>                                                      /ultrasound/submit
+> 南非站点:              ftp.sun.ac.za                 /pub/packages/ultrasound
+> 投稿站点:              archive.epas.utoronto.ca      pub/pc/ultrasound/submit
+> 新验证文件:            archive.epas.utoronto.ca      pub/pc/ultrasound
+>
+> 镜像站点:              garbo.uwasa.fi                mirror/ultrasound
+>                        ftp.st.nepean.uws.edu.au      pc/ultrasound
+>                        ftp.luth.se                   pub/msdos/ultrasound
+
+--------------------------------------------------------------------------
+问: 这个 MIDI 文件以前在版本 0.0001z 中能正常工作，但现在突然
+   听起来奇怪了。发生了什么?
+
+答: TiMidity 解释 MIDI 或音色参数的方式发生了变化。
+   如果您认为变得更糟了，请尝试找出哪个音色/MIDI 文件引起了问题、
+   具体有什么不同，如果可能的话，找出原因 :)
+   另外，尝试使用另一个 MIDI 播放器或设备来听正确播放的效果。
+   然后发邮件给我。
+
+   如果您刚从 0.2c 或更低版本升级，请注意需要更新配置文件。
+   参见 "gravis.cfg" 作为示例。
+
+--------------------------------------------------------------------------
+问: 有些文件有可怕的咔嗒声和爆音。
+
+答: 找出哪个音色导致了咔嗒声（尝试 "timidity
+   -P<音色> <midi/test-decay|midi/test-panning>"）。
+   在配置文件中其名称后添加 "strip=tail"。如果仍不能修复，
+   请将该音色发邮件给我。
+
+--------------------------------------------------------------------------
+问: 我正在后台播放《即兴幻想曲》。当我运行 Netscape 时，
+   声音变得断断续续，加载需要十分钟。我该怎么办?
+
+答: 以下是一些可以尝试的方法：
+
+   - 使用较低的采样率。
+
+   - 使用单声道输出。这可以提高 10-30% 的性能。
+     （使用 8 位代替 16 位输出没有区别。）
+
+   - 使用较少的最大同时发音数。
+
+   - 确保在 config.h 中启用了 FAST_DECAY 和 PRECALC_LOOPS 编译。
+
+   - 如果您没有计算正弦的硬件，在 config.h 中启用
+     LOOKUP_SINE 重新编译。
+
+   - 在 config.h 中启用 LOOKUP_HACK 重新编译。
+
+   - 在 config.h 中禁用 LINEAR_INTERPOLATION 重新编译。
+
+   - 在 config.h 中启用 DANGEROUS_RENICE 重新编译，并
+     使 TiMidity setuid root。这仅在您频繁在其他进程运行时
+     播放音乐时有帮助。
+
+   - 使用 Intel 优化的 gcc 重新编译，可获得 5-15% 的性能提升。
+
+   - 使用 "bag"。
+
+--------------------------------------------------------------------------
+问: 我让 TiMidity setuid root 了。现在启动 Netscape 需要
+   *二十分钟*!
+
+答: 哇。
+
+--------------------------------------------------------------------------
+问: 我无法访问 WWW 页面。URL 没问题吧?
+
+答: URL 没问题，但 clinet.fi 是通过两只猴子敲击电传打字机上的
+   5-bit PPP 连接到互联网的。如果您连接遇到问题，
+   请稍后再试，万一它们往机器里塞了香蕉或开始吃纸带什么的。
+   源代码也可在 ftp://sunsite.unc.edu/Linux/apps/sound/players/ 获取，
+   尽管并非每个版本都会到达那里。您也可以尝试镜像站点
+   http://www.loria.fr/~pagel/
+
+   欢迎其他国外镜像站点——如果您能在服务器上腾出几兆 HTTP 空间，
+   请发邮件给我！
+
+--------------------------------------------------------------------------
+问: 有没有什么 TiMidity 竞赛，我可以赢得大奖如前往芬兰 tersundom
+   与作者共进晚餐并与北极熊合影的旅行，以及免费一年的
+   TiMidity Inside Edition 测试版订阅，还有...
+
+答: 当然有。宣布 TIMIDITY 音色寻找与毁灭宝藏大赛！
+   您可能已经是赢家！您所要做的就是找到您能找到的最奇怪的
+   GUS 音色，将其带到最近的 Unix 提示符，并念出咒语：
+
+	"cat weird.pat |
+	gzip -9 |
+	uuencode weird.pat.gz |
+	pbmtext |
+	pnmscale 3 |
+	pgmtopbm |
+	pbmtoascii -2x4 |
+	od -vb |
+	morse |
+	sed -e 's/,/....../' |
+	say -a -o -
+	uuencode contest_entry.au |
+	mail -s 'Contest Entry' John.R.Format-Designer@gravis.whatever"
+
+   [免责声明：参赛者必须不满 18 个月才能参加。规则不可索取。
+   您不会获得奖品。请勿在家尝试。中奖者不会在 1996 年 7 月 10 日
+   的《纽约时报》上公布。中奖者不会私下通知。没有赢家，只有幸存者。
+   在常识未禁止的地方无效。最高可判处三年监禁和/或 50 万美元罚款。
+   不要汇款。]
+
+--------------------------------------------------------------------------

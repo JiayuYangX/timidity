@@ -1,0 +1,698 @@
+如何在 Windows 上编译 TiMidity++
+
+本文档包含以下编译方法的说明：
+
+1. 使用 Mingw 在 Msys 环境下编译
+2. 使用 Turbo C++ 在 Msys 环境下编译
+3. 使用 OpenWatcom C++ 在 Msys 环境下编译
+4. 使用 Visual C++ 在 Msys 环境下编译
+5. 使用 Digital Mars 在 Msys 环境下编译
+6. 使用 Pelles C 在 Msys 环境下编译
+
+1. 使用 Mingw 在 Msys 环境下编译
+
+(1) 安装 Mingw 和 MSYS
+    1) 安装 Mingw (http://sourceforge.net/projects/mingw/)
+       和 MSYS (参见 MingwWiki: http://mingw.sourceforge.net/MinGWiki/)
+(2) 安装所需库
+    2-0) 从 Mingw 获取 pexports
+        "pexports" 包含在 mingw-utils-0.3.tar.gz 中，获取并解压。
+    2-1) pdcurses
+        从 Mingw 网站获取 pdcurses-2.6.0-2003.07.21-1.exe 并解压。
+        将 curses.h 移到 include 路径，libcurses.a 移到库路径。
+    2-2) oggvorbis (http://www.vorbis.com/)
+        获取 OggVorbis-win32sdk-1.0.1.zip 并解压。
+        DLL 文件生成导入库的方法：
+            pexports xxxx.dll >xxxx.def
+            dlltool --dllname xxxx.dll --input-def xxxx.def --output-lib libxxxx.a
+        将 include\ogg\os_types.h 第 29 行改为：
+            (os_types.h)
+            29 #  if !defined(__GNUC__) || defined(__MINGW32__)
+        在批处理文件中设置环境变量：
+            REM OggVorbis
+            set PATH=\usr\local\oggvorbis-win32sdk-1.0.1\bin;\usr\local\oggvorbis-win32sdk-1.0.1\lib;%PATH%
+            set C_INCLUDE_PATH=/usr/local/oggvorbis-win32sdk-1.0.1/include:%C_INCLUDE_PATH
+            set LD_LIBRARY_PATH=/usr/local/oggvorbis-win32sdk-1.0.1/lib:%LD_LIBRARY_PATH%
+
+    2-3) gogo no coder (http://www.marinecat.net/mct_top.htm)
+        从 Gogo no Coder 获取 gogo.dll
+        (http://www.marinecat.net/cgi/lcount/count.cgi?page=3112&name=wing311.exe&downex=wing311a.exe)
+        从 Gogo noCoder 源代码获取 gogo.h 文件
+        (http://www.marinecat.net/cgi/lcount/count.cgi?page=3111&name=petit311-src.lzh&downex=petit311.lzh)
+        移动 gogo.h 到 gogo\include\gogo
+        移动 gogo.dll 到 gogo\lib
+        生成导入库：
+            pexports gogo.dll >gogo.def
+            dlltool --dllname gogo.dll --input-def gogo.def --output-lib libgogo.a
+        在批处理文件中设置环境变量：
+            REM GOGO
+            set PATH=\usr\local\gogo\bin;\usr\local\gogo\lib;%PATH%
+            set C_INCLUDE_PATH=/usr/local/gogo/include:%C_INCLUDE_PATH%
+            set LD_LIBRARY_PATH=/usr/local/gogo/lib:%LD_LIBRARY_PATH%
+    2-4) flac (http://flac.sourceforge.net/)
+        获取 "http://downloads.sourceforge.net/flac/flac-1.2.1-devel-win.zip" 并解压。
+        将 include\*\export.h 第 58 行改为：
+            (export.h)
+            58 #if defined(FLAC__NO_DLL) || !defined(_MSC_VER) \
+            || !defined(__BORLANDC__) || !defined(__CYGWIN32__) || !defined(__MINGW32__)
+        在批处理文件中设置环境变量：
+            REM FLAC
+            set PATH=\usr\local\flac-1.2.1-devel-win\lib;;%PATH%
+            set C_INCLUDE_PATH=/usr/local/flac-1.2.1-devel-win/include:%C_INCLUDE_PATH%
+            set LD_LIBRARY_PATH=/usr/local/flac-1.2.1-devel-win/bin:%LD_LIBRARY_PATH%
+
+    2-5) portaudio (http://www.portaudio.com/)
+        下载 portaudio v1.19 并解压。
+        将 portaudio.h 放到 include 路径。
+        从 Csound5.08.2-gnu-win32-f.exe
+        (http://sourceforge.net/project/showfiles.php?group_id=81968) 中获取 portaudio.dll。
+        将 portaudio.dll 重命名为 libportaudio.dll 并移到库路径。
+        TiMidity++ 编译只需要 portaudio.h。
+
+(3) 编译 TiMidity++ 二进制文件
+    3-1) timw32g.exe
+        (configure)
+         CFLAGS="-O2" ./configure --enable-network --enable-w32gui --enable-spline=gauss \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         strip timidity.exe
+         mv timidity.exe timw32g.exe
+    3-2) twsyng.exe
+        (configure)
+         CFLAGS="-O2" ./configure --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         strip timidity.exe
+         mv timidity.exe twsyng.exe
+
+    3-3) twsynsrv.exe
+        (configure)
+          CFLAGS="-O2" ./configure --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+         在 config.h 中添加以下行：
+            #define TWSYNSRV 1
+        (make)
+         make
+         strip timidity.exe
+         mv timidity.exe twsynsrv.exe
+
+    3-4) timidity.exe
+        (configure)
+         CFLAGS="-O2" ./configure --enable-interface=ncurses,vt100,winsyn --enable-network --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         strip timidity.exe
+    3-5) timiditydrv.dll
+        (configure)
+         CFLAGS="-O2" ./configure --enable-winsyn --enable-windrv --enable-spline=linear \
+         --enable-audio=w32,portaudio
+        (make)
+         make
+         cd windrv
+         strip timiditydrv.dll
+
+
+2. 使用 Turbo C++ 在 Msys 环境下编译
+
+(1) 安装 BorlandC 和 MSYS
+    1) 安装 BorlandC
+        下载 Turbo C++ Explorer
+        (http://www.codegear.com/jp/downloads/free/turbo)
+        编写 bcc32.cfg 和 ilink32.cfg：
+        (bcc32.cfg)
+          -IC:\Borland\BDS\4.0\include
+          -LC:\Borland\BDS\4.0\lib
+          -LC:\Borland\BDS\4.0\lib\psdk
+          -DWINVER=0x0400
+          -D_WIN32_WINNT=0x0400
+        (ilink32.cfg)
+            -LC:\Borland\BDS\4.0\lib;C:\Borland\BDS\4.0\lib\psdk
+        ** 注意 !! **
+          包含 '-' 的文件夹名不被接受。
+          ilink32 无法识别此类文件夹名。
+          如果路径中有 "-"，需要改为 "_"。
+    2) 安装 MSYS (参见 MingwWiki)
+        从 /etc/fstab 中移除 mingw 路径。
+        在 Msys.bat 顶部添加以下行：
+              set PATH=C:\Borland\BDS\4.0\bin;%PATH%
+
+(2) 安装所需库
+    2-0-1) implib.exe (从 DLL 生成导入库)
+       implib -a -c xxx.lib xxx.dll
+    2-0-2) coff2omf.exe (将 VCC 库转换为 BCC 库)
+       coff2omf xxxx.lib xxx_bcpp.lib
+
+    2-1) pdcurses
+        从 Mingw 网站 (http://sourceforge.net/project/showfiles.php?group_id=2435)
+        获取 pdcurses-2.6.0-src.tar.bz2 并编译。
+        将 pdcurses.lib 重命名为 libpdcurses.lib。
+        在 bcc32.cfg 中添加 include 和 library 路径。
+        在 ilink32.cfg 中添加 library 路径。
+    2-2) oggvorbis (http://www.vorbis.com/)
+        获取 OggVorbis-win32sdk-1.0.1.zip 并解压。
+        在 bcc32.cfg 和 ilink32.cfg 中添加对应路径。
+        编译 TiMidity++ 仅需要头文件。
+    2-3) gogo no coder (http://www.marinecat.net/mct_top.htm)
+        从 Gogo no Coder 获取 gogo.dll 和 gogo.h 文件。
+        移动 gogo.h 到 gogo\include\gogo。
+        （TiMidity++ 不需要 gogo.lib）
+        在 bcc32.cfg 和 ilink32.cfg 中添加 include 和 library 路径。
+        TiMidity++ 编译仅需要头文件。
+    2-4) flac (http://flac.sourceforge.net/)
+        获取 "http://downloads.sourceforge.net/flac/flac-1.2.1-devel-win.zip" 并解压。
+        将 include\*\export.h 第 58 行改为：
+            (export.h)
+            58 #if defined(FLAC__NO_DLL) || !defined(_MSC_VER) \
+                || !defined(__BORLANDC__) || !defined(__CYGWIN32__) || !defined(__MINGW32__)
+        使用 coff2omf 将 VCC 库转换为 BCC 库。
+        在 bcc32.cfg 和 ilink32.cfg 中设置对应路径。
+    2-5) portaudio (http://www.portaudio.com/)
+        我不知道如何用 BCC 命令行工具编译 portaudio。
+        TiMidity++ 编译仅需要 portaudio.h。
+        可从 Csound5.08.2-gnu-win32-f.exe 获取 portaudio.dll
+        (http://sourceforge.net/project/showfiles.php?group_id=81968)。
+
+(3) 编译 TiMidity++ 二进制文件
+    3-0) perl -pe 's/CC\s-o\s\S\S*\s/CC /g' configure >configure_bc
+              （因为 -o xxxx 选项在 BCC 中不能正常工作）
+
+    3-1) timw32g.exe
+        (configure)
+         CC="bcc32" CPP="cpp32" CFLAGS="" ./configure_bc  --enable-w32gui --enable-spline=gauss \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         mv timidity.exe timw32g.exe
+    3-2) twsyng.exe
+        (configure)
+        CC="bcc32" CPP="cpp32" CFLAGS="" \
+        ./configure_bc --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         mv timidity.exe twsyng.exe
+    3-3) twsynsrv.exe
+        (configure)
+         CC="bcc32" CPP="cpp32" CFLAGS=""\
+         ./configure_bc --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+         在 config.h 中添加以下行：
+            #define TWSYNSRV 1
+         (make)
+         make
+         mv timidity.exe twsynsrv.exe
+    3-4) timidity.exe
+        (configure)
+        CC="bcc32" CPP="cpp32" CFLAGS="" \
+         ./configure_bc --enable-interface=vt100,winsyn,ncurses --enable-network --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+    3-5) timiditydrv.dll
+        (configure)
+        CC="bcc32" CPP="cpp32" CFLAGS="" \
+         ./configure_bc  --enable-winsyn --enable-windrv --enable-spline=linear \
+         --enable-audio=w32,portaudio
+        (make)
+         make
+
+
+3. 使用 OpenWatcom C++ 在 Msys 环境下编译
+
+(1) OpenWatcom 和 MSYS
+    1) 安装 OpenWatcom (http://www.openwatcom.org)
+        1-1) 下载、安装并配置 OpenWatcom
+        1-2) 下载并安装 Microsoft Platform SDK。
+             用 Platform SDK 的 rc.exe 替换 OpenWatcom 的 rc.exe，
+             或从 wine-prgs-0.9.5.zip (http://www.winehq.com/) 获取 wrc.exe 并重命名为 rc.exe。
+             （OpenWatcom 自带的 rc.exe 不可用）
+    2) 安装 Mingw 和 MSYS (参见 MingwWiki)
+        从 /etc/fstab 中移除 mingw 路径。
+        在 Msys.bat 顶部添加以下行并创建 wcc_env.bat：
+              call wcc_env.bat
+        wcc_env.bat 示例：
+            @echo off
+            set LIB=
+            set INCLUDE=
+            call i:\watcom\setvars.bat
+                 ----
+               (设置各种环境变量)
+                  ----
+(2) 安装所需库（推荐 wcc386 选项 -5s，因为 TiMidity++ 兼容性!）
+    2-0) 从 DLL 生成导入库的方法
+       mlib -n -b out.lib in.dll
+    2-1) pdcurses
+        从 GnuWin32 (http://sourceforge.net/projects/gnuwin32/) 获取 pdcurses-2.5.0。
+        从 DLL 生成导入库。
+        需要的是 "libpdcurses.lib" (不是 pdcurses.lib)。
+        将 curses.h 移到 include 路径，libpdcurses.lib 移到库路径。
+        在批处理文件中设置环境变量。
+    2-2) oggvorbis (http://www.vorbis.com/)
+        获取 OggVorbis-win32sdk-1.0.1.zip 并解压。
+        编辑 include\ogg\os_types.h：
+            (os_types.h)
+            29 #  if defined(__WATCOMC__)
+            30 /* MSVC/Borland */
+            31 typedef __int64 ogg_int64_t;
+            32 typedef int ogg_int32_t;
+            33 typedef unsigned int ogg_uint32_t;
+            34 typedef short ogg_int16_t;
+            35 typedef unsigned short ogg_uint16_t;
+            36 #  else
+                 -----
+            52 #  endif
+        从 DLL 生成导入库。
+        在批处理文件中设置环境变量：
+            REM OggVorbis
+            set PATH=\usr\local\oggvorbis-win32sdk-1.0.1_wcc\bin;\usr\local\oggvorbis-win32sdk-1.0.1_wcc\lib;%PATH%
+            set C_INCLUDE_PATH=/usr/local/oggvorbis-win32sdk-1.0.1_wcc/include:%C_INCLUDE_PATH
+            set LIB=\usr\local\oggvorbis-win32sdk-1.0.1_wcc\lib:%LIB%
+        TiMidity++ 编译仅需要 *.h 文件。
+
+    2-3) gogo no coder (http://www.marinecat.net/mct_top.htm)
+        从 Gogo no Coder 获取 gogo.dll 和 gogo.h 文件。
+        移动 gogo.h 到 gogo\include\gogo。
+        （TiMidity++ 不需要 gogo.lib）
+        在批处理文件中设置环境变量：
+            REM GOGO
+            set PATH=\usr\local\gogo_wcc\bin;\usr\local\gogo_wcc\lib;%PATH%
+            set C_INCLUDE_PATH=/usr/local/gogo_wcc/include:%C_INCLUDE_PATH%
+            set LIB=\usr\local\gogo_wcc\lib:%LIB%
+        TiMidity++ 编译仅需要 *.h 文件。
+
+    2-4) flac (http://flac.sourceforge.net/)
+        获取 "http://downloads.sourceforge.net/flac/flac-1.2.1-devel-win.zip" 并解压。
+        生成导入库。
+        将 include\*\export.h 第 58 行改为包含所有编译器：
+            (export.h)
+            58 #if defined(FLAC__NO_DLL) || !defined(_MSC_VER) \
+                || !defined(__BORLANDC__) || !defined(__CYGWIN32__) || !defined(__MINGW32__) \
+                || !defined(__WATCOMC__) || !defined(__DMC__)
+        在批处理文件中设置环境变量：
+            REM FLAC
+            set PATH=\usr\local\flac-1.2.1-win_wcc\bin;%PATH%
+            set C_INCLUDE_PATH=/usr/local/flac-1.2.1-win_wcc/include:%C_INCLUDE_PATH%
+            set LIB=\usr\local\flac-1.2.1-win_wcc\bin:%LIB%
+        TiMidity++ 编译仅需要 *.h 文件。
+
+    2-5) portaudio (http://www.portaudio.com/)
+        我不知道如何用 OpenWatcom 命令行工具编译 portaudio。
+        TiMidity++ 编译仅需要 portaudio.h。
+        可从 Csound5.08.2-gnu-win32-f.exe 获取 portaudio.dll
+        (http://sourceforge.net/project/showfiles.php?group_id=81968)。
+
+(3) 编译 TiMidity++ 二进制文件
+    3-0-1) wcc386_w.sh & wpp386_w.sh (位于 scripts/ 目录中)
+        Wcc386 与 GNU autotools 配合不佳，因此准备了包装脚本。
+        使用包装脚本 wcc386_w.sh 代替 wcc386.exe。
+
+    3-1) timw32g.exe
+        (configure)
+        CC="wcc386_w.sh" CPP="wcc386_w.sh -p"  CFLAGS="-d0 -obll+riemcht" \
+        ./configure --enable-network --enable-w32gui --enable-spline=gauss \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio \
+         --disable-oggtest --disable-vorbistest --disable-libFLACtest --disable-libOggFLACtest
+        (make)
+         make
+         mv timidity.exe timw32g.exe
+    3-2) twsyng.exe
+        (configure)
+        CC="wcc386_w.sh" CPP="wcc386_w.sh -p"  CFLAGS="-d0 -obll+riemcht" \
+        ./configure --enable-network --enable-winsyng --enable-spline=linear \
+        --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio \
+        --disable-oggtest --disable-vorbistest --disable-libFLACtest --disable-libOggFLACtest
+         (make)
+         make
+         mv timidity.exe twsyng.exe
+    3-3) twsynsrv.exe
+        (configure)
+        CC="wcc386_w.sh" CPP="wcc386_w.sh -p"  CFLAGS="-d0 -obll+riemcht" \
+        ./configure --enable-network --enable-winsyng --enable-spline=linear \
+        --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio \
+        --disable-oggtest --disable-vorbistest --disable-libFLACtest --disable-libOggFLACtest
+        在 config.h 中添加以下行：
+            #define TWSYNSRV 1
+         (make)
+         make
+         mv timidity.exe twsynsrv.exe
+    3-4) timidity.exe
+        (configure)
+        CC="wcc386_w.sh" CPP="wcc386_w.sh -p"  CFLAGS="-d0 -obll+riemcht" \
+        ./configure --enable-interface=ncurses,vt100,winsyn --enable-network --enable-spline=linear \
+        --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio \
+        --disable-oggtest --disable-vorbistest --disable-libFLACtest --disable-libOggFLACtest
+        (make)
+        make
+    3-5) timiditydrv.dll
+        (configure)
+        CC="wcc386_w.sh" CPP="wcc386_w.sh -p"  CFLAGS="-d0 -obll+riemcht" \
+         ./configure  --enable-winsyn --enable-windrv --enable-spline=linear \
+         --enable-audio=w32,portaudio
+        (make)
+         make
+
+
+4. 使用 Visual C++ 在 Msys 环境下编译
+
+(1) 安装 Visual C++ 和 MSYS
+    1) 安装 Visual C++
+        下载
+            Visual C++ 2008 Express Edition
+            (http://www.microsoft.com/japan/msdn/vstudio/express/default.aspx)
+            Microsoft Platform SDK
+        安装并配置。
+
+    2) 安装 Mingw 和 MSYS (参见 MingwWiki)
+        从 /etc/fstab 中移除 mingw 路径。
+        在 Msys.bat 顶部添加以下行并创建 vc_msys_env.bat：
+              call vc_msys_env.bat
+        vc_msys_env.bat 示例：
+            @echo off
+            call c:\"Program Files\Microsoft Platform SDK"\SetEnv.Cmd /2000 /RETAIL
+            call c:"\Program Files\Microsoft Visual Studio 9.0"\Common7\Tools\vsvars32.bat
+
+            Set INCLUDE=c:\DXSDK\include;%INCLUDE%
+            Set LIB=c:\DXSDK\lib;%LIB%
+
+                  ----
+               (设置各种环境变量)
+                  ----
+
+(2) 安装所需库
+    2-0) 从 DLL 生成导入库的方法
+        pexports xxxx.dll >xxxx.def
+        lib -def:xxxx.def -machine:x86
+        pexports 包含在 mingw-utils 中。
+
+    2-1) pdcurses
+        从 Mingw 网站 (http://sourceforge.net/project/showfiles.php?group_id=2435)
+        获取 pdcurses-2.6.0-src.tar.bz2 并编译。
+        将 pdcurses.lib 重命名为 libpdcurses.lib。
+        将 curses.h 移到 include 路径，libpdcurses.lib 移到库路径。
+        在批处理文件中设置环境变量。
+
+    2-2) oggvorbis (http://www.vorbis.com/)
+        获取 OggVorbis-win32sdk-1.0.1.zip 并解压。
+        在批处理文件中设置环境变量：
+            REM OggVorbis
+            set PATH=\usr\local\oggvorbis-win32sdk-1.0.1\bin;\usr\local\oggvorbis-win32sdk-1.0.1\lib;%PATH%
+            set C_INCLUDE_PATH=/usr/local/oggvorbis-win32sdk-1.0.1/include:%C_INCLUDE_PATH
+            set LIB=\usr\local\oggvorbis-win32sdk-1.0.1\lib:%LIB%
+
+    2-3) gogo no coder (http://www.marinecat.net/mct_top.htm)
+        从 Gogo no Coder 获取 gogo.dll 和 gogo.h 文件。
+        移动 gogo.h 到 gogo\include\gogo。
+        （TiMidity++ 不需要 gogo.lib）
+        在批处理文件中设置环境变量：
+            REM GOGO
+            set PATH=\usr\local\gogo\bin;\usr\local\gogo\lib;%PATH%
+            set C_INCLUDE_PATH=/usr/local/gogo/include:%C_INCLUDE_PATH%
+            set LIB=\usr\local\gogo\lib:%LIB%
+
+    2-4) flac (http://flac.sourceforge.net/)
+        获取 "http://downloads.sourceforge.net/flac/flac-1.2.1-devel-win.zip" 并解压。
+        从 DLL 生成导入库。
+        在批处理文件中设置环境变量：
+            REM FLAC
+            set PATH=\usr\local\flac-1.2.1-win\bin;;%PATH%
+            set C_INCLUDE_PATH=/usr/local/flac-1.2.1-win/include:%C_INCLUDE_PATH%
+            set LIB=\usr\local\flac-1.2.1-win\bin:%LIB%
+
+    2-5) portaudio (http://www.portaudio.com/)
+        我不知道如何用 VC 命令行工具编译 portaudio。
+        但编译 TiMidity++ 仅需要 portaudio.h。
+        可从 Csound5.08.2-gnu-win32-f.exe 获取 portaudio.dll
+        (http://sourceforge.net/project/showfiles.php?group_id=81968)。
+        从 DLL 生成导入库。在批处理文件中设置环境变量。
+        （只要有 portaudio.h 即可编译 TiMidity++）
+
+(3) 编译 TiMidity++ 二进制文件
+    3-1) timw32g.exe
+        (configure)
+         CC="cl" CPP="cl.exe -EP"  CFLAGS="-O2" \
+        ./configure --enable-network --enable-w32gui --enable-spline=gauss \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+        make
+         mv timidity.exe timw32g.exe
+    3-2) twsyng.exe
+        (configure)
+        CC="cl" CPP="cl.exe -EP"  CFLAGS="-O2" \
+        ./configure --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         mv timidity.exe twsyng.exe
+    3-3) twsynsrv.exe
+        (configure)
+         CC="cl" CPP="cl.exe -EP"  CFLAGS="-O2"\
+         ./configure --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+         在 config.h 中添加以下行：
+            #define TWSYNSRV 1
+         (make)
+         make
+         mv timidity.exe twsynsrv.exe
+    3-4) timidity.exe
+        (configure)
+        CC="cl" CPP="cl.exe -EP"  CFLAGS="-O2" \
+         ./configure --enable-interface=ncurses,vt100,winsyn --enable-network --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+    3-5) timiditydrv.dll
+        (configure)
+        CC="cl" CXX="cl" CPP="cl.exe -EP"  CFLAGS="-O2" \
+          ./configure --enable-winsyn --enable-windrv --enable-spline=linear \
+          --enable-audio=w32,portaudio
+        (make)
+         make
+
+
+5. 使用 Digital Mars 在 Msys 环境下编译
+
+(1) Digital Mars & MSYS
+    1) 安装 Digital Mars (http://www.digitalmars.com/)
+        1-1) 下载 Digital Mars。
+        1-2) 用 Microsoft Platform SDK 的 rc.exe 替换 Digital Mars 的 rc.exe。
+             （Digital Mars 自带 rcc.exe 不适合编译 TiMidity）
+    2) 安装 MSYS (http://sourceforge.net/projects/mingw/ http://mingw.sourceforge.net/MinGWiki/)
+        从 /etc/fstab 中移除 mingw 相关路径。
+        创建 dm_env.bat 并从 msys.bat 调用：
+        (在 msys.bat 顶部添加)
+            call dm_env.bat
+        (dm_env.bat 示例)
+            set LIB=
+            set INCLUDE=
+
+            Set PATH=i:\dm\bin;%PATH%
+            Set INCLUDE=i:\dm\include;i:\dm\include\win32;%INCLUDE%
+            Set LIB=i:\dm\lib;%LIB%
+
+            Set PATH=i:\usr\local\gogo\bin;%PATH%
+            Set INCLUDE=i:\usr\local\gogo\include;%INCLUDE%
+            Set LIB=i:\usr\local\gogo\lib;%LIB%
+                （等等）
+                 ----
+(2) 安装各种库
+    2-0) 从 DLL 生成导入库的方法
+        implib out.lib in.dll
+
+    2-1) pcurses
+        从 GnuWin32 (http://sourceforge.net/projects/gnuwin32/) 获取 "pdcurses-2.5.0"。
+        修改 curses.h 如下：
+        281 #if defined( _MSC_VER )|| defined(__DMC__)       /* defined by compiler */
+        977 #if !defined(PDC_STATIC_BUILD) && (defined(_MSC_VER) || defined(__DMC__))&& defined(WIN32) && !defined(CURSES_LIBRARY)
+        988 # if !defined(PDC_STATIC_BUILD) && (defined(_MSC_VER) || defined(__DMC__)) && defined(WIN32)
+        使用 /system 选项生成导入库：
+            $implib /system libpdcurses.lib pdcurses.dll
+        将 pccurses.lib 重命名为 libpdcurses.lib。
+        在批处理文件中设置环境变量。
+
+    2-2) oggvorbis (http://www.vorbis.com/)
+        使用 "OggVorbis-win32sdk-1.0.1.zip"。
+        编辑 include\ogg\os_types.h 如下：
+            (os_types.h)
+            36 #  elif defined(__MINGW32__) || defined(__DMC__)
+        从 DLL 生成导入库。
+        在批处理文件中设置环境变量。
+
+    2-3) Gogo no Coder (MP3 编码 DLL) (http://www.marinecat.net/mct_top.htm)
+        从 Gogo no Coder 获取 gogo.dll 和 gogo.h 文件。
+        从 gogo.dll 生成 gogo.lib。
+        移动 gogo.h 到 gogo\include\gogo。
+        移动 gogo.dll 和 libgogo.a 到 gogo\lib。
+        在批处理文件中设置环境变量。
+
+    2-4) flac (http://flac.sourceforge.net/)
+        使用 "http://downloads.sourceforge.net/flac/flac-1.2.1-devel-win.zip"。
+        编辑 include\*\export.h 第 58 行：
+            (export.h)
+            58 #if defined(FLAC__NO_DLL) || !defined(_MSC_VER) \
+                || !defined(__BORLANDC__) || !defined(__CYGWIN32__) || !defined(__MINGW32__) \
+                || !defined(__WATCOMC__) || !defined(__DMC__)
+        从 DLL 生成导入库。
+        在批处理文件中设置环境变量。
+
+    2-5) portaudio (http://www.portaudio.com/)
+        编译 TiMidity++ 仅需要 portaudio.h。
+        可从 Csound5.08.2-gnu-win32-f.exe 获取 portaudio.dll
+        (http://sourceforge.net/project/showfiles.php?group_id=81968)。
+        只要有 portaudio.h 即可编译 TiMidity++。
+
+(3) 编译 TiMidity++
+    3-0-1) Unix -> DOS 换行符转换 (LF -> CRLF)
+       $sh script/unix2dos.sh
+    3-0-2) perl -pe 's/CC\s-o\s\S\S*\s/CC /g' configure |perl -pe 's/CXX\s-o\s\S\S*\s/CXX /g' - >configure_dm
+            （因为 "-o xxxx" 不适合 dmc.exe）
+    3-0-3) 从 Free Pascal Compiler (http://www.freepascal.org/) 获取 cpp.exe，
+        重命名为 fpcpp.exe 并放到路径中。
+        （dmc.exe 的预处理器不兼容 gnu autotools）
+
+    3-1) timw32g.exe
+        (configure)
+        CC="dmc -Jm -w -mn -5 -o" CPP="fpcpp -D__NT__ -I/i/dm/include" \
+         ./configure_dm --enable-network --enable-w32gui --enable-spline=gauss \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         mv timidity.exe timw32g.exe
+    3-2) twsyng.exe
+        (configure)
+        CC="dmc -Jm -w -mn -5 -o" CPP="fpcpp -D__NT__ -I/i/dm/include" \
+         ./configure_dm --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+         (make)
+         make
+         mv timidity.exe twsyng.exe
+    3-3) twsynsrv.exe
+        (configure)
+        CC="dmc -Jm -w -mn -5 -o" CPP="fpcpp -D__NT__ -I/i/dm/include" \
+         ./configure_dm --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        在 config.h 末尾添加以下行：
+            #define TWSYNSRV 1
+         (make)
+         make
+         mv timidity.exe twsynsrv.exe
+    3-4) timidity.exe
+        (configure)
+        CC="dmc -Jm -w -mn -5 -o" CPP="fpcpp -D__NT__ -I/i/dm/include" \
+         ./configure_dm --enable-interface=ncurses,vt100,winsyn --enable-network --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+        make
+    3-5) timiditydrv.dll
+        (configure)
+        CC="dmc -Jm -w -mn -5 -o" CPP="fpcpp -D__NT__ -I/i/dm/include" \
+         ./configure_dm --enable-interface=windrv,winsyn --enable-network --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+        make
+          注释掉 timiditydrv.h 第 23 行：
+          23 //#error this stub requires an updated version of <rpcndr.h>
+        make
+
+
+6. 使用 Pelles C 在 Msys 环境下编译
+
+(1) 安装 Pelles C 和 MSYS
+    1) Pelles C
+        从 Pelles C 主页 (http://www.smorgasbordet.com/pellesc/) 下载并安装。
+    2) MSYS (http://sourceforge.net/projects/mingw/ http://mingw.sourceforge.net/MinGWiki/)
+        从 /etc/fstab 中移除与 MINGW 相关的路径。
+        从 msys.bat 调用新建的 "pocc_env.bat"：
+        (msys.bat 顶部)
+            call pocc_env.bat
+        (pocc_env.bat 示例)
+            @echo off
+            call c:\PellesC\bin\povars32.bat
+
+            Set INCLUDE=c:\DXSDK\include;%INCLUDE%
+            Set LIB=c:\DXSDK\lib;%LIB%
+                ... 继续 ...
+                 ----
+(2) 安装各种库
+    2-1) pcurses
+        从 "Mingw 网站" 获取 "pdcurses-2.6.0-src.tar.bz2" 并编译。
+        将 pccurses.lib 重命名为 libpdcurses.lib。
+        在批处理文件中设置环境变量。
+
+    2-2) oggvorbis (http://www.vorbis.com/)
+        获取 "OggVorbis-win32sdk-1.0.1.zip"
+        (http://www.vorbis.com/files/1.0.1/windows/OggVorbis-win32sdk-1.0.1.zip)
+        在批处理文件中设置环境变量。
+
+    2-3) Gogo no Coder (MP3 编码 DLL) (http://www.marinecat.net/mct_top.htm)
+        从 Gogo no Coder 获取 gogo.dll 和 gogo.h 文件。
+        从 gogo.dll 生成 gogo.lib。
+        移动 gogo.h 到 gogo\include\gogo。
+        移动 gogo.dll 和 libgogo.a 到 gogo\lib。
+        在批处理文件中设置环境变量。
+
+    2-4) flac (http://flac.sourceforge.net/)
+        使用 "http://downloads.sourceforge.net/flac/flac-1.2.1-devel-win.zip"。
+        编辑 include\*\export.h 第 58 行如下：
+            (export.h)
+            58  #if defined(FLAC__NO_DLL) || !defined(_MSC_VER) \
+                || !defined(__BORLANDC__) || !defined(__CYGWIN32__) || !defined(__MINGW32__) \
+                || !defined(__WATCOMC__) || !defined(__DMC__)
+        在批处理文件中设置环境变量。
+
+    2-5) portaudio (http://www.portaudio.com/)
+        编译仅需要 "portaudio.h"。
+        可从 Csound5.08.2-gnu-win32-f.exe 获取 portaudio.dll
+        (http://sourceforge.net/project/showfiles.php?group_id=81968)。
+        只要有 portaudio.h 即可编译 TiMidity++。
+
+(3) 编译 TiMidity++
+    3-0-1) perl -pe 's/CC\s-o\s\S\S*\s/CC /g' configure >configure_pocc
+            （configure 中的 " -o xxxx " 不被 pocc 接受）
+    3-0-2) 将所有源文件的编码转换为 SJIS，换行符转换为 CR/LF。
+
+    3-1) timw32g.exe
+        (configure)
+        CC="cc" CPP="pocc.exe -E"  CFLAGS="-MT" ./configure_pocc  \
+        --enable-network --enable-w32gui --enable-spline=gauss \
+        --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+        make
+         mv timidity.exe timw32g.exe
+    3-2) twsyng.exe
+        (configure)
+        CC="cc" CPP="pocc.exe -E"  CFLAGS="-MT" ./configure_pocc  \
+        --enable-network --enable-winsyng --enable-spline=linear \
+        --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+         mv timidity.exe twsyng.exe
+    3-3) twsynsrv.exe
+        (configure)
+         CC="cc" CPP="pocc.exe -E"  CFLAGS="-MT" ./configure_pocc  \
+         --enable-network --enable-winsyng --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+         在 config.h 中添加以下行：
+            #define TWSYNSRV 1
+         (make)
+         make
+         mv timidity.exe twsynsrv.exe
+    3-4) timidity.exe
+        (configure)
+        CC="cc" CPP="pocc.exe -E"  CFLAGS="-MT" ./configure_pocc  \
+        --enable-interface=ncurses,vt100,winsyn --enable-network --enable-spline=linear \
+         --enable-audio=w32,vorbis,gogo,ogg,flac,portaudio
+        (make)
+         make
+    3-5) timiditydrv.dll
+        (configure)
+        CC="cc" CPP="pocc.exe -E"  CFLAGS="-MT" ./configure_pocc  \
+        --enable-winsyn --enable-windrv --enable-spline=linear \
+          --enable-audio=w32,portaudio
+        (make)
+         make
+
+
+2008.4.10 末永圭志 (Keishi Suenaga) (skeishi@mutt.freemail.ne.jp)

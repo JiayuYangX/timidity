@@ -1,0 +1,72 @@
+------------------------------------------------------------------
+本文档介绍 TiMidity++ 皮肤界面。
+
+ 皮肤界面是 TiMidity++ 的前端程序，允许用户通过有趣的 GUI 来
+控制 TiMidity++。GUI 的外观可通过使用 WinAmp / x11amp 的
+"皮肤数据"来改变。
+
+
+* 设置 X-SKIN 界面 *
+
+ 首先，选择要使用的皮肤数据并将其放置在某个目录中。
+然后设置环境变量 "timidity_skin"。
+ 例如，如果您喜爱的皮肤数据 (*.bmp) 放在
+ ~/.x11amp/Skins/timidity/ 下：
+
+% setenv timidity_skin ~/.x11amp/Skins/timidity/                 (csh)
+$ timidity_skin=~/.x11amp/Skins/timidity ; export timidity_skin  (sh)
+
+ 如果您的皮肤数据压缩包位于 /dos/programs/winamp/skins/winamp.zip：
+
+% setenv timidity_skin /dos/programs/winamp/skins/winamp.zip
+$ timidity_skin=/dos/programs/winamp/skins/winamp.zip ; export timidity_skin
+
+ 只能指定一个皮肤。没有皮肤选择器。
+ 由于未提供默认皮肤，如果未设置环境变量或所指定的数据损坏，
+TiMidity++ 将无法启动。
+
+ 此皮肤界面需要 10 个 BMP 文件作为皮肤数据：
+
+ main, titlebar, playpaus, cbuttons, monoster,
+ posbar, shufrep, text, volume, number
+
+ 如果您的数据缺少其中某些文件，请从其他皮肤数据中借用对应的文件。
+ 如果数据中包含 viscolor.txt，频谱分析器的颜色由此文件决定。
+否则将使用默认颜色。
+
+
+* 启动 TiMidity++ *
+
+ 要使用皮肤界面，请使用命令行选项 -ii(tv) 启动 TiMidity++。
+TiMidity++ 内部初始化后，会出现一个类似 WinAmp 的窗口 :)
+
+
+* 界面功能 *
+
+ 此界面目前提供的功能有：
+
+ 上一首/播放/暂停/停止/下一首/随机播放/重复/音量/退出
+
+对应各自的按钮。
+ 点击已播放时间显示区域可切换显示内容为已播放时间/剩余时间。
+ 点击时间显示区域下方的区域可切换显示内容为频谱分析器。
+如果您想显示频谱分析器，需要在编译 TiMidity++ 时
+使用 configure 选项 --enable-spectrogram。
+
+ 您可以抓取窗口的任何位置来拖拽移动界面窗口。
+
+ 要退出此界面，请点击窗口右上角的小按钮。
+
+
+* 问题? *
+
+ 文本显示区域只能显示英文、数字和部分图形字符，无法显示任何多字节字符。
+ 无法设置 Panpot、Equalizer 和播放列表。
+ 点击弹出按钮无任何效果。
+ 无法图标化或最小化。
+
+
+ 使用此界面风险自负。
+
+                              Daisuke Nagano <breeze_geo@geocities.co.jp>
+                      http://www.geocities.co.jp/Playtown/4370/index.html

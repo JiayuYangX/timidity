@@ -1,0 +1,124 @@
+=======================================================================
+                       ALSA 音序器接口
+           Copyright (c) 2000  Takashi Iwai <tiwai@suse.de>
+=======================================================================
+
+概述
+====
+
+本文档介绍高级 Linux 声音架构 (ALSA) 音序器接口。ALSA 音序器接口
+在 ALSA 音序器核心与 timidity 之间进行通信。此接口从音序器接收
+事件，并以（准）实时方式播放。
+在此模式下，TiMidity 纯粹作为软件实时 MIDI 渲染器工作，即作为
+ALSA 上的软件 MIDI 合成器引擎。
+此接口中没有调度例程，因为所有调度均由 ALSA 音序器核心完成。
+
+要启动 ALSA 音序器接口，请按如下方式运行 timidity：
+	% timidity -iA -B2,8 -Os -q0/0 -k0
+片段大小可调。数值越小，实时响应越好。
+然后 timidity 会显示新创建的端口号（如下例中的 128:0 和 128:1）。
+       ---------------------------------------
+	% timidity -iA -B2,8 -Os -q0/0 -k0
+	TiMidity starting in ALSA server mode
+	Opening sequencer port 128:0 128:1
+       ---------------------------------------
+这些端口可以与其他任何音序器端口连接。
+例如，通过 pmidi 播放 MIDI 文件（有点大材小用 :-)，）
+	% pmidi -p128:0 foo.mid
+如果 MIDI 文件需要两个端口，可以这样连接：
+	% pmidi -p128:0,128:1 bar.mid
+从外部 MIDI 键盘连接可能像这样：
+	% aconnect 64:0 128:0
+
+安装
+====
+
+请使用 --enable-alsaseq 和 --enable-audio=alsa 选项进行 configure。
+当然，也可以额外选择其他音频设备或接口。
+
+要获得更好的实时响应，timidity 必须以 root 身份运行（见下文）。
+Set-UID root 是实现此目的的最简单方法。您可以按如下方式更改
+已安装 timidity 二进制文件的所有者和权限：
+	# chown root /usr/local/bin/timidity
+	# chmod 4755 /usr/local/bin/timidity
+
+请注意，这可能导致安全漏洞！
+
+
+实时响应
+========
+
+此接口尝试将进程调度重置为 SCHED_FIFO 并设置尽可能高的优先级。
+设为 SCHED_FIFO 的程序表现出明显更好的实时响应。
+例如，如果没有 SCHED_FIFO，timidity 在每次访问 /proc 时
+可能会产生显著的停顿。
+要启用此功能，timidity 必须由 root 启动或以 set-uid root 安装。
+
+
+乐器加载
+========
+
+timidity 每次收到音色变化事件时动态加载乐器。这有时会在播放过程中
+因缓冲区欠载而导致停顿。此外，当所有订阅断开时，timidity 会重置
+已加载的乐器。因此，要在播放完成后保留已加载的乐器，
+需要通过 aconnect 将虚拟端口（例如 MIDI 输入端口）
+连接到 timidity 端口：
+	% aconnect 64:0 128:0
+
+
+重置播放
+========
+
+您可以在播放过程中通过向 timidity 发送 SIGHUP 信号来停止所有声音。
+重置后连接会保持，但事件将不再被处理。要重新启用音频，
+您需要重新连接端口。
+
+
+可视化
+======
+
+如果您喜欢更花哨的可视化输出，可以尝试我的小程序 aseqview。
+	% aseqview -p2 &
+然后将两个端口连接到 timidity 端口（假设 aseqview 创建了
+129:0 和 129:1）：
+	% aconnect 129:0 128:0
+	% aconnect 129:1 128:1
+输出应重定向到 129:0,1 而非 128:0,1。
+	% pmidi -p129:0,129:1 foo.mid
+
+
+与 OSS 的兼容性
+===============
+
+您还可以通过 ALSA 音序器上的 OSS MIDI 模拟来访问 timidity。
+查看 /proc/asound/seq/oss 以检查要访问的设备号。
+       ---------------------------------------
+	% cat /proc/asound/seq/oss
+	OSS sequencer emulation version 0.1.8
+	ALSA client number 63
+	ALSA receiver port 0
+	...
+	midi 1: [TiMidity port 0] ALSA port 128:0
+	  capability write / opened none
+	
+	midi 2: [TiMidity port 1] ALSA port 128:1
+	  capability write / opened none
+       ---------------------------------------
+在上述情况下，MIDI 设备 1 和 2 分配给了 timidity。
+现在，用 playmidi 播放：
+	% playmidi -e -D1 foo.mid
+
+
+已知问题
+========
+
+嗯，问题肯定是有的...
+
+
+相关资源
+========
+
+- ALSA 主页
+	http://www.alsa-project.org
+- 我的 ALSA 技术页面（含 aseqview）
+	http://members.tripod.de/iwai/alsa.html
