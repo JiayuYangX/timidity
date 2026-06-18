@@ -801,7 +801,7 @@ static int ctl_pass_playing_list(int number_of_files, char *list_of_files[])
                             strncpy(Panel->filename,p,sizeof(Panel->filename));
 		}
 
-		SetWrdWndActive();
+		// SetWrdWndActive();
 		rc = play_midi_file(w32g_get_playlist(selected));
 
 		if(ctl.flags & CTLF_NOT_CONTINUE)
