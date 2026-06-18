@@ -876,7 +876,7 @@ dnl gogo(g):    MP3 GOGO
 dnl jack(j):    JACK
 dnl ao(O):      Libao
 
-audio_targets='default oss alsa sun hpux irix mme sb_dsp w32 alib nas arts esd vorbis flac gogo lame portaudio npipe jack ao'
+audio_targets='default oss alsa sun hpux irix mme sb_dsp w32 alib nas arts esd vorbis flac gogo portaudio npipe jack ao'
 
 AC_ARG_WITH(nas-library,
   AS_HELP_STRING([--with-nas-library=library], [NAS absolute library path(Don't use -laudio)]))
@@ -907,8 +907,7 @@ AC_ARG_ENABLE(audio,
                               vorbis:    Ogg Vorbis
                               flac:      FLAC / OggFLAC
                               speex:     Ogg Speex
-                               gogo:      MP3 GOGO (Only Windows is supported)
-                               lame:      MP3 LAME encoder (requires libmp3lame)
+                              gogo:      MP3 GOGO (Only Windows is supported)
 ],
   [ enable_audio=$enableval
     have_audio_opt=yes ],
@@ -931,7 +930,7 @@ AC_ARG_WITH(default-output,
   [Specify default output mode (optional):
                                 (default|alsa|alib|arts|nas|
                                 esd|wav|au|aiff|list|vorbis|flac|speex|
-                                 gogo|portaudio|npipe|jack|ao|lame)]),
+                                gogo|portaudio|npipe|jack|ao)]),
   [ if test "$enable_audio" != no; then
     DEFAULT_PLAYMODE=$withval
     eval "au_enable_$DEFAULT_PLAYMODE=yes"
@@ -1320,9 +1319,15 @@ dnl portaudio
 AC_MSG_CHECKING(enable_audio=portaudio)
 if test "x$au_enable_portaudio" = xyes; then
   AC_MSG_RESULT(yes)
-  SYSEXTRAS="$SYSEXTRAS portaudio_a.c"
-  EXTRALIBS="$EXTRALIBS -lportaudio -lwinmm -lole32 -lsetupapi -loleaut32 -lstdc++"
-  EXTRADEFS="$EXTRADEFS -DAU_PORTAUDIO"
+  if test "x$MSYS" = xyes ; then
+	SYSEXTRAS="$SYSEXTRAS portaudio_a.c w32_portaudio_dll.c"
+  	EXTRALIBS="$EXTRALIBS -lportaudio"
+  	EXTRADEFS="$EXTRADEFS -DAU_PORTAUDIO -DAU_PORTAUDIO_DLL"
+  else
+  	SYSEXTRAS="$SYSEXTRAS portaudio_a.c"
+  	EXTRALIBS="$EXTRALIBS -lportaudio"
+  	EXTRADEFS="$EXTRADEFS -DAU_PORTAUDIO"
+  fi
 else
   AC_MSG_RESULT(no)
 fi
@@ -1371,13 +1376,22 @@ dnl ogg's vorbis
 AC_MSG_CHECKING(enable_audio=vorbis)
 if test "x$au_enable_vorbis" = xyes; then
   AC_MSG_RESULT([yes, configuring vorbis])
-  dnl MSYS path: always use static
+  if test "x$MSYS" = "xyes" && test "x$MINGWGCC" != "xyes" ; then
+    AC_CHECK_HEADER(vorbis/vorbisenc.h,, [ 
+    EXTRADEFS="-DAU_VORBIS_DLL $EXTRADEFS"
+	SYSEXTRAS="$SYSEXTRAS w32g_vorbisenc_dll.c w32g_vorbis_dll.c w32g_ogg_dll.c"
+    ])
+  else
   XIPH_PATH_OGG([
     XIPH_PATH_VORBIS([
       have_vorbis=yes
       SYSEXTRAS="$SYSEXTRAS vorbis_a.c"
       EXTRADEFS="$EXTRADEFS -DAU_VORBIS $OGG_CFLAGS $VORBIS_CFLAGS"
       EXTRALIBS="$EXTRALIBS $VORBIS_LIBS $VORBISENC_LIBS $OGG_LIBS"
+      if test "x$MSYS" = "xyes" && test "x$MINGWGCC" = "xyes" ; then
+      EXTRADEFS="-DAU_VORBIS_DLL $EXTRADEFS"
+	  SYSEXTRAS="$SYSEXTRAS w32g_vorbisenc_dll.c w32g_vorbis_dll.c w32g_ogg_dll.c"
+      fi
     ],[
       AC_MSG_WARN([Unable to configure vorbis, but ogg is there (???)])
     ])
@@ -1385,19 +1399,54 @@ if test "x$au_enable_vorbis" = xyes; then
     AC_MSG_WARN(Unable to configure vorbis!)
     have_vorbis=no
   ])
+  fi
 else
   AC_MSG_RESULT(no)
 fi
 
 dnl libFLAC - Free Lossless Audio Codec
-AC_MSG_CHECKING(enable_audio=flac)
-if test "x$au_enable_flac" = xyes; then
-  AC_MSG_RESULT([yes, configuring flac])
-  SYSEXTRAS="$SYSEXTRAS flac_a.c"
-  EXTRADEFS="$EXTRADEFS -DAU_FLAC -DFLAC__NO_DLL"
-  EXTRALIBS="$EXTRALIBS -lFLAC -logg"
+if test "x$MSYS" = xyes ; then
+  AC_MSG_CHECKING(enable_audio=flac)
+  if test "x$au_enable_flac" = xyes; then
+    AC_MSG_RESULT([yes, configuring flac])
+    SYSEXTRAS="$SYSEXTRAS flac_a.c w32_libFLAC_dll.c w32_libOggFLAC_dll.c"
+    AC_CHECK_HEADER(FLAC/all.h, [ 
+      EXTRADEFS="$EXTRADEFS -DAU_FLAC -DAU_FLAC_DLL"
+    ])
+    AC_CHECK_HEADER(OggFLAC/all.h, [ 
+      EXTRADEFS="$EXTRADEFS -DAU_OGGFLAC -DAU_OGGFLAC_DLL"
+    ])
+dnl    AM_PATH_LIBFLAC([
+dnl      EXTRADEFS="$EXTRADEFS -DAU_FLAC -DAU_FLAC_DLL"
+dnl      EXTRACT_CPPFLAGS(CPPFLAGS,CFLAGS,$LIBFLAC_CFLAGS)
+dnl      LIBS="$LIBS $LIBFLAC_LIBS"
+dnl    ])
+dnl    AM_PATH_LIBOGGFLAC([
+dnl      EXTRADEFS="$EXTRADEFS -DAU_OGGFLAC -DAU_OGGFLAC_DLL"
+dnl      EXTRACT_CPPFLAGS(CPPFLAGS,CFLAGS,$LIBOGGFLAC_CFLAGS)
+dnl      LIBS="$LIBS $LIBOGGFLAC_LIBS"
+dnl    ])
+  else
+    AC_MSG_RESULT(no)
+  fi
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_CHECKING(enable_audio=flac)
+  if test "x$au_enable_flac" = xyes; then
+    AC_MSG_RESULT([yes, configuring flac])
+    SYSEXTRAS="$SYSEXTRAS flac_a.c"
+    AM_PATH_LIBFLAC([
+      EXTRADEFS="$EXTRADEFS -DAU_FLAC"
+      EXTRACT_CPPFLAGS(CPPFLAGS,CFLAGS,$LIBFLAC_CFLAGS)
+      LIBS="$LIBS $LIBFLAC_LIBS"
+    ])
+    AM_PATH_LIBOGGFLAC([
+      EXTRADEFS="$EXTRADEFS -DAU_OGGFLAC"
+      EXTRACT_CPPFLAGS(CPPFLAGS,CFLAGS,$LIBOGGFLAC_CFLAGS)
+      LIBS="$LIBS $LIBOGGFLAC_LIBS"
+    ])
+  else
+    AC_MSG_RESULT(no)
+  fi
 fi
 dnl ogg's speex
 AC_MSG_CHECKING(enable_audio=speex)
@@ -1439,20 +1488,6 @@ else
   AC_MSG_RESULT(no)
 fi
 
-dnl LAME MP3 encoder
-AC_MSG_CHECKING(enable_audio=lame)
-if test "x$au_enable_lame" = xyes; then
-  AC_MSG_RESULT(yes, configuring lame)
-  AC_CHECK_HEADER(lame/lame.h, [
-    have_lame=yes
-  ])
-  SYSEXTRAS="$SYSEXTRAS lame_a.c"
-  EXTRADEFS="$EXTRADEFS -DAU_LAME"
-  EXTRALIBS="$EXTRALIBS -lmp3lame"
-else
-  AC_MSG_RESULT(no)
-fi
-
 dnl Pseudo audio device (Undocumented).
 if test "x$au_enable_none" = xyes; then
     EXTRADEFS="$EXTRADEFS -DAU_NONE -DAU_AUDRIV"
@@ -1490,7 +1525,6 @@ case ".$DEFAULT_PLAYMODE" in
   .flac)     TIMIDITY_OUTPUT_ID=F ;;
   .speex)    TIMIDITY_OUTPUT_ID=S ;;
   .gogo)     TIMIDITY_OUTPUT_ID=g ;;
-  .lame)     TIMIDITY_OUTPUT_ID=L ;;
   .jack)     TIMIDITY_OUTPUT_ID=j ;;
   .ao)       TIMIDITY_OUTPUT_ID=O ;;
   *)         TIMIDITY_OUTPUT_ID= ;;
@@ -1696,7 +1730,6 @@ dnl configure must check ncurses header with -I/usr/include/ncurses option.
       ])
   ],
   [ LIBS="$LIBS $lib_curses_opt"
-    EXTRADEFS="$EXTRADEFS -DNCURSES_STATIC"
     case "$target" in
        *-*-freebsd[123]*)
          EXTRALIBS="$EXTRALIBS -lmytinfo"

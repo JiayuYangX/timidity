@@ -254,7 +254,8 @@ void w32g_i_init(void)
 #endif
 }
 
-int PlayerLanguage = LANGUAGE_ENGLISH;
+int PlayerLanguage = LANGUAGE_CHINESE;
+//int PlayerLanguage = LANGUAGE_ENGLISH;
 //int PlayerLanguage = LANGUAGE_JAPANESE;
 #define PInfoOK 1
 long SetValue(int32 value, int32 min, int32 max)
@@ -434,6 +435,8 @@ static void InitOutputMenu(HWND hWnd)
 	mii.hSubMenu = outputMenu;
 	if (PlayerLanguage == LANGUAGE_JAPANESE) {
 		mii.dwTypeData = TEXT("出力(&O)");
+	} else if (PlayerLanguage == LANGUAGE_CHINESE) {
+		mii.dwTypeData = TEXT("输出(&O)");
 	} else {
 		mii.dwTypeData = TEXT("Output(&O)");
 	}
@@ -490,6 +493,8 @@ static void InitMainWnd(HWND hParentWnd)
 	INILoadMainWnd();
 	if (PlayerLanguage == LANGUAGE_JAPANESE)
 	  hMainWnd = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_MAIN),hParentWnd,MainProc);
+	else if(PlayerLanguage == LANGUAGE_CHINESE)
+	  hMainWnd = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_MAIN_ZH),hParentWnd,MainProc);
 	else
 	  hMainWnd = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_MAIN_EN),hParentWnd,MainProc);
 	InitOutputMenu(hMainWnd);
@@ -4277,6 +4282,8 @@ static void DlgDirOpen(HWND hwnd)
     bi.pszDisplayName = biBuffer;
 	if ( PlayerLanguage == LANGUAGE_JAPANESE ) 
 		bi.lpszTitle = "MIDI ファイルのあるディレクトリを御選択なされますよう。";
+	else if ( PlayerLanguage == LANGUAGE_CHINESE )
+		bi.lpszTitle = "请选择包含 MIDI 文件的目录。";
 	else
 		bi.lpszTitle = "Select a directory with MIDI files.";
 	bi.ulFlags = 0;

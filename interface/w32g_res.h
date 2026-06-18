@@ -23,6 +23,24 @@
 #define IDB_BITMAP_TRACER               125
 #define IDD_PREF_SYN1                   127
 #define IDD_PREF_SYN1_EN                128
+// Chinese (Simplified) resource IDs
+#define IDD_DIALOG_MAIN_ZH              201
+#define IDM_MENU_MAIN_ZH                202
+#define IDD_DIALOG_CONSOLE_ZH           203
+#define IDD_DIALOG_DOC_ZH               204
+#define IDD_DIALOG_SIMPLE_LIST_ZH       205
+#define IDD_DIALOG_PREF_ZH              206
+#define IDD_PREF_PLAYER_ZH              207
+#define IDD_PREF_TIMIDITY1_ZH           208
+#define IDD_PREF_TIMIDITY2_ZH           209
+#define IDD_PREF_TIMIDITY3_ZH           210
+#define IDD_PREF_TIMIDITY4_ZH           211
+#define IDD_PREF_SYN1_ZH                212
+#define IDD_DIALOG_VORBIS_ZH            213
+#define IDD_DIALOG_GOGO_ZH              214
+#define IDD_DIALOG_ASIO_ZH              215
+#define IDD_DIALOG_LAME_ZH              216
+#define IDD_DIALOG_ONE_LINE_ZH          217
 #define IDD_DIALOG_PREF                 132
 #define IDC_CHECK_SEACHDIRRECURSIVE     1001
 #define IDC_CHECK_DOCWNDINDEPENDENT     1002
@@ -82,6 +100,7 @@
 #define IDC_GROUPBOX_PLAYERMODE         1046
 #define IDC_RADIOBUTTON_JAPANESE        1047
 #define IDC_RADIOBUTTON_ENGLISH         1048
+#define IDC_RADIOBUTTON_CHINESE         1049
 #define IDC_GROUPBOX_LANGUAGE           1049
 #define IDC_EDIT_CONFIG_FILE            1050
 #define IDC_BUTTON_CONFIG_FILE          1051

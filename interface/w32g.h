@@ -33,6 +33,7 @@
 
 #define LANGUAGE_JAPANESE				0x0001
 #define LANGUAGE_ENGLISH				0x0002
+#define LANGUAGE_CHINESE				0x0004
 extern int PlayerLanguage;
 extern int PlayerMode;
 

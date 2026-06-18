@@ -4782,7 +4782,7 @@ elif test $ac_cv_prog_cc_g = yes; then
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-O2"
+    CFLAGS="-std=gnu89 -O2 -Wno-incompatible-pointer-types"
   else
     CFLAGS=
   fi
@@ -5362,7 +5362,7 @@ fi
 
 if test "x$NOCFLAGS" = "xyes"; then
   if test "x$GCC" = "xyes"; then
-    CFLAGS="-O2"
+    CFLAGS="-std=gnu89 -O2 -Wno-incompatible-pointer-types"
   else
     CFLAGS=""
   fi
@@ -12725,7 +12725,9 @@ printf '%s\n' "#define SHARED_LIB_EXT \".$so\"" >>confdefs.h
   fi
 fi
 
-
+if test "x$MINGWGCC" = xyes; then
+    timidity_LDFLAGS="$timidity_LDFLAGS -static -static-libgcc -static-libstdc++"
+fi
 
 if test "$NEEDDLOPEN" = "yes"; then
   NEEDDLOPEN_TRUE=

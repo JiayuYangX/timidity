@@ -139,6 +139,10 @@ void InitConsoleWnd(HWND hParentWnd)
 		hConsoleWnd = CreateDialog
   			(hInst,MAKEINTRESOURCE(IDD_DIALOG_CONSOLE),hParentWnd,ConsoleWndProc);
 	break;
+	case LANGUAGE_CHINESE:
+		hConsoleWnd = CreateDialog
+  			(hInst,MAKEINTRESOURCE(IDD_DIALOG_CONSOLE_ZH),hParentWnd,ConsoleWndProc);
+	break;
 	}
 	ConsoleWndInfoReset(hConsoleWnd);
 	ShowWindow(hConsoleWnd,SW_HIDE);
@@ -391,6 +395,10 @@ void InitListWnd(HWND hParentWnd)
 		hListWnd = CreateDialog
 			(hInst,MAKEINTRESOURCE(IDD_DIALOG_SIMPLE_LIST),hParentWnd,ListWndProc);
 		break;
+	case LANGUAGE_CHINESE:
+		hListWnd = CreateDialog
+			(hInst,MAKEINTRESOURCE(IDD_DIALOG_SIMPLE_LIST_ZH),hParentWnd,ListWndProc);
+		break;
 	}
 	ListWndInfoReset(hListWnd);
 	ListWndInfo.hPopupMenu = CreatePopupMenu();
@@ -405,6 +413,17 @@ void InitListWnd(HWND hParentWnd)
 		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_REMOVE,"削除");
 		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
 		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CHOOSEFONT,"フォントの選択");
+		break;
+	case LANGUAGE_CHINESE:
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_PLAY,"播放");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDC_BUTTON_DOC,"文档");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CURRENT,"当前曲目");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_SEARCH,"搜索");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_REMOVE,"删除");
+		AppendMenu(ListWndInfo.hPopupMenu,MF_SEPARATOR,0,0);
+		AppendMenu(ListWndInfo.hPopupMenu,MF_STRING,IDM_LISTWND_CHOOSEFONT,"选择字体");
 		break;
  	default:
   	case LANGUAGE_ENGLISH:
@@ -655,6 +674,23 @@ ListWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 							"TiMidity コマンド\n"
 							"  Q: 終了\n"
 							,"ヘルプ", MB_OK);
+						} else if ( PlayerLanguage == LANGUAGE_CHINESE ){
+						MessageBox(hListWnd,
+							"按键帮助\n"
+							"列表窗口操作\n"
+							"  ESC: 关闭帮助      H: 显示帮助\n"
+							"  V: 查看文档      W: 打开 WRD 窗口\n"
+							"播放器操作\n"
+							"  SPACE/ENTER: 开始播放    E: 停止    S: 暂停\n"
+							"  P: 上一曲    N: 下一曲\n"
+							"播放列表操作\n"
+							"  M: 删除非MIDI文件    U: 删除重复文件\n"
+							"  C: 清空播放列表\n"
+							"  D: 删除当前曲目    BS: 删除前一曲\n"
+							"  INS: 移至列表末尾 (Push)    DEL: 从末尾插入 (Pop)\n"
+							"TiMidity 命令\n"
+							"  Q: 退出\n"
+							,"帮助", MB_OK);
 						} else {
 						MessageBox(hListWnd,
 							"Usage of key.\n"
@@ -855,6 +891,9 @@ static int ListWndInfoReset(HWND hwnd)
 	case LANGUAGE_JAPANESE:
 		ListWndInfo.fontName = ListWndInfo.fontNameJA;
 		break;
+	case LANGUAGE_CHINESE:
+		ListWndInfo.fontName = ListWndInfo.fontNameEN;
+		break;
 	}
 	return 0;
 }
@@ -995,6 +1034,10 @@ void InitDocWnd(HWND hParentWnd)
 		hDocWnd = CreateDialog
 			(hInst,MAKEINTRESOURCE(IDD_DIALOG_DOC),hParentWnd,DocWndProc);
 	break;
+	case LANGUAGE_CHINESE:
+		hDocWnd = CreateDialog
+			(hInst,MAKEINTRESOURCE(IDD_DIALOG_DOC_ZH),hParentWnd,DocWndProc);
+	break;
 	}
 	hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON_TIMIDITY), IMAGE_ICON, 16, 16, 0);
 	if (hIcon!=NULL) SendMessage(hDocWnd,WM_SETICON,FALSE,(LPARAM)hIcon);
@@ -1004,6 +1047,10 @@ void InitDocWnd(HWND hParentWnd)
 	case LANGUAGE_JAPANESE:
 		AppendMenu(hMenu,MF_SEPARATOR,0,0);
 		AppendMenu(hMenu,MF_STRING,IDM_DOCWND_CHOOSEFONT,"フォントの選択");
+		break;
+	case LANGUAGE_CHINESE:
+		AppendMenu(hMenu,MF_SEPARATOR,0,0);
+		AppendMenu(hMenu,MF_STRING,IDM_DOCWND_CHOOSEFONT,"选择字体");
 		break;
  	default:
   	case LANGUAGE_ENGLISH:
@@ -1216,6 +1263,9 @@ static int DocWndInfoReset2(HWND hwnd)
 	default:
 	case LANGUAGE_JAPANESE:
 		DocWndInfo.fontName = DocWndInfo.fontNameJA; 
+		break;
+	case LANGUAGE_CHINESE:
+		DocWndInfo.fontName = DocWndInfo.fontNameEN;
 		break;
 	}
 	return 0;
@@ -1652,6 +1702,10 @@ void InitListSearchWnd(HWND hParentWnd)
 		hListSearchWnd = CreateDialog
 			(hInst,MAKEINTRESOURCE(IDD_DIALOG_ONE_LINE),hParentWnd,ListSearchWndProc);
 		break;
+	case LANGUAGE_CHINESE:
+		hListSearchWnd = CreateDialog
+			(hInst,MAKEINTRESOURCE(IDD_DIALOG_ONE_LINE_ZH),hParentWnd,ListSearchWndProc);
+		break;
 	default:
 	case LANGUAGE_ENGLISH:
 		hListSearchWnd = CreateDialog
@@ -1677,6 +1731,14 @@ ListSearchWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_1),WM_SETTEXT,0,(LPARAM)"検索");
 			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_2),WM_SETTEXT,0,(LPARAM)"次を検索");
 			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_3),WM_SETTEXT,0,(LPARAM)"閉じる");
+			break;
+		case LANGUAGE_CHINESE:
+			SendMessage(hwnd,WM_SETTEXT,0,(LPARAM)"搜索列表");
+			SendMessage(GetDlgItem(hwnd,IDC_STATIC_HEAD),WM_SETTEXT,0,(LPARAM)"请输入搜索关键字");
+			SendMessage(GetDlgItem(hwnd,IDC_STATIC_TAIL),WM_SETTEXT,0,(LPARAM)"");
+			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_1),WM_SETTEXT,0,(LPARAM)"查找");
+			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_2),WM_SETTEXT,0,(LPARAM)"下一个");
+			SendMessage(GetDlgItem(hwnd,IDC_BUTTON_3),WM_SETTEXT,0,(LPARAM)"关闭");
 			break;
 		default:
 		case LANGUAGE_ENGLISH:

@@ -866,6 +866,9 @@ void w32g_initialize(void)
     case LANG_JAPANESE:
 	PlayerLanguage = LANGUAGE_JAPANESE;
 	break;
+    case LANG_CHINESE:
+	PlayerLanguage = LANGUAGE_CHINESE;
+	break;
     default:
 	PlayerLanguage = LANGUAGE_ENGLISH;
 	break;

@@ -652,6 +652,84 @@ SynWinProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 					AppendMenu ( hMenu, MF_STRING, IDM_TIMIDITY, "TiMidity++ について(&A)");
 					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
 					AppendMenu ( hMenu, MF_STRING, IDM_QUIT, "終了(&X)");
+				
+				} else if (PlayerLanguage == LANGUAGE_CHINESE) {
+					if ( w32g_syn_status == run ) {
+						AppendMenu ( hMenu, MF_STRING, IDM_STOP, "合成器停止(&S)");
+					} else if ( w32g_syn_status == stop ) {
+						AppendMenu ( hMenu, MF_STRING, IDM_START, "合成器开始(&S)");
+					} else if ( w32g_syn_status == quit ) { 
+						AppendMenu ( hMenu, MF_STRING | MF_GRAYED, IDM_START, "正在退出……");
+					}
+					AppendMenu ( hMenu, MF_STRING, IDM_SYSTEM_RESET, "系统重置(&R)");
+					switch ( rtsyn_system_mode ) {
+					case GM_SYSTEM_MODE:
+						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_GM_SYSTEM_RESET, "GM 重置");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS 重置");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG 重置");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_GM_SYSTEM, "切换到 GM 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "切换到 GS 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "切换到 XG 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "切换到默认系统");
+						break;
+					case GS_SYSTEM_MODE:
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM 重置");
+						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_GS_SYSTEM_RESET, "GS 重置");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG 重置");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "切换到 GM 系统");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_GS_SYSTEM, "切换到 GS 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "切换到 XG 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "切换到默认系统");
+						break;
+					case XG_SYSTEM_MODE:
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM 重置");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS 重置");
+						AppendMenu ( hMenuReset, MF_STRING | MF_CHECKED, IDM_XG_SYSTEM_RESET, "XG 重置");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "切换到 GM 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "切换到 GS 系统");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_XG_SYSTEM, "切换到 XG 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_DEFAULT_SYSTEM, "切换到默认系统");
+						break;
+					default:
+					case DEFAULT_SYSTEM_MODE:
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GM_SYSTEM_RESET, "GM 重置");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_GS_SYSTEM_RESET, "GS 重置");
+						AppendMenu ( hMenuReset, MF_STRING, IDM_XG_SYSTEM_RESET, "XG 重置");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GM_SYSTEM, "切换到 GM 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_GS_SYSTEM, "切换到 GS 系统");
+						AppendMenu ( hMenuChange, MF_STRING, IDM_CHANGE_XG_SYSTEM, "切换到 XG 系统");
+						AppendMenu ( hMenuChange, MF_STRING | MF_CHECKED, IDM_CHANGE_DEFAULT_SYSTEM, "切换到默认系统");
+						break;
+					}
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][0], IDM_PROCESS_PRIORITY_LOWEST, "低");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][1], IDM_PROCESS_PRIORITY_BELOW_NORMAL, "稍低");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][2], IDM_PROCESS_PRIORITY_NORMAL, "普通");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][3], IDM_PROCESS_PRIORITY_ABOVE_NORMAL, "稍高");
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][4], IDM_PROCESS_PRIORITY_HIGHEST, "高");
+					AppendMenu ( hMenuProcessPriority, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenuProcessPriority, MF_STRING | priority_flag[0][5], IDM_PROCESS_PRIORITY_REALTIME, "实时");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][0], IDM_SYN_THREAD_PRIORITY_LOWEST, "低");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][1], IDM_SYN_THREAD_PRIORITY_BELOW_NORMAL, "稍低");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][2], IDM_SYN_THREAD_PRIORITY_NORMAL, "普通");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][3], IDM_SYN_THREAD_PRIORITY_ABOVE_NORMAL, "稍高");
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][4], IDM_SYN_THREAD_PRIORITY_HIGHEST, "高");
+					AppendMenu ( hMenuSynPriority, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenuSynPriority, MF_STRING | priority_flag[1][5], IDM_SYN_THREAD_PRIORITY_TIMECRITICAL, "时间关键");
+					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuReset, "各种系统重置" );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuChange, "切换到特定系统" );
+					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuProcessPriority, "进程优先级设置" );
+					AppendMenu ( hMenu, MF_POPUP, (UINT)hMenuSynPriority, "合成线程优先级设置" );
+					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenu, MF_STRING, IDM_PREFERENCE, "设置(&P)...");
+					AppendMenu ( hMenu, MF_STRING, IDM_CONSOLE_WND, "控制台(&C)");
+					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenu, MF_STRING, IDM_VERSION, "版本信息");
+					AppendMenu ( hMenu, MF_STRING, IDM_TIMIDITY, "关于 TiMidity++(&A)");
+					AppendMenu ( hMenu, MF_SEPARATOR, 0, 0 );
+					AppendMenu ( hMenu, MF_STRING, IDM_QUIT, "退出(&X)");
+				
 				} else {
 					if ( w32g_syn_status == run ) {
 						AppendMenu ( hMenu, MF_STRING, IDM_STOP, "&Stop synthesizer");

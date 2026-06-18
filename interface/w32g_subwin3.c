@@ -2003,6 +2003,19 @@ TracerCanvasWndProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 					"TiMidity コマンド\n"
 					"  Q: 終了\n"
 					,"ヘルプ", MB_OK);
+				} else if ( PlayerLanguage == LANGUAGE_CHINESE ){
+				MessageBox(hTracerWnd,
+					"按键帮助\n"
+					"追踪器窗口命令\n"
+					"  ESC: 关闭帮助      H: 显示帮助\n"
+					"  +: 提高键位    -: 降低键位\n"
+					"  >: 加速    <: 减速\n"
+					"播放器命令\n"
+					"  SPACE/ENTER: 开始播放    E: 停止    S: 暂停\n"
+					"  P: 上一曲    N: 下一曲\n"
+					"TiMidity 命令\n"
+					"  Q: 退出\n"
+					,"帮助", MB_OK);
 				} else {
 				MessageBox(hTracerWnd,
 					"Usage of key.\n"

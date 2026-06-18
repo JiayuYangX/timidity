@@ -164,6 +164,17 @@ static pref_page_t pref_pages_en[] = {
 #endif
 };
 
+static pref_page_t pref_pages_zh[] = {
+	{ 0, "播放器", (HWND)NULL, IDD_PREF_PLAYER_ZH, (DLGPROC) PrefPlayerDialogProc, 0 },
+	{ 1, "效果", (HWND)NULL, IDD_PREF_TIMIDITY1_ZH, (DLGPROC) PrefTiMidity1DialogProc, 0 },
+	{ 2, "杂项", (HWND)NULL, IDD_PREF_TIMIDITY2_ZH, (DLGPROC) PrefTiMidity2DialogProc, 0 },
+	{ 3, "输出", (HWND)NULL, IDD_PREF_TIMIDITY3_ZH, (DLGPROC) PrefTiMidity3DialogProc, 0 },
+	{ 4, "声道", (HWND)NULL, IDD_PREF_TIMIDITY4_ZH, (DLGPROC) PrefTiMidity4DialogProc, 0 },
+#ifdef IA_W32G_SYN
+	{ 5, "合成器", (HWND)NULL, IDD_PREF_SYN1_ZH, (DLGPROC) PrefSyn1DialogProc, 0 },
+#endif
+};
+
 #ifndef IA_W32G_SYN
 #define PREF_PAGE_MAX 5
 #else
@@ -184,6 +195,9 @@ static void PrefWndCreatePage ( HWND hwnd )
 	switch(PlayerLanguage) {
 		case LANGUAGE_JAPANESE:
 			pref_pages = pref_pages_ja;
+			break;
+		case LANGUAGE_CHINESE:
+			pref_pages = pref_pages_zh;
 			break;
 		default:
 		case LANGUAGE_ENGLISH:
@@ -220,6 +234,9 @@ void PrefWndCreate(HWND hwnd)
 	switch(PlayerLanguage) {
 		case LANGUAGE_JAPANESE:
 			DialogBox ( hInst, MAKEINTRESOURCE(IDD_DIALOG_PREF), hwnd, PrefWndDialogProc );
+			break;
+		case LANGUAGE_CHINESE:
+			DialogBox ( hInst, MAKEINTRESOURCE(IDD_DIALOG_PREF_ZH), hwnd, PrefWndDialogProc );
 			break;
 		default:
 		case LANGUAGE_ENGLISH:
@@ -423,12 +440,16 @@ PrefPlayerDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		}
 		switch(sp_temp->PlayerLanguage){
 		case LANGUAGE_ENGLISH:
-			CheckRadioButton(hwnd,IDC_RADIOBUTTON_JAPANESE,IDC_RADIOBUTTON_ENGLISH,
+			CheckRadioButton(hwnd,IDC_RADIOBUTTON_JAPANESE,IDC_RADIOBUTTON_CHINESE,
 			IDC_RADIOBUTTON_ENGLISH);
+			break;
+		case LANGUAGE_CHINESE:
+			CheckRadioButton(hwnd,IDC_RADIOBUTTON_JAPANESE,IDC_RADIOBUTTON_CHINESE,
+			IDC_RADIOBUTTON_CHINESE);
 			break;
 		default:
 		case LANGUAGE_JAPANESE:
-			CheckRadioButton(hwnd,IDC_RADIOBUTTON_JAPANESE,IDC_RADIOBUTTON_ENGLISH,
+			CheckRadioButton(hwnd,IDC_RADIOBUTTON_JAPANESE,IDC_RADIOBUTTON_CHINESE,
 			IDC_RADIOBUTTON_JAPANESE);
 			break;
 		}
@@ -503,6 +524,7 @@ PrefPlayerDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDC_RADIOBUTTON_JAPANESE:
 		case IDC_RADIOBUTTON_ENGLISH:
+		case IDC_RADIOBUTTON_CHINESE:
 			break;
 		default:
 		break;
@@ -529,6 +551,8 @@ PrefPlayerDialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 			sp_temp->PlayerLanguage = LANGUAGE_ENGLISH;
 		} else if(SendDlgItemMessage(hwnd,IDC_RADIOBUTTON_JAPANESE,BM_GETCHECK,0,0)){
 			sp_temp->PlayerLanguage = LANGUAGE_JAPANESE;
+		} else {
+			sp_temp->PlayerLanguage = LANGUAGE_CHINESE;
 		}
 	 {
 	 int flag;
@@ -596,6 +620,14 @@ static char *cb_info_IDC_COMBO_REVERB_jp[] = {
 	"新リバーブ（グローバル）",
 };
 
+static char *cb_info_IDC_COMBO_REVERB_zh[] = {
+	"无混响",
+	"标准混响",
+	"标准混响（全局）",
+	"新混响",
+	"新混响（全局）",
+};
+
 // IDC_COMBO_CHORUS
 #define cb_num_IDC_COMBO_CHORUS 3
 
@@ -611,6 +643,12 @@ static char *cb_info_IDC_COMBO_CHORUS_jp[] = {
 	"サラウンドコーラス",
 };
 
+static char *cb_info_IDC_COMBO_CHORUS_zh[] = {
+	"无合唱",
+	"标准合唱",
+	"环绕合唱",
+};
+
 // IDC_COMBO_DELAY
 #define cb_num_IDC_COMBO_DELAY 2
 
@@ -622,6 +660,11 @@ static char *cb_info_IDC_COMBO_DELAY_en[] = {
 static char *cb_info_IDC_COMBO_DELAY_jp[] = {
 	"ディレイなし",
 	"標準ディレイ",
+};
+
+static char *cb_info_IDC_COMBO_DELAY_zh[] = {
+	"无延迟",
+	"标准延迟",
 };
 
 // IDC_COMBO_LPF
@@ -637,6 +680,12 @@ static char *cb_info_IDC_COMBO_LPF_jp[] = {
 	"フィルタなし",
 	"LPF (12dB/oct)",
 	"LPF (24dB/oct)",
+};
+
+static char *cb_info_IDC_COMBO_LPF_zh[] = {
+	"无滤波",
+	"低通滤波 (12dB/oct)",
+	"低通滤波 (24dB/oct)",
 };
 
 // IDC_COMBO_MODULE
@@ -682,6 +731,8 @@ PrefTiMidity1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		// CHORUS
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 			cb_info = cb_info_IDC_COMBO_CHORUS_jp;
+		else if (PlayerLanguage == LANGUAGE_CHINESE)
+			cb_info = cb_info_IDC_COMBO_CHORUS_zh;
 		else 
 			cb_info = cb_info_IDC_COMBO_CHORUS_en;
 
@@ -710,6 +761,8 @@ PrefTiMidity1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		// REVERB
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 			cb_info = cb_info_IDC_COMBO_REVERB_jp;
+		else if (PlayerLanguage == LANGUAGE_CHINESE)
+			cb_info = cb_info_IDC_COMBO_REVERB_zh;
 		else 
 			cb_info = cb_info_IDC_COMBO_REVERB_en;
 
@@ -734,6 +787,8 @@ PrefTiMidity1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		// DELAY
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 			cb_info = cb_info_IDC_COMBO_DELAY_jp;
+		else if (PlayerLanguage == LANGUAGE_CHINESE)
+			cb_info = cb_info_IDC_COMBO_DELAY_zh;
 		else 
 			cb_info = cb_info_IDC_COMBO_DELAY_en;
 
@@ -755,6 +810,8 @@ PrefTiMidity1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		// LPF
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 			cb_info = cb_info_IDC_COMBO_LPF_jp;
+		else if (PlayerLanguage == LANGUAGE_CHINESE)
+			cb_info = cb_info_IDC_COMBO_LPF_zh;
 		else 
 			cb_info = cb_info_IDC_COMBO_LPF_en;
 
@@ -1230,6 +1287,11 @@ static char *cb_info_IDC_COMBO_BANDWIDTH_jp[] = {
 	"16ビット",
 	"24ビット",
 };
+static char *cb_info_IDC_COMBO_BANDWIDTH_zh[] = {
+	"8位",
+	"16位",
+	"24位",
+};
 static char **cb_info_IDC_COMBO_BANDWIDTH;
 
 // IDC_COMBO_OUTPUT_MODE
@@ -1252,6 +1314,17 @@ static char *cb_info_IDC_COMBO_OUTPUT_MODE_en[]= {
 	"auto filename and output in next dir (with folder name)",(char *)3,
 	NULL
 };
+static char *cb_info_IDC_COMBO_OUTPUT_MODE_zh[]= {
+	"输出到以下文件",(char *)0,
+#if defined(__CYGWIN32__) || defined(__MINGW32__)
+	"自动确定文件名，输出到源文件所在文件夹",(char *)1,
+#else
+	"自动确定文件名，输出到源文件所在文件夹",(char *)1,
+#endif
+	"自动确定文件名，输出到以下文件夹",(char *)2,
+	"自动确定文件名，输出到以下文件夹（含文件夹名）",(char *)3,
+	NULL
+};
 static char **cb_info_IDC_COMBO_OUTPUT_MODE;
 
 static BOOL APIENTRY
@@ -1268,6 +1341,8 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 			}
 			if (PlayerLanguage == LANGUAGE_JAPANESE)
 			  cb_info_IDC_COMBO_OUTPUT_MODE = cb_info_IDC_COMBO_OUTPUT_MODE_jp;
+			else if (PlayerLanguage == LANGUAGE_CHINESE)
+			  cb_info_IDC_COMBO_OUTPUT_MODE = cb_info_IDC_COMBO_OUTPUT_MODE_zh;
 			else
 			  cb_info_IDC_COMBO_OUTPUT_MODE = cb_info_IDC_COMBO_OUTPUT_MODE_en;
 			for(i=0;cb_info_IDC_COMBO_OUTPUT_MODE[i];i+=2){
@@ -1320,6 +1395,8 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 		// BANDWIDTH
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 		  cb_info_IDC_COMBO_BANDWIDTH = cb_info_IDC_COMBO_BANDWIDTH_jp;
+		else if (PlayerLanguage == LANGUAGE_CHINESE)
+		  cb_info_IDC_COMBO_BANDWIDTH = cb_info_IDC_COMBO_BANDWIDTH_zh;
 		else
 		  cb_info_IDC_COMBO_BANDWIDTH = cb_info_IDC_COMBO_BANDWIDTH_en;
 		for (i = 0; i < cb_num_IDC_COMBO_BANDWIDTH; i++)
@@ -1540,6 +1617,8 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				cb_num1 = SendDlgItemMessage(hwnd,IDC_COMBO_OUTPUT_MODE,CB_GETCURSEL,(WPARAM)0,(LPARAM)0);
 				if (PlayerLanguage == LANGUAGE_JAPANESE)
 				  cb_info_IDC_COMBO_OUTPUT_MODE = cb_info_IDC_COMBO_OUTPUT_MODE_jp;
+				else if (PlayerLanguage == LANGUAGE_CHINESE)
+				  cb_info_IDC_COMBO_OUTPUT_MODE = cb_info_IDC_COMBO_OUTPUT_MODE_zh;
 				else
 				  cb_info_IDC_COMBO_OUTPUT_MODE = cb_info_IDC_COMBO_OUTPUT_MODE_en;
 				for(cb_num2=0;(int)cb_info_IDC_COMBO_OUTPUT_MODE[cb_num2];cb_num2+=2){
@@ -1554,6 +1633,14 @@ PrefTiMidity3DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				    SetDlgItemText(hwnd,IDC_EDIT_OUTPUT_FILE,st_temp->OutputDirName);
 				  } else {
 				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"出力ファイル");
+				    SetDlgItemText(hwnd,IDC_EDIT_OUTPUT_FILE,st_temp->OutputName);
+				  }
+				} else if (PlayerLanguage == LANGUAGE_CHINESE) {
+				  if(st_temp->auto_output_mode>0){
+				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"输出目录");
+				    SetDlgItemText(hwnd,IDC_EDIT_OUTPUT_FILE,st_temp->OutputDirName);
+				  } else {
+				    SendDlgItemMessage(hwnd,IDC_BUTTON_OUTPUT_FILE,WM_SETTEXT,0,(LPARAM)"输出文件");
 				    SetDlgItemText(hwnd,IDC_EDIT_OUTPUT_FILE,st_temp->OutputName);
 				  }
 				} else {
@@ -1951,6 +2038,32 @@ PrefSyn1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "高い" );
 			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
 				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "タイムクリティカル" );
+		} else if (PlayerLanguage == LANGUAGE_CHINESE) {
+			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "低" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "较低" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "标准" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "较高" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "高" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "实时" );
+
+			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "低" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "较低" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "标准" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "较高" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "高" );
+			SendDlgItemMessage(hwnd, IDC_COMBO_SYN_THREAD_PRIORITY,
+				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "时间关键" );
 		} else {
 			SendDlgItemMessage(hwnd, IDC_COMBO_PROCESS_PRIORITY,
 				CB_INSERTSTRING, (WPARAM) -1, (LPARAM) "Lowest" );
@@ -2030,6 +2143,7 @@ PrefSyn1DialogProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 	switch (LOWORD(wParam)) {
 		case IDC_RADIOBUTTON_JAPANESE:
 		case IDC_RADIOBUTTON_ENGLISH:
+		case IDC_RADIOBUTTON_CHINESE:
 			break;
 		default:
 		break;
@@ -2915,6 +3029,8 @@ int gogoConfigDialog(void)
   if(!IsWindow(hgogoConfigDailog)) {
     if (PlayerLanguage == LANGUAGE_JAPANESE)
       hgogoConfigDailog = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_GOGO),(HWND)hPrefWnd,gogoConfigDialogProc);
+    else if (PlayerLanguage == LANGUAGE_CHINESE)
+      hgogoConfigDailog = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_GOGO_ZH),(HWND)hPrefWnd,gogoConfigDialogProc);
     else
       hgogoConfigDailog = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_GOGO_EN),(HWND)hPrefWnd,gogoConfigDialogProc);
   }
@@ -3208,6 +3324,10 @@ int lameConfigDialog(void)
             hlameConfigDailog = CreateDialog(hInst,
                 MAKEINTRESOURCE(IDD_DIALOG_LAME),
                 (HWND)hPrefWnd, lameConfigDialogProc);
+        else if (PlayerLanguage == LANGUAGE_CHINESE)
+            hlameConfigDailog = CreateDialog(hInst,
+                MAKEINTRESOURCE(IDD_DIALOG_LAME_ZH),
+                (HWND)hPrefWnd, lameConfigDialogProc);
         else
             hlameConfigDailog = CreateDialog(hInst,
                 MAKEINTRESOURCE(IDD_DIALOG_LAME_EN),
@@ -3294,6 +3414,14 @@ static void lameConfigDialogReset(HWND hwnd)
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"X");
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Y");
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Z");
+    } else if(PlayerLanguage == LANGUAGE_CHINESE) {
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"单声道");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"仅左声道");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"仅右声道");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"立体声");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"联合立体声");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"中/侧立体声");
+        SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"双声道");
     } else {
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Mono");
         SendDlgItemMessage(hwnd, IDC_COMBO_LAME_ENCODE_MODE, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)"Left Only");
@@ -3450,6 +3578,22 @@ CB_INFO_TYPE2_BEGIN(IDC_COMBO_MODE_jp)
 	NULL
 CB_INFO_TYPE2_END
 
+// IDC_COMBO_MODE_zh
+CB_INFO_TYPE2_BEGIN(IDC_COMBO_MODE_zh)
+	"VBR 品质 1 (低)",(char *)1,
+	"VBR 品质 2",(char *)2,
+	"VBR 品质 3",(char *)3,
+	"VBR 品质 4",(char *)4,
+	"VBR 品质 4.99",(char *)499,
+	"VBR 品质 5",(char *)5,
+	"VBR 品质 6",(char *)6,
+	"VBR 品质 7",(char *)7,
+	"VBR 品质 8 (默认)",(char *)8,
+	"VBR 品质 9",(char *)9,
+	"VBR 品质 10 (高)",(char *)10,
+	NULL
+CB_INFO_TYPE2_END
+
 // IDC_COMBO_MODE_en
 CB_INFO_TYPE2_BEGIN(IDC_COMBO_MODE_en)
 	"VBR Quality 1 (low)",(char *)1,
@@ -3576,6 +3720,8 @@ static BOOL APIENTRY vorbisConfigDialogProc(HWND hwnd, UINT uMess, WPARAM wParam
 		// コンボボックスの初期化
 		if (PlayerLanguage == LANGUAGE_JAPANESE)
 		  cb_info_IDC_COMBO_MODE = cb_info_IDC_COMBO_MODE_jp;
+		else if (PlayerLanguage == LANGUAGE_CHINESE)
+		  cb_info_IDC_COMBO_MODE = cb_info_IDC_COMBO_MODE_zh;
 		else
 		  cb_info_IDC_COMBO_MODE = cb_info_IDC_COMBO_MODE_en;
 
@@ -3684,6 +3830,8 @@ int vorbisConfigDialog(void)
   if(!IsWindow(hvorbisConfigDailog)) {
     if (PlayerLanguage == LANGUAGE_JAPANESE)
       hvorbisConfigDailog = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_VORBIS),(HWND)hPrefWnd,vorbisConfigDialogProc);
+    else if (PlayerLanguage == LANGUAGE_CHINESE)
+      hvorbisConfigDailog = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_VORBIS_ZH),(HWND)hPrefWnd,vorbisConfigDialogProc);
     else
       hvorbisConfigDailog = CreateDialog(hInst,MAKEINTRESOURCE(IDD_DIALOG_VORBIS_EN),(HWND)hPrefWnd,vorbisConfigDialogProc);
   }
@@ -3933,8 +4081,11 @@ int asioConfigDialog(void)
 
     asio_dialog_saved_device = asio_ConfigDialogInfo.device_index;
 
-    result = DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_ASIO),
-                (HWND)hPrefWnd, asioConfigDialogProc);
+	if (PlayerLanguage == LANGUAGE_CHINESE) {
+		result = DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_ASIO_ZH), (HWND)hPrefWnd, asioConfigDialogProc);
+	} else {
+		result = DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_ASIO), (HWND)hPrefWnd, asioConfigDialogProc);
+	}
     if(result < 0) result = 0;
 
     if(need_pa_cleanup)

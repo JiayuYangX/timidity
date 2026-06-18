@@ -467,9 +467,9 @@ EXTRA_libinterface_a_SOURCES = \
 @ENABLE_SOUND_SPEC_TRUE@	soundspec.$(OBJEXT)
 
 
-@ENABLE_W32G_SYN_TRUE@W32GUI_DEPS = w32g_res.res
+@ENABLE_W32G_SYN_TRUE@W32GUI_DEPS = w32g_res.o w32g_res_zh.o
 
-@ENABLE_W32GUI_TRUE@W32GUI_DEPS = w32g_res.res
+@ENABLE_W32GUI_TRUE@W32GUI_DEPS = w32g_res.o w32g_res_zh.o
 
 INTERFACE_OBJS = $(INTERFACE_SRCS:.c=.$(OBJEXT))
 
@@ -515,7 +515,7 @@ EXTRA_DIST = \
 
 #BRCC32 = c:/borland/bcc55/bin/brcc32.exe
 #BRCC32_FLAGS = -ic:/borland/bcc55/include
-#w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+#w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 #	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp
 #	perl -pe 's/(^FONT.*".*").*$$/$$1/' w32g_res.rc >w32g_res_bc.rc
 #	$(BRCC32) $(BRCC32_FLAGS) w32g_res_bc.rc
@@ -1112,19 +1112,19 @@ install.el: $(ELFILES)
 	test -d $(DESTDIR)$(ELISP_DIR) || mkdir -p $(DESTDIR)$(ELISP_DIR)
 	for f in $(ELFILES) ''; do case ".$$f" in .);; *) $(INSTALL_DATA) $$f $(DESTDIR)$(ELISP_DIR);; esac; done
 
-@VCPP_TRUE@w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+@VCPP_TRUE@w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 @VCPP_TRUE@	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp 
 @VCPP_TRUE@	rc -l0x11 w32g_res.rc
-@VCPP_FALSE@@WATCOM_C_TRUE@w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+@VCPP_FALSE@@WATCOM_C_TRUE@w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 @VCPP_FALSE@@WATCOM_C_TRUE@	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp 
 @VCPP_FALSE@@WATCOM_C_TRUE@	rc -l0x11 w32g_res.rc
-@DMC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+@DMC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 @DMC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp 
 @DMC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@	rc -D__NT__ -l0x11 w32g_res.rc
-@DMC_FALSE@@POCC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+@DMC_FALSE@@POCC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 @DMC_FALSE@@POCC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp 
 @DMC_FALSE@@POCC_TRUE@@VCPP_FALSE@@WATCOM_C_FALSE@	porc  w32g_res.rc
-@BORLANDC_TRUE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+@BORLANDC_TRUE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 @BORLANDC_TRUE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp
 @BORLANDC_TRUE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	perl -pe 's/(^FONT.*".*").*$$/$$1/' w32g_res.rc >w32g_res_bc.rc
 @BORLANDC_TRUE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	brcc32 -iC:/Borland/BDS/4.0/include w32g_res_bc.rc
@@ -1136,13 +1136,16 @@ install.el: $(ELFILES)
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_subwin_escaped.c:w32g_subwin.c escape_sjis.pl
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	./escape_sjis.pl < w32g_subwin.c > w32g_subwin_escaped.c
 
-@BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.res: w32g_res.h w32g_rec.h w32g_res.rc \
+@BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@w32g_res.o: w32g_res.h w32g_rec.h w32g_res.rc \
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	w32g_btn.bmp w32g_icon.ico w32g_sleep.bmp w32g_subbtn.bmp \
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	escape_sjis.pl
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	./escape_sjis.pl <w32g_res.rc >w32g_res_escaped.rc
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	windres -o $@ -O coff w32g_res.rc 2>&1|grep escape - >/dev/null && \
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	windres -o $@ -O coff w32g_res_escaped.rc || echo
 @BORLANDC_FALSE@@DMC_FALSE@@POCC_FALSE@@VCPP_FALSE@@WATCOM_C_FALSE@	rm w32g_res_escaped.rc
+
+w32g_res_zh.o: w32g_res_zh.rc
+	windres -c 936 -o $@ -O coff w32g_res_zh.rc
 #n_so_libs = @n_so_libs@
 #s_so_libs = @s_so_libs@
 #m_so_libs = @m_so_libs@
