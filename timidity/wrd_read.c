@@ -1554,109 +1554,57 @@ static int wrd_nexttok(struct timidity_file *tf)
 
 static uint8 cmdlookup(uint8 *cmd)
 {
-    switch(cmd[0])
-    {
-      case 'C':
-	return WRD_COLOR;
-      case 'E':
-	if(cmd[1] == 'N')
-	    return WRD_END;
-	if(cmd[1] == 'S')
-	    return WRD_ESC;
-	return WRD_EXEC;
-      case 'F':
-	if(cmd[1] == 'A')
-	    return WRD_FADE;
-	if(cmd[4] == 'M')
-	    return WRD_eFONTM;
-	if(cmd[4] == 'P')
-	    return WRD_eFONTP;
-	return WRD_eFONTR;
-      case 'G':
-	if(cmd[1] == 'O')
-	    return WRD_GON;
-	if(cmd[1] == 'S')
-	{
-	    if(cmd[3] == 'R')
-		return WRD_GSCREEN;
-	    return WRD_eGSC;
-	}
-	if(cmd[3] == 'R')
-	    return WRD_GCIRCLE;
-	if(cmd[3] == 'S')
-	    return WRD_GCLS;
-	if(cmd[3] == 'I')
-	    return WRD_GINIT;
-	if(cmd[3] == 'N')
-	    return WRD_GLINE;
-	if(cmd[3] == 'D')
-	    return WRD_GMODE;
-	return WRD_GMOVE;
-      case 'I':
-	return WRD_INKEY;
-      case 'L':
-	if(cmd[2] == 'C')
-	    return WRD_LOCATE;
-	if(cmd[2] == 'N')
-	    return WRD_eLINE;
-	return WRD_LOOP;
-      case 'M':
-	if(cmd[1] == 'A')
-	    return WRD_MAG;
-	return WRD_MIDI;
-      case 'O':
-	if(cmd[1] == 'U' && cmd[2] == 'T')
-	    return 0;	/* @out: PC-98 I/O port, unsupported */
-	return WRD_OFFSET;
-      case 'P':
-	if(cmd[3] == '\0')
-	    return WRD_PAL;
-	if(cmd[1] == 'L')
-	    return WRD_PLOAD;
-	if(cmd[2] == 'T')
-	    return WRD_PATH;
-	if(cmd[3] == 'C')
-	    return WRD_PALCHG;
-	return WRD_PALREV;
-      case 'R':
-	if(cmd[2] == 'G')
-	    return WRD_eREGSAVE;
-	if(cmd[2] == 'S')
-	    return WRD_REST;
-	if(cmd[3] == 'A')
-	    return WRD_REMARK;
-	return WRD_REM;
-      case 'S':
-	if(cmd[3] == 'E')
-	    return WRD_SCREEN;
-	if(cmd[3] == 'O')
-	    return WRD_SCROLL;
-	if(cmd[3] == 'R')
-	    return WRD_STARTUP;
-	return WRD_STOP;
-      case 'T':
-	if(cmd[1] == 'C')
-	    return WRD_TCLS;
-	if(cmd[1] == 'E')
-	    return WRD_eTEXTDOT;
-	if(cmd[1] == 'M')
-	    return WRD_eTMODE;
-	if(cmd[1] == 'O')
-	    return WRD_TON;
-	return WRD_eTSCRL;
-      case 'V':
-	if(cmd[2] == 'O')
-	    return WRD_eVCOPY;
-	if(cmd[2] == 'G')
-	    return WRD_eVSGET;
-	return WRD_eVSRES;
-      case 'W':
-	if(cmd[1] == 'A')
-	    return WRD_WAIT;
-	return WRD_WMODE;
-      case 'X':
-	return WRD_eXCOPY;
-    }
+    char *s = (char*)cmd;
+
+    if(strcmp(s, "COLOR") == 0)   return WRD_COLOR;
+    if(strcmp(s, "END") == 0)     return WRD_END;
+    if(strcmp(s, "ESC") == 0)     return WRD_ESC;
+    if(strcmp(s, "EXEC") == 0)    return WRD_EXEC;
+    if(strcmp(s, "FADE") == 0)    return WRD_FADE;
+    if(strcmp(s, "FONTM") == 0)   return WRD_eFONTM;
+    if(strcmp(s, "FONTP") == 0)   return WRD_eFONTP;
+    if(strcmp(s, "FONTR") == 0)   return WRD_eFONTR;
+    if(strcmp(s, "GCIRCLE") == 0) return WRD_GCIRCLE;
+    if(strcmp(s, "GCLS") == 0)    return WRD_GCLS;
+    if(strcmp(s, "GINIT") == 0)   return WRD_GINIT;
+    if(strcmp(s, "GLINE") == 0)   return WRD_GLINE;
+    if(strcmp(s, "GMODE") == 0)   return WRD_GMODE;
+    if(strcmp(s, "GMOVE") == 0)   return WRD_GMOVE;
+    if(strcmp(s, "GON") == 0)     return WRD_GON;
+    if(strcmp(s, "GSC") == 0)     return WRD_eGSC;
+    if(strcmp(s, "GSCREEN") == 0) return WRD_GSCREEN;
+    if(strcmp(s, "INKEY") == 0)   return WRD_INKEY;
+    if(strcmp(s, "LINE") == 0)    return WRD_eLINE;
+    if(strcmp(s, "LOCATE") == 0)  return WRD_LOCATE;
+    if(strcmp(s, "LOOP") == 0)    return WRD_LOOP;
+    if(strcmp(s, "MAG") == 0)     return WRD_MAG;
+    if(strcmp(s, "MIDI") == 0)    return WRD_MIDI;
+    if(strcmp(s, "OFFSET") == 0)  return WRD_OFFSET;
+    if(strcmp(s, "PAL") == 0)     return WRD_PAL;
+    if(strcmp(s, "PALCHG") == 0)  return WRD_PALCHG;
+    if(strcmp(s, "PALREV") == 0)  return WRD_PALREV;
+    if(strcmp(s, "PATH") == 0)    return WRD_PATH;
+    if(strcmp(s, "PLOAD") == 0)   return WRD_PLOAD;
+    if(strcmp(s, "REGSAVE") == 0) return WRD_eREGSAVE;
+    if(strcmp(s, "REM") == 0)     return WRD_REM;
+    if(strcmp(s, "REMARK") == 0)  return WRD_REMARK;
+    if(strcmp(s, "REST") == 0)    return WRD_REST;
+    if(strcmp(s, "SCREEN") == 0)  return WRD_SCREEN;
+    if(strcmp(s, "SCROLL") == 0)  return WRD_SCROLL;
+    if(strcmp(s, "STARTUP") == 0) return WRD_STARTUP;
+    if(strcmp(s, "STOP") == 0)    return WRD_STOP;
+    if(strcmp(s, "TCLS") == 0)    return WRD_TCLS;
+    if(strcmp(s, "TEXTDOT") == 0) return WRD_eTEXTDOT;
+    if(strcmp(s, "TMODE") == 0)   return WRD_eTMODE;
+    if(strcmp(s, "TON") == 0)     return WRD_TON;
+    if(strcmp(s, "TSCRL") == 0)   return WRD_eTSCRL;
+    if(strcmp(s, "VCOPY") == 0)   return WRD_eVCOPY;
+    if(strcmp(s, "VSGET") == 0)   return WRD_eVSGET;
+    if(strcmp(s, "VSRES") == 0)   return WRD_eVSRES;
+    if(strcmp(s, "WAIT") == 0)    return WRD_WAIT;
+    if(strcmp(s, "WMODE") == 0)   return WRD_WMODE;
+    if(strcmp(s, "XCOPY") == 0)   return WRD_eXCOPY;
+
     return 0;
 }
 
