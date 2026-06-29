@@ -1357,7 +1357,7 @@ void wrd_text_scroll ( int x1, int y1, int x2, int y2, int mode, int color, int 
 			memcpy ( &w32g_wrd_wnd.textbuf [ y + 1 ][x1], 
 				&w32g_wrd_wnd.textbuf [ y ][x1], dx );
 			memcpy ( &w32g_wrd_wnd.forecolorbuf [ y + 1 ][x1], 
-				&w32g_wrd_wnd.forecolorbuf [ y ], dx );
+				&w32g_wrd_wnd.forecolorbuf [ y ][x1], dx );
 			memcpy ( &w32g_wrd_wnd.backcolorbuf [ y + 1 ][x1], 
 				&w32g_wrd_wnd.backcolorbuf [ y ][x1], dx );
 			memcpy ( &w32g_wrd_wnd.attrbuf [ y + 1 ][x1], 
