@@ -581,7 +581,7 @@ extern void wrd_graphic_gon ( int sw );
 extern void wrd_graphic_gline ( int x1, int y1, int x2, int y2, int p1, int sw, int p2 );
 extern void wrd_graphic_gcircle ( int x, int y, int r, int p1, int sw, int p2 );
 extern void wrd_graphic_pload ( char *path );
-extern void wrd_graphic_pal_g4r4b4 ( int p, int *g4r4b4, int max );
+extern void wrd_graphic_pal_r4g4b4 ( int p, int *r4g4b4, int max );
 extern void wrd_graphic_palrev ( int p );
 extern void wrd_graphic_apply_pal ( int p );
 extern void wrd_graphic_fade ( int p1, int p2, int speed );
@@ -929,14 +929,14 @@ void wrd_graphic_pload ( char *path )
 	}
 }
 
-static COLORREF g4r4b4_to_rgb ( int g4r4b4 )
+static COLORREF r4g4b4_to_rgb ( int r4g4b4 )
 {
-	return RGB ( ((g4r4b4 & 0x0F00) >> 8 ) << 4, 
-		((g4r4b4 & 0x00F0) >> 4 ) << 4, 
-		((g4r4b4 & 0x000F) >> 0 ) << 4 );
+	return RGB ( ((r4g4b4 & 0x0F00) >> 8 ) << 4, 
+		((r4g4b4 & 0x00F0) >> 4 ) << 4, 
+		((r4g4b4 & 0x000F) >> 0 ) << 4 );
 }
 
-void wrd_graphic_pal_g4r4b4 ( int p, int *g4r4b4, int max )
+void wrd_graphic_pal_r4g4b4 ( int p, int *r4g4b4, int max )
 {
 	int i;
 
@@ -950,7 +950,7 @@ void wrd_graphic_pal_g4r4b4 ( int p, int *g4r4b4, int max )
 		max = W32G_WRDWND_GRAPHIC_PALLETE_MAX;
 	}
 	for ( i = 0; i < max; i++ ) {
-		w32g_wrd_wnd.gpal_buff[p][i] = RGBtoRGBQUAD ( g4r4b4_to_rgb( g4r4b4[i] ) );
+		w32g_wrd_wnd.gpal_buff[p][i] = RGBtoRGBQUAD ( r4g4b4_to_rgb( r4g4b4[i] ) );
 	}
 	wrd_wnd_unlock();
 	if ( p == 0 ) {
@@ -1276,15 +1276,15 @@ void wrd_graphic_mag ( char *path, int x, int y, int s, int p )
 		}
 	}
 	wrd_wnd_unlock();
-	wrd_graphic_pal_g4r4b4 ( 17, mh->pal, 16 );
+	wrd_graphic_pal_r4g4b4 ( 17, mh->pal, 16 );
 	if ( w32g_wrd_wnd.index_active == 0 )
-		wrd_graphic_pal_g4r4b4 ( 18, mh->pal, 16 );
+		wrd_graphic_pal_r4g4b4 ( 18, mh->pal, 16 );
 	if ( w32g_wrd_wnd.index_active == 1 )
-		wrd_graphic_pal_g4r4b4 ( 19, mh->pal, 16 );
+		wrd_graphic_pal_r4g4b4 ( 19, mh->pal, 16 );
 	if ( p == 0 || p == 2 ) {
-		wrd_graphic_pal_g4r4b4 ( 0, mh->pal, 16 );
+		wrd_graphic_pal_r4g4b4 ( 0, mh->pal, 16 );
 	} else {
-		// wrd_graphic_pal_g4r4b4() を実行しないと領域が更新されない。
+		// wrd_graphic_pal_r4g4b4() を実行しないと領域が更新されない。
 		if ( w32g_wrd_wnd.index_active == w32g_wrd_wnd.index_display ) {
 			RECT rc;
 			SetRect ( &rc, x_orig, y_orig, width, height );

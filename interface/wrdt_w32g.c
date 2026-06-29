@@ -552,7 +552,7 @@ extern void wrd_graphic_gon ( int sw );
 extern void wrd_graphic_gline ( int x1, int y1, int x2, int y2, int p1, int sw, int p2 );
 extern void wrd_graphic_gcircle ( int x, int y, int r, int p1, int sw, int p2 );
 extern void wrd_graphic_pload ( char *path );
-extern void wrd_graphic_pal_g4r4b4 ( int p, int *g4r4b4, int max );
+extern void wrd_graphic_pal_r4g4b4 ( int p, int *r4g4b4, int max );
 extern void wrd_graphic_palrev ( int p );
 extern void wrd_graphic_apply_pal ( int p );
 extern void wrd_graphic_fade ( int p1, int p2, int speed );
@@ -732,7 +732,7 @@ to be ignored in kterm)*/
       case WRD_OFFSET: /* Never call */
 	break;
       case WRD_PAL:
-		wrd_graphic_pal_g4r4b4 (wrd_args[0], wrd_args + 1, 16 );
+		wrd_graphic_pal_r4g4b4 (wrd_args[0], wrd_args + 1, 16 );
 #ifdef WRD_VERBOSE
 	p = (char *)new_segment(&tmpbuffer, MIN_MBLOCK_SIZE);
 	snprintf(p, MIN_MBLOCK_SIZE, "@PAL(%03x", wrd_args[0]);
