@@ -955,9 +955,7 @@ SynWinProc(HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 			break;
 #ifdef HAVE_SYN_CONSOLE
 		case IDM_CONSOLE_WND:
-			if ( hConsoleWnd == NULL ) {
-				InitConsoleWnd ( w32g_syn.nid_hWnd );
-			}
+			InitConsoleWnd ( w32g_syn.nid_hWnd );
 			if ( IsWindowVisible ( hConsoleWnd ) )
 				ShowWindow ( hConsoleWnd, SW_HIDE );
 			else
@@ -1769,6 +1767,10 @@ void InitConsoleWnd(HWND hParentWnd)
   	case LANGUAGE_ENGLISH:
 		hConsoleWnd = CreateDialog
   			(hInst,MAKEINTRESOURCE(IDD_DIALOG_CONSOLE_EN),hParentWnd,ConsoleWndProc);
+		break;
+	case LANGUAGE_CHINESE:
+		hConsoleWnd = CreateDialog
+  			(hInst,MAKEINTRESOURCE(IDD_DIALOG_CONSOLE_ZH),hParentWnd,ConsoleWndProc);
 		break;
  	default:
 	case LANGUAGE_JAPANESE:

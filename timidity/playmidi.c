@@ -2157,7 +2157,8 @@ static int find_voice(MidiEvent *e)
 				kill_note(i);
 			else if (voice[i].note == note && (channel[ch].assign_mode == 0
 					|| (channel[ch].assign_mode == 1 &&
-					    voice[i].proximate_flag == 0)))
+					    voice[i].proximate_flag == 0))
+					&& !opt_overlap_voice_allow)
 				kill_note(i);
 		}
 	for (i = 0; i < upper_voices; i++)

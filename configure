@@ -15235,7 +15235,7 @@ fi
   	lib_w32gui_opt='-lgdi32 -lcomctl32 -lcomdlg32 -lole32'
     lib_user32_opt='-luser32'
     LDFLAGS="-mwindows $LDFLAGS"
-    INTERFACE_SRCS="$INTERFACE_SRCS w32g_ini.c w32g_pref.c w32g_syn_escaped.c w32g_utl.c winsyn_c.c rtsyn_common.c rtsyn_winmm.c"
+    INTERFACE_SRCS="$INTERFACE_SRCS w32g_ini.c w32g_pref.c w32g_syn_escaped.c w32g_utl.c winsyn_c.c rtsyn_common.c rtsyn_winmm.c w32g_res_zh.rc"
   fi
 
   ;;
