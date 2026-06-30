@@ -6,11 +6,18 @@
 
 ## 基本使用
 
-在软件根目录创建 `timidity.cfg` 配置文件，用 `soundfont` 指定音色文件（支持 GUS Patch、SoundFont 2 和独立 PCM 采样），用 `opt` 设置启动参数。具体参考 `timidity.cfg.5.html`（汉化版本位于 `man/zh` 目录）。启动软件时会创建其他 `.ini` 配置文件。
+在软件根目录创建 `timidity.cfg` 配置文件，用 `soundfont` 指定音色文件（支持 GUS Patch、SoundFont 2 和独立 PCM 采样），用 `opt` 设置启动参数。配置文件具体参考 `timidity.cfg.5.html`，命令行参数参考 `timidity.1.html`（汉化版本位于 `man/zh` 目录）。启动软件时会创建其他 `.ini` 配置文件。
 
-本次构建提供控制台和 GUI 两种使用方式。控制台版本可执行文件为 `timidity.exe`，在终端命令行中使用（可配置环境变量）。默认使用 dumb interface（`-id`），可通过 `-i` 或 `--interface` 参数指定其他控制台界面（支持 ncurses 和 vt100）；可通过 `-O` 或 `--output-mode` 参数指定输出方式。命令行参数参考 `timidity.1.html`（汉化版本位置同上）。
+本次构建提供命令行、播放器 GUI、合成器 GUI、合成器服务四种使用方法（驱动形式不适配现代系统，未参与构建）。
 
-GUI 版可执行文件为 `timw32g.exe`，支持显示 Tracer、DOC、WRD 窗口。
+| **类型**      | **二进制文件** | **特点**                                 | **基础用法**                                                 |
+| ------------- | -------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| 命令行（CLI） | `timidity.exe` | 命令行程序，无图形界面；基础功能最全面   | `-i` 或 `--interface` 参数指定控制台界面<br /> `-O` 或 `--output-mode` 参数指定输出方式 |
+| 播放器 GUI    | `timw32g.exe`  | 有图形界面；支持 Tracer、WRD、DOC 等功能 | 略                                                           |
+| 合成器 GUI    | `twsyng.exe`   | 托盘程序，有图形界面；支持设置输入端口   | 托盘右键设置选择输入端口，点击“合成器开始”                   |
+| 合成器服务    | `twsynsrv.exe` | 用于注册/卸载合成器服务，无图形界面      | 终端 `twsynsrv /INSTALL` 安装服务，启动服务后主动监听<br />`twsynsrv /UNINSTALL` 卸载服务 |
+
+
 
 ## 修改内容
 
@@ -47,24 +54,23 @@ GUI 版可执行文件为 `timw32g.exe`，支持显示 Tracer、DOC、WRD 窗口
 
 ## 构建启用
 
-### 控制台界面
+### 界面
 
-- dumb interface `-id`
-- ncurses `-in`
-- vt100 `-iT`
+- `timw32g.exe` Windows GUI 界面
+- `twsyng.exe` Windows 合成器 GUI 界面
+- `timidity.exe` 命令行界面
+  - dumb 界面（默认） `-id`
+  - ncurses 界面 `-in`
+  - vt100 界面 `-iT`
+  - Windows 合成器界面 `-iW`
+
 
 ### 音频输出
 
-- w32 (Windows MMS)
-
+- w32 (Windows MMS)（默认）
 - PortAudio MME / DirectSound / ASIO / + WASAPI (新增)
-
 - Vorbis OGG
-
 - FLAC
-
 - MP3 GOGO
-
   > 注：Gogo-No-Coda（午後のこ～だ），日本人写的 LAME 分支，是当时最快的 MP3 编码器；现早已停止维护
-
 - \+ MP3 LAME (新增)
