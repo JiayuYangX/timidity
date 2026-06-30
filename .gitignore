@@ -1,6 +1,7 @@
 *.a
 *.o
 *.exe
+*.dll
 Makefile
 /doc/timidity.*
 /autom4te.cache/

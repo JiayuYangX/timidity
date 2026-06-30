@@ -435,11 +435,13 @@ typedef struct {
 DWORD 			WINAPI	mciGetDriverData(UINT uDeviceID);
 BOOL			WINAPI	mciSetDriverData(UINT uDeviceID, DWORD dwData);
 UINT			WINAPI	mciDriverYield(UINT uDeviceID);
+#ifndef __MINGW32__
 BOOL			WINAPI	mciDriverNotify(HWND hwndCallback, UINT uDeviceID,
 						UINT uStatus);
 UINT			WINAPI	mciLoadCommandResource(HINSTANCE hInstance,
 					       LPCWSTR lpResName, UINT uType);
 BOOL			WINAPI	mciFreeCommandResource(UINT uTable);
+#endif
 
 #define DCB_NULL		0x0000
 #define DCB_WINDOW		0x0001			/* dwCallback is a HWND */
@@ -449,8 +451,10 @@ BOOL			WINAPI	mciFreeCommandResource(UINT uTable);
 #define DCB_TYPEMASK		0x0007
 #define DCB_NOSWITCH		0x0008			/* don't switch stacks for callback */
 
+#ifndef __MINGW32__
 BOOL		 	WINAPI	DriverCallback(DWORD_PTR dwCallBack, UINT uFlags, HDRVR hDev,
-					       UINT wMsg, DWORD_PTR dwUser, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+				       UINT wMsg, DWORD_PTR dwUser, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+#endif
 
 typedef void (*LPTASKCALLBACK)(DWORD_PTR dwInst);
 
